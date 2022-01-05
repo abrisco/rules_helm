@@ -1,0 +1,34 @@
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "helm_uninstall.bat.template",
+    "helm_uninstall.sh.template",
+])
+
+config_setting(
+    name = "windows",
+    constraint_values = ["@platforms//os:windows"],
+)
+
+alias(
+    name = "template",
+    actual = select({
+        ":windows": ":helm_uninstall.bat.template",
+        "//conditions:default": ":helm_uninstall.sh.template",
+    }),
+)
+
+filegroup(
+    name = "bzl_srcs",
+    srcs = glob(["**/*.bzl"]),
+    visibility = ["//:__subpackages__"],
+)
+
+filegroup(
+    name = "distro",
+    srcs = glob([
+        "**/*.template",
+        "**/*.bazel",
+    ]),
+    visibility = ["//:__subpackages__"],
+)

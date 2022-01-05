@@ -1,0 +1,16 @@
+# Bazel configuration flags
+
+# Enable helm linting. Note that workspaces loading `rules_helm` will need to
+# use the fully qualified aspect path: `@rules_helm//helm:defs.bzl%helm_lint_aspect`
+build:strict --aspects=//helm:defs.bzl%helm_lint_aspect
+build:strict --output_groups=+helm_lint_checks
+
+# Used for populating stamp data
+build --workspace_status_command=tools/workspace_status.sh
+
+# These settings make the windows workers behave similarly to unix workers
+startup --windows_enable_symlinks
+build --enable_runfiles
+
+# This flag should always go last
+try-import %workspace%/user.bazelrc

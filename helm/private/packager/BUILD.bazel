@@ -1,0 +1,22 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+
+py_binary(
+    name = "packager",
+    srcs = ["packager.py"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "bzl_srcs",
+    srcs = glob(["**/*.bzl"]),
+    visibility = ["//:__subpackages__"],
+)
+
+filegroup(
+    name = "distro",
+    srcs = glob([
+        "**/*.py",
+        "**/*.bazel",
+    ]),
+    visibility = ["//:__subpackages__"],
+)

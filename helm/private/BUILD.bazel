@@ -1,0 +1,29 @@
+load(":helm_utils.bzl", "stamp_build_setting")
+
+stamp_build_setting(name = "stamp")
+
+filegroup(
+    name = "bzl_srcs",
+    srcs = glob(["**/*.bzl"]) + [
+        "//helm/private/installer:bzl_srcs",
+        "//helm/private/packager:bzl_srcs",
+        "//helm/private/pusher:bzl_srcs",
+        "//helm/private/uninstaller:bzl_srcs",
+    ],
+    visibility = ["//:__subpackages__"],
+)
+
+filegroup(
+    name = "distro",
+    srcs = glob([
+        "**/*.bzl",
+        "**/*.bazel",
+    ]) + [
+        "//helm/private/installer:distro",
+        "//helm/private/linter:distro",
+        "//helm/private/packager:distro",
+        "//helm/private/pusher:distro",
+        "//helm/private/uninstaller:distro",
+    ],
+    visibility = ["//:__subpackages__"],
+)

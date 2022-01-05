@@ -1,0 +1,10 @@
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test")
+
+helm_chart(
+    name = "simple",
+)
+
+helm_lint_test(
+    name = "simple_test",
+    chart = ":simple",
+)

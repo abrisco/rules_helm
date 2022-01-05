@@ -1,0 +1,3 @@
+ECHO OFF
+
+{helm} uninstall {install_name} %@%

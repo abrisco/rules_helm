@@ -1,0 +1,11 @@
+# git ignore patterns
+
+# Bazel
+/bazel-*
+user.bazelrc
+
+# Helm
+# Dependency charts are not checked in and are instead handled by Bazel.
+**/charts/**
+# Lock files are not used by Bazel. Instead, lock information is required by repository rules
+Chart.lock

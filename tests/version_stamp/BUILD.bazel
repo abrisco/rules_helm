@@ -1,0 +1,5 @@
+load(":version_stamp_unit_test.bzl", "version_stamp_test_suite")
+
+version_stamp_test_suite(
+    name = "version_stamp_test_suite",
+)

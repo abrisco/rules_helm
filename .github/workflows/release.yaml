@@ -1,0 +1,58 @@
+---
+name: Release
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      # Only trigger for new releases
+      - "version.bzl"
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  BAZEL_STARTUP_FLAGS: --bazelrc=${{ github.workspace }}/.github/github.bazelrc
+
+jobs:
+  release:
+    if: ${{ github.repository_owner == 'abrisco' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+      - name: Detect the current version
+        run: |
+          version="$(grep 'VERSION =' ./version.bzl | sed 's/VERSION = "//' | sed 's/"//')"
+          echo "RELEASE_VERSION=${version}" >> $GITHUB_ENV
+      - name: Create release artifact
+        run: |
+          bazel ${BAZEL_STARTUP_FLAGS} run //distro:publish -- ${{ github.workspace }}/.github/
+          sha256="$(shasum --algorithm 256 ${{ github.workspace }}/.github/rules_helm.tar.gz | awk '{ print $1 }')"
+          echo "ARCHIVE_SHA256=${sha256}" >> $GITHUB_ENV
+      - name: Generate release notes
+        run: |
+          # Generate the release notes
+          sed 's/{version}/${{env.RELEASE_VERSION}}/g' ${{ github.workspace }}/.github/release_notes.template \
+          | sed 's/{sha256}/${{env.ARCHIVE_SHA256}}/g' \
+          > ${{ github.workspace }}/.github/release_notes.txt
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        id: rules_release
+        with:
+          generate_release_notes: true
+          tag_name: ${{ env.RELEASE_VERSION }}
+          body_path: ${{ github.workspace }}/.github/release_notes.txt
+          target_commitish: ${{ github.base_ref }}
+      - name: "Upload the rules archive"
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.rules_release.outputs.upload_url }}
+          asset_name: rules_helm-v${{ env.RELEASE_VERSION }}.tar.gz
+          asset_path: ${{ github.workspace }}/.github/rules_helm.tar.gz
+          asset_content_type: application/gzip
