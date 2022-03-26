@@ -26,7 +26,7 @@ helm_register_toolchains()
 ## Rules
 
 - [helm_chart](#helm_chart)
-- [helm_dep_repository](#helm_dep_repository)
+- [helm_import_repository](#helm_import_repository)
 - [helm_import](#helm_import)
 - [helm_install](#helm_install)
 - [helm_lint_aspect](#helm_lint_aspect)
@@ -42,8 +42,8 @@ helm_register_toolchains()
 
 load(
     "//helm/private:helm_import.bzl",
-    _helm_dep_repository = "helm_dep_repository",
     _helm_import = "helm_import",
+    _helm_import_repository = "helm_import_repository",
 )
 load(
     "//helm/private:helm_install.bzl",
@@ -79,7 +79,7 @@ load(
 )
 
 helm_chart = _helm_chart
-helm_dep_repository = _helm_dep_repository
+helm_import_repository = _helm_import_repository
 helm_import = _helm_import
 helm_install = _helm_install
 helm_lint_aspect = _helm_lint_aspect

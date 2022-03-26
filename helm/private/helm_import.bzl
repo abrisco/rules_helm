@@ -67,7 +67,7 @@ alias(
 )
 """
 
-def _helm_dep_repository(repository_ctx):
+def _helm_import_repository_impl(repository_ctx):
     if repository_ctx.attr.url:
         chart_url = repository_ctx.attr.url
     else:
@@ -113,8 +113,8 @@ def _helm_dep_repository(repository_ctx):
         "version": repository_ctx.attr.version,
     }
 
-helm_dep_repository = repository_rule(
-    implementation = _helm_dep_repository,
+helm_import_repository = repository_rule(
+    implementation = _helm_import_repository_impl,
     doc = "A rule for fetching external Helm charts from an arbitrary repository.",
     attrs = {
         "chart_name": attr.string(

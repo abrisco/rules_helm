@@ -28,7 +28,7 @@ helm_register_toolchains()
 ## Rules
 
 - [helm_chart](#helm_chart)
-- [helm_dep_repository](#helm_dep_repository)
+- [helm_import_repository](#helm_import_repository)
 - [helm_import](#helm_import)
 - [helm_install](#helm_install)
 - [helm_lint_aspect](#helm_lint_aspect)
@@ -40,30 +40,6 @@ helm_register_toolchains()
 - [helm_uninstall](#helm_uninstall)
 - [rules_helm_dependencies](#rules_helm_dependencies)
 
-
-
-<a id="#helm_dep_repository"></a>
-
-## helm_dep_repository
-
-<pre>
-helm_dep_repository(<a href="#helm_dep_repository-name">name</a>, <a href="#helm_dep_repository-chart_name">chart_name</a>, <a href="#helm_dep_repository-repo_mapping">repo_mapping</a>, <a href="#helm_dep_repository-repository">repository</a>, <a href="#helm_dep_repository-sha256">sha256</a>, <a href="#helm_dep_repository-url">url</a>, <a href="#helm_dep_repository-version">version</a>)
-</pre>
-
-A rule for fetching external Helm charts from an arbitrary repository.
-
-**ATTRIBUTES**
-
-
-| Name  | Description | Type | Mandatory | Default |
-| :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_dep_repository-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| <a id="helm_dep_repository-chart_name"></a>chart_name |  Chart name to import.   | String | required |  |
-| <a id="helm_dep_repository-repo_mapping"></a>repo_mapping |  A dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.&lt;p&gt;For example, an entry <code>"@foo": "@bar"</code> declares that, for any time this repository depends on <code>@foo</code> (such as a dependency on <code>@foo//some:target</code>, it should actually resolve that dependency within globally-declared <code>@bar</code> (<code>@bar//some:target</code>).   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | required |  |
-| <a id="helm_dep_repository-repository"></a>repository |  Chart repository url where to locate the requested chart.   | String | required |  |
-| <a id="helm_dep_repository-sha256"></a>sha256 |  The expected SHA-256 hash of the chart imported.   | String | optional | "" |
-| <a id="helm_dep_repository-url"></a>url |  The url where the chart can be directly downloaded.   | String | optional | "" |
-| <a id="helm_dep_repository-version"></a>version |  Specify a version constraint for the chart version to use.   | String | optional | "" |
 
 
 <a id="#helm_import"></a>
@@ -84,6 +60,30 @@ A rule that allows pre-packaged Helm charts to be used within Bazel.
 | <a id="helm_import-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
 | <a id="helm_import-chart"></a>chart |  A Helm chart's <code>.tgz</code> file.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | optional | None |
 | <a id="helm_import-version"></a>version |  The version fo the helm chart   | String | optional | "" |
+
+
+<a id="#helm_import_repository"></a>
+
+## helm_import_repository
+
+<pre>
+helm_import_repository(<a href="#helm_import_repository-name">name</a>, <a href="#helm_import_repository-chart_name">chart_name</a>, <a href="#helm_import_repository-repo_mapping">repo_mapping</a>, <a href="#helm_import_repository-repository">repository</a>, <a href="#helm_import_repository-sha256">sha256</a>, <a href="#helm_import_repository-url">url</a>, <a href="#helm_import_repository-version">version</a>)
+</pre>
+
+A rule for fetching external Helm charts from an arbitrary repository.
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="helm_import_repository-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| <a id="helm_import_repository-chart_name"></a>chart_name |  Chart name to import.   | String | required |  |
+| <a id="helm_import_repository-repo_mapping"></a>repo_mapping |  A dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.&lt;p&gt;For example, an entry <code>"@foo": "@bar"</code> declares that, for any time this repository depends on <code>@foo</code> (such as a dependency on <code>@foo//some:target</code>, it should actually resolve that dependency within globally-declared <code>@bar</code> (<code>@bar//some:target</code>).   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | required |  |
+| <a id="helm_import_repository-repository"></a>repository |  Chart repository url where to locate the requested chart.   | String | required |  |
+| <a id="helm_import_repository-sha256"></a>sha256 |  The expected SHA-256 hash of the chart imported.   | String | optional | "" |
+| <a id="helm_import_repository-url"></a>url |  The url where the chart can be directly downloaded.   | String | optional | "" |
+| <a id="helm_import_repository-version"></a>version |  Specify a version constraint for the chart version to use.   | String | optional | "" |
 
 
 <a id="#helm_install"></a>

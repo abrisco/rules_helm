@@ -1,10 +1,10 @@
 """Dependencies for helm test/example targets"""
 
 load("@io_bazel_rules_docker//container:container.bzl", "container_pull")
-load("//helm:defs.bzl", "helm_dep_repository")
+load("//helm:defs.bzl", "helm_import_repository")
 
 def helm_test_deps():
-    helm_dep_repository(
+    helm_import_repository(
         name = "helm_test_deps__with_chart_deps",
         repository = "https://charts.bitnami.com/bitnami",
         url = "https://charts.bitnami.com/bitnami/redis-14.4.0.tgz",
