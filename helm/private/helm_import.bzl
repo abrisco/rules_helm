@@ -68,6 +68,8 @@ alias(
 """
 
 def _helm_import_repository_impl(repository_ctx):
+    chart_name = repository_ctx.attr.chart_name or repository_ctx.name
+
     if repository_ctx.attr.url:
         chart_url = repository_ctx.attr.url
     else:
@@ -83,7 +85,7 @@ def _helm_import_repository_impl(repository_ctx):
             ),
         )
         file_name = "{}-{}.tgz".format(
-            repository_ctx.attr.chart_name,
+            chart_name,
             repository_ctx.attr.version,
         )
 
@@ -93,7 +95,7 @@ def _helm_import_repository_impl(repository_ctx):
     _, _, chart_file = chart_url.rpartition("/")
 
     repository_ctx.file("BUILD.bazel", content = _HELM_DEP_BUILD_FILE.format(
-        chart_name = repository_ctx.attr.chart_name,
+        chart_name = chart_name,
         chart_file = chart_file,
         repository_name = repository_ctx.name,
     ))
@@ -119,7 +121,6 @@ helm_import_repository = repository_rule(
     attrs = {
         "chart_name": attr.string(
             doc = "Chart name to import.",
-            mandatory = True,
         ),
         "repository": attr.string(
             doc = "Chart repository url where to locate the requested chart.",
