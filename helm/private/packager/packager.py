@@ -23,9 +23,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--template",
         dest="templates",
-        required=True,
         type=Path,
         action="append",
+        default=list(),
         help="A helm template file",
     )
     parser.add_argument(
