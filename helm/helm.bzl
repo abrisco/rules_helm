@@ -35,15 +35,18 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None):
         tags = tags,
     )
 
+    if not install_name:
+        install_name = name.replace("_", "-")
+
     helm_install(
         name = name + ".install",
-        install_name = install_name or name,
+        install_name = install_name,
         package = name,
         tags = tags,
     )
 
     helm_uninstall(
         name = name + ".uninstall",
-        install_name = install_name or name,
+        install_name = install_name,
         tags = tags,
     )
