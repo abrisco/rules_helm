@@ -245,12 +245,28 @@ def main() -> None:
             exit(proc.returncode)
 
         # Locate the package file
-        files = glob("{}/*.tgz".format(tmp_path))
-        if len(files) != 1:
-            raise ValueError(
-                "Unexpected number of helm packages found: {}".format(files)
-            )
-        package = Path(files[0])
+        package = None
+
+        # Try to parse the package path from stdout
+        stdout = proc.stdout.decode("utf-8")
+        if ":" in stdout:
+            package_path = Path(stdout.split(":", maxsplit=1)[-1].strip())
+            if package_path.exists():
+                package = package_path
+
+        # Try to find the package via glob patterns
+        if not package:
+            files = glob("{}/*.tgz".format(tmp_path))
+            if len(files) != 1:
+                raise ValueError(
+                    "Unexpected number of helm packages found: {}".format(files)
+                )
+            package = Path(files[0])
+
+        if not package:
+            print(proc.stdout.decode("utf-8"))
+            print(proc.stderr.decode("utf-8"))
+            raise FileNotFoundError("Failed to locate helm tgz package")
 
         # Read metadata
         match = re.match(r"(.*)-([\d][\d\w\-\.]+)\.tgz", package.name)
