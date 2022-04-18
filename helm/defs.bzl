@@ -34,6 +34,7 @@ helm_register_toolchains()
 - [helm_package](#helm_package)
 - [helm_push](#helm_push)
 - [helm_register_toolchains](#helm_register_toolchains)
+- [helm_reinstall](#helm_reinstall)
 - [helm_toolchain](#helm_toolchain)
 - [helm_uninstall](#helm_uninstall)
 - [rules_helm_dependencies](#rules_helm_dependencies)
@@ -49,6 +50,7 @@ load(
     "//helm/private:helm_install.bzl",
     _helm_install = "helm_install",
     _helm_push = "helm_push",
+    _helm_reinstall = "helm_reinstall",
     _helm_uninstall = "helm_uninstall",
 )
 load(
@@ -79,14 +81,15 @@ load(
 )
 
 helm_chart = _helm_chart
-helm_import_repository = _helm_import_repository
 helm_import = _helm_import
+helm_import_repository = _helm_import_repository
 helm_install = _helm_install
 helm_lint_aspect = _helm_lint_aspect
 helm_lint_test = _helm_lint_test
 helm_package = _helm_package
 helm_push = _helm_push
 helm_register_toolchains = _helm_register_toolchains
+helm_reinstall = _helm_reinstall
 helm_toolchain = _helm_toolchain
 helm_uninstall = _helm_uninstall
 HelmPackageInfo = _HelmPackageInfo

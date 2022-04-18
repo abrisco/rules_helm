@@ -36,6 +36,7 @@ helm_register_toolchains()
 - [helm_package](#helm_package)
 - [helm_push](#helm_push)
 - [helm_register_toolchains](#helm_register_toolchains)
+- [helm_reinstall](#helm_reinstall)
 - [helm_toolchain](#helm_toolchain)
 - [helm_uninstall](#helm_uninstall)
 - [rules_helm_dependencies](#rules_helm_dependencies)
@@ -168,6 +169,26 @@ Produce a script for pushing all docker images used by a helm chart
 | <a id="helm_push-package"></a>package |  The helm package to upload images from.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
 
 
+<a id="#helm_reinstall"></a>
+
+## helm_reinstall
+
+<pre>
+helm_reinstall(<a href="#helm_reinstall-name">name</a>, <a href="#helm_reinstall-install_name">install_name</a>, <a href="#helm_reinstall-package">package</a>)
+</pre>
+
+Produce a script for performing a helm uninstall and install actions
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="helm_reinstall-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| <a id="helm_reinstall-install_name"></a>install_name |  The name to use for the <code>helm install</code> command. The target name will be used if unset.   | String | optional | "" |
+| <a id="helm_reinstall-package"></a>package |  The helm pacage to reinstall.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+
+
 <a id="#helm_toolchain"></a>
 
 ## helm_toolchain
@@ -241,6 +262,7 @@ Rules for producing a helm package and some convenience targets.
 | `{name}.push` | [helm_push](#helm_push) |
 | `{name}.install` | [helm_install](#helm_install) |
 | `{name}.uninstall` | [helm_uninstall](#helm_uninstall) |
+| `{name}.reinstall` | [helm_reinstall](#helm_reinstall) |
 
 
 **PARAMETERS**

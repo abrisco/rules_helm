@@ -1,6 +1,6 @@
 """Helm rules"""
 
-load("//helm/private:helm_install.bzl", "helm_install", "helm_push", "helm_uninstall")
+load("//helm/private:helm_install.bzl", "helm_install", "helm_push", "helm_reinstall", "helm_uninstall")
 load("//helm/private:helm_package.bzl", "helm_package")
 
 def helm_chart(name, images = [], deps = None, tags = [], install_name = None):
@@ -11,6 +11,7 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None):
     | `{name}.push` | [helm_push](#helm_push) |
     | `{name}.install` | [helm_install](#helm_install) |
     | `{name}.uninstall` | [helm_uninstall](#helm_uninstall) |
+    | `{name}.reinstall` | [helm_reinstall](#helm_reinstall) |
 
     Args:
         name (str): The name of the [helm_package](#helm_package) target.
@@ -48,5 +49,12 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None):
     helm_uninstall(
         name = name + ".uninstall",
         install_name = install_name,
+        tags = tags,
+    )
+
+    helm_reinstall(
+        name = name + ".reinstall",
+        install_name = install_name,
+        package = name,
         tags = tags,
     )
