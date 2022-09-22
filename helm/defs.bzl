@@ -21,6 +21,10 @@ load("@rules_helm//helm:repositories.bzl", "helm_register_toolchains", "rules_he
 rules_helm_dependencies()
 
 helm_register_toolchains()
+
+load("@rules_helm//helm:repositories_transitive.bzl", "rules_helm_transitive_dependencies")
+
+rules_helm_transitive_dependencies()
 ```
 
 ## Rules
@@ -38,6 +42,7 @@ helm_register_toolchains()
 - [helm_toolchain](#helm_toolchain)
 - [helm_uninstall](#helm_uninstall)
 - [rules_helm_dependencies](#rules_helm_dependencies)
+- [chart_content](#chart_content)
 
 """
 
@@ -64,6 +69,7 @@ load(
 )
 load(
     ":helm.bzl",
+    _chart_content = "chart_content",
     _helm_chart = "helm_chart",
 )
 load(
@@ -94,3 +100,4 @@ helm_toolchain = _helm_toolchain
 helm_uninstall = _helm_uninstall
 HelmPackageInfo = _HelmPackageInfo
 rules_helm_dependencies = _rules_helm_dependencies
+chart_content = _chart_content

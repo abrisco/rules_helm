@@ -1,9 +1,10 @@
-load("@rules_python//python:defs.bzl", "py_binary")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 
-py_binary(
+go_binary(
     name = "packager",
-    srcs = ["packager.py"],
+    srcs = ["packager.go"],
     visibility = ["//visibility:public"],
+    deps = ["@go_yaml_yaml"],
 )
 
 filegroup(

@@ -23,6 +23,10 @@ load("@rules_helm//helm:repositories.bzl", "helm_register_toolchains", "rules_he
 rules_helm_dependencies()
 
 helm_register_toolchains()
+
+load("@rules_helm//helm:repositories_transitive.bzl", "rules_helm_transitive_dependencies")
+
+rules_helm_transitive_dependencies()
 ```
 
 ## Rules
@@ -40,10 +44,11 @@ helm_register_toolchains()
 - [helm_toolchain](#helm_toolchain)
 - [helm_uninstall](#helm_uninstall)
 - [rules_helm_dependencies](#rules_helm_dependencies)
+- [chart_content](#chart_content)
 
 
 
-<a id="#helm_import"></a>
+<a id="helm_import"></a>
 
 ## helm_import
 
@@ -58,12 +63,12 @@ A rule that allows pre-packaged Helm charts to be used within Bazel.
 
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_import-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| <a id="helm_import-chart"></a>chart |  A Helm chart's <code>.tgz</code> file.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | optional | None |
+| <a id="helm_import-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_import-chart"></a>chart |  A Helm chart's <code>.tgz</code> file.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | None |
 | <a id="helm_import-version"></a>version |  The version fo the helm chart   | String | optional | "" |
 
 
-<a id="#helm_import_repository"></a>
+<a id="helm_import_repository"></a>
 
 ## helm_import_repository
 
@@ -78,16 +83,16 @@ A rule for fetching external Helm charts from an arbitrary repository.
 
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_import_repository-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| <a id="helm_import_repository-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="helm_import_repository-chart_name"></a>chart_name |  Chart name to import.   | String | optional | "" |
-| <a id="helm_import_repository-repo_mapping"></a>repo_mapping |  A dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.&lt;p&gt;For example, an entry <code>"@foo": "@bar"</code> declares that, for any time this repository depends on <code>@foo</code> (such as a dependency on <code>@foo//some:target</code>, it should actually resolve that dependency within globally-declared <code>@bar</code> (<code>@bar//some:target</code>).   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | required |  |
+| <a id="helm_import_repository-repo_mapping"></a>repo_mapping |  A dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.&lt;p&gt;For example, an entry <code>"@foo": "@bar"</code> declares that, for any time this repository depends on <code>@foo</code> (such as a dependency on <code>@foo//some:target</code>, it should actually resolve that dependency within globally-declared <code>@bar</code> (<code>@bar//some:target</code>).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | required |  |
 | <a id="helm_import_repository-repository"></a>repository |  Chart repository url where to locate the requested chart.   | String | required |  |
 | <a id="helm_import_repository-sha256"></a>sha256 |  The expected SHA-256 hash of the chart imported.   | String | optional | "" |
 | <a id="helm_import_repository-url"></a>url |  The url where the chart can be directly downloaded.   | String | optional | "" |
 | <a id="helm_import_repository-version"></a>version |  Specify a version constraint for the chart version to use.   | String | optional | "" |
 
 
-<a id="#helm_install"></a>
+<a id="helm_install"></a>
 
 ## helm_install
 
@@ -102,12 +107,12 @@ Produce a script for performing a helm install action
 
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_install-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| <a id="helm_install-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="helm_install-install_name"></a>install_name |  The name to use for the <code>helm install</code> command. The target name will be used if unset.   | String | optional | "" |
-| <a id="helm_install-package"></a>package |  The helm pacage to install.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+| <a id="helm_install-package"></a>package |  The helm pacage to install.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
-<a id="#helm_lint_test"></a>
+<a id="helm_lint_test"></a>
 
 ## helm_lint_test
 
@@ -122,16 +127,16 @@ A rule for performing `helm lint` on a helm package
 
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_lint_test-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| <a id="helm_lint_test-chart"></a>chart |  The helm package to run linting on.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+| <a id="helm_lint_test-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_lint_test-chart"></a>chart |  The helm package to run linting on.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
-<a id="#helm_package"></a>
+<a id="helm_package"></a>
 
 ## helm_package
 
 <pre>
-helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-chart">chart</a>, <a href="#helm_package-deps">deps</a>, <a href="#helm_package-images">images</a>, <a href="#helm_package-stamp">stamp</a>, <a href="#helm_package-templates">templates</a>, <a href="#helm_package-values">values</a>)
+helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-chart">chart</a>, <a href="#helm_package-chart_json">chart_json</a>, <a href="#helm_package-deps">deps</a>, <a href="#helm_package-images">images</a>, <a href="#helm_package-stamp">stamp</a>, <a href="#helm_package-templates">templates</a>, <a href="#helm_package-values">values</a>, <a href="#helm_package-values_json">values_json</a>)
 </pre>
 
 
@@ -141,16 +146,18 @@ helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-chart
 
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_package-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| <a id="helm_package-chart"></a>chart |  The <code>Chart.yaml</code> file of the helm chart   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | optional | None |
-| <a id="helm_package-deps"></a>deps |  Other helm packages this package depends on.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
-| <a id="helm_package-images"></a>images |  [@rules_docker//container:push.bzl%container_push](https://github.com/bazelbuild/rules_docker/blob/v0.22.0/docs/container.md#container_push) targets.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| <a id="helm_package-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_package-chart"></a>chart |  The <code>Chart.yaml</code> file of the helm chart   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | None |
+| <a id="helm_package-chart_json"></a>chart_json |  A json encoded string to use as the <code>Chart.yaml</code> file of the helm chart   | String | optional | "" |
+| <a id="helm_package-deps"></a>deps |  Other helm packages this package depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | [] |
+| <a id="helm_package-images"></a>images |  [@rules_docker//container:push.bzl%container_push](https://github.com/bazelbuild/rules_docker/blob/v0.22.0/docs/container.md#container_push) targets.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | [] |
 | <a id="helm_package-stamp"></a>stamp |  Whether to encode build information into the helm actions. Possible values:<br><br>                - <code>stamp = 1</code>: Always stamp the build information into the helm actions, even in                 [--nostamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) builds.                 This setting should be avoided, since it potentially kills remote caching for the target and                 any downstream actions that depend on it.<br><br>                - <code>stamp = 0</code>: Always replace build information by constant values. This gives good build result caching.<br><br>                - <code>stamp = -1</code>: Embedding of build information is controlled by the                 [--[no]stamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) flag.<br><br>                Stamped targets are not rebuilt unless their dependencies change.   | Integer | optional | -1 |
-| <a id="helm_package-templates"></a>templates |  All templates associated with the current helm chart. E.g., the <code>./templates</code> directory   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
-| <a id="helm_package-values"></a>values |  The <code>values.yaml</code> file for the current package.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | optional | None |
+| <a id="helm_package-templates"></a>templates |  All templates associated with the current helm chart. E.g., the <code>./templates</code> directory   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | [] |
+| <a id="helm_package-values"></a>values |  The <code>values.yaml</code> file for the current package. This attribute is mutally exclusive with <code>values_json</code>.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | None |
+| <a id="helm_package-values_json"></a>values_json |  A json encoded string to use as the <code>values.yaml</code> file. This attribute is mutally exclusive with <code>values</code>.   | String | optional | "" |
 
 
-<a id="#helm_push"></a>
+<a id="helm_push"></a>
 
 ## helm_push
 
@@ -165,11 +172,11 @@ Produce a script for pushing all docker images used by a helm chart
 
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_push-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| <a id="helm_push-package"></a>package |  The helm package to upload images from.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+| <a id="helm_push-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_push-package"></a>package |  The helm package to upload images from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
-<a id="#helm_reinstall"></a>
+<a id="helm_reinstall"></a>
 
 ## helm_reinstall
 
@@ -184,12 +191,12 @@ Produce a script for performing a helm uninstall and install actions
 
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_reinstall-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| <a id="helm_reinstall-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="helm_reinstall-install_name"></a>install_name |  The name to use for the <code>helm install</code> command. The target name will be used if unset.   | String | optional | "" |
-| <a id="helm_reinstall-package"></a>package |  The helm pacage to reinstall.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+| <a id="helm_reinstall-package"></a>package |  The helm pacage to reinstall.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
-<a id="#helm_toolchain"></a>
+<a id="helm_toolchain"></a>
 
 ## helm_toolchain
 
@@ -204,11 +211,11 @@ A helm toolchain
 
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_toolchain-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| <a id="helm_toolchain-helm"></a>helm |  A helm binary   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+| <a id="helm_toolchain-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_toolchain-helm"></a>helm |  A helm binary   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
-<a id="#helm_uninstall"></a>
+<a id="helm_uninstall"></a>
 
 ## helm_uninstall
 
@@ -223,11 +230,11 @@ Produce a script for performing a helm uninstall action
 
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_uninstall-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| <a id="helm_uninstall-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="helm_uninstall-install_name"></a>install_name |  The name to use for the <code>helm install</code> command. The target name will be used if unset.   | String | optional | "" |
 
 
-<a id="#HelmPackageInfo"></a>
+<a id="HelmPackageInfo"></a>
 
 ## HelmPackageInfo
 
@@ -247,7 +254,34 @@ A provider for helm packages
 | <a id="HelmPackageInfo-metadata"></a>metadata |  File: A json encoded file containing metadata about the helm chart    |
 
 
-<a id="#helm_chart"></a>
+<a id="chart_content"></a>
+
+## chart_content
+
+<pre>
+chart_content(<a href="#chart_content-name">name</a>, <a href="#chart_content-api_version">api_version</a>, <a href="#chart_content-description">description</a>, <a href="#chart_content-type">type</a>, <a href="#chart_content-version">version</a>, <a href="#chart_content-app_version">app_version</a>)
+</pre>
+
+A convenience wrapper for defining Chart.yaml files with [helm_package.chart_json](#helm_package-chart_json).
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="chart_content-name"></a>name |  The name of the chart   |  none |
+| <a id="chart_content-api_version"></a>api_version |  The Helm API version   |  <code>"v2"</code> |
+| <a id="chart_content-description"></a>description |  A descritpion of the chart.   |  <code>"A Helm chart for Kubernetes by Bazel."</code> |
+| <a id="chart_content-type"></a>type |  The chart type.   |  <code>"application"</code> |
+| <a id="chart_content-version"></a>version |  The chart version.   |  <code>"0.1.0"</code> |
+| <a id="chart_content-app_version"></a>app_version |  The version number of the application being deployed.   |  <code>"0.16.0"</code> |
+
+**RETURNS**
+
+str: A json encoded string which represents `Chart.yaml` contents.
+
+
+<a id="helm_chart"></a>
 
 ## helm_chart
 
@@ -259,6 +293,7 @@ Rules for producing a helm package and some convenience targets.
 
 | target | rule |
 | --- | --- |
+| `{name}` | [helm_package](#helm_package) |
 | `{name}.push` | [helm_push](#helm_push) |
 | `{name}.install` | [helm_install](#helm_install) |
 | `{name}.uninstall` | [helm_uninstall](#helm_uninstall) |
@@ -277,7 +312,7 @@ Rules for producing a helm package and some convenience targets.
 | <a id="helm_chart-install_name"></a>install_name |  The <code>helm install</code> name to use. <code>name</code> will be used if unset.   |  <code>None</code> |
 
 
-<a id="#helm_register_toolchains"></a>
+<a id="helm_register_toolchains"></a>
 
 ## helm_register_toolchains
 
@@ -292,11 +327,11 @@ Register helm toolchains.
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="helm_register_toolchains-version"></a>version |  The version of Helm to use   |  <code>"3.8.1"</code> |
+| <a id="helm_register_toolchains-version"></a>version |  The version of Helm to use   |  <code>"3.10.0"</code> |
 | <a id="helm_register_toolchains-helm_url_templates"></a>helm_url_templates |  A list of url templates where helm can be downloaded.   |  <code>["https://get.helm.sh/helm-v{version}-{platform}.{compression}"]</code> |
 
 
-<a id="#rules_helm_dependencies"></a>
+<a id="rules_helm_dependencies"></a>
 
 ## rules_helm_dependencies
 
@@ -308,7 +343,7 @@ Defines helm dependencies
 
 
 
-<a id="#helm_lint_aspect"></a>
+<a id="helm_lint_aspect"></a>
 
 ## helm_lint_aspect
 
@@ -327,6 +362,6 @@ An aspect for running `helm lint` on helm package targets
 
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_lint_aspect-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |   |
+| <a id="helm_lint_aspect-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |   |
 
 

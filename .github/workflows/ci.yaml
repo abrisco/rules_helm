@@ -144,7 +144,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Download Buildifier
         run: |
-          wget "https://github.com/bazelbuild/buildtools/releases/download/5.0.1/buildifier-linux-amd64" -O buildifier
+          wget "https://github.com/bazelbuild/buildtools/releases/download/5.1.0/buildifier-linux-amd64" -O buildifier
           chmod +x buildifier
       - name: Buildifier
         run: ./buildifier -lint=warn -mode=check -warnings=all -r ${{ github.workspace }}
