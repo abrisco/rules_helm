@@ -1,0 +1,62 @@
+load("//helm:defs.bzl", "helm_lint_test", "helm_package")
+
+helm_package(
+    name = "inline_values",
+    chart = "Chart.yaml",
+    templates = glob(["templates/**"]),
+    values_json = json.encode({
+        "affinity": {},
+        "autoscaling": {
+            "enabled": False,
+            "maxReplicas": 100,
+            "minReplicas": 1,
+            "targetCPUUtilizationPercentage": 80,
+        },
+        "fullnameOverride": "",
+        "image": {
+            "pullPolicy": "IfNotPresent",
+            "repository": "nginx",
+            "tag": "",
+        },
+        "imagePullSecrets": [],
+        "ingress": {
+            "annotations": {},
+            "className": "",
+            "enabled": False,
+            "hosts": [
+                {
+                    "host": "chart-example.local",
+                    "paths": [
+                        {
+                            "path": "/",
+                            "pathType": "ImplementationSpecific",
+                        },
+                    ],
+                },
+            ],
+            "tls": [],
+        },
+        "nameOverride": "",
+        "nodeSelector": {},
+        "podAnnotations": {},
+        "podSecurityContext": {},
+        "replicaCount": 1,
+        "resources": {},
+        "securityContext": {},
+        "service": {
+            "port": 80,
+            "type": "ClusterIP",
+        },
+        "serviceAccount": {
+            "annotations": {},
+            "create": True,
+            "name": "",
+        },
+        "tolerations": [],
+    }),
+)
+
+helm_lint_test(
+    name = "inline_values_test",
+    chart = ":inline_values",
+)
