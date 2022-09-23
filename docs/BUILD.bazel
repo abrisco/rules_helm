@@ -17,6 +17,11 @@ stardoc(
     out = "README.md",
     input = "//helm:defs.bzl",
     deps = [":bzl_lib"],
+    # TODO: https://github.com/bazelbuild/stardoc/issues/110
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
 )
 
 diff_test(
@@ -24,4 +29,9 @@ diff_test(
     failure_message = "To fix, run 'cp -f ./bazel-bin/docs/README.md ./README.md' from the root of the repo.",
     file1 = ":docs",
     file2 = "//:README.md",
+    # TODO: # TODO: https://github.com/bazelbuild/stardoc/issues/110
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
 )

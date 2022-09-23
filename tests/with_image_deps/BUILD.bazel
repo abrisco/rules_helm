@@ -9,11 +9,19 @@ helm_chart(
         ":image_a.push",
         ":image_b.push",
     ],
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
 )
 
 helm_lint_test(
     name = "with_image_deps_test",
     chart = ":with_image_deps",
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
 )
 
 _IMAGES = [
@@ -25,6 +33,7 @@ _IMAGES = [
     container_image(
         name = name,
         base = "@rules_helm_test_container_base//image",
+        tags = ["manual"],
     )
     for name in _IMAGES
 ]
@@ -37,6 +46,7 @@ _IMAGES = [
         registry = "docker.io",
         repository = "rules_helm/test/{}".format(name),
         tag = "latest",
+        tags = ["manual"],
     )
     for name in _IMAGES
 ]

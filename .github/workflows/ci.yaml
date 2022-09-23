@@ -24,8 +24,7 @@ jobs:
         include:
           - os: macos-11
           - os: ubuntu-20.04
-          # TODO: https://github.com/abrisco/rules_helm/issues/1
-          # - os: windows-2019
+          - os: windows-2019
     steps:
       # Checkout the code
       - uses: actions/checkout@v2
@@ -83,8 +82,7 @@ jobs:
         include:
           - os: macos-11
           - os: ubuntu-20.04
-          # TODO: https://github.com/abrisco/rules_helm/issues/1
-          # - os: windows-2019
+          - os: windows-2019
     steps:
       # Checkout the code
       - uses: actions/checkout@v2
