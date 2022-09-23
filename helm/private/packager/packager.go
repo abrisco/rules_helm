@@ -190,7 +190,7 @@ func get_chart_name(content string) string {
 }
 
 func copy_file(source string, dest string) {
-    src_file, err := os.Open(source)
+    src_file, err := os.Open(filepath.Clean(source))
     if err != nil {
         log.Fatal(err)
     }
@@ -201,7 +201,7 @@ func copy_file(source string, dest string) {
         log.Fatal(dir_err)
     }
 
-    dest_file, err := os.Create(dest)
+    dest_file, err := os.Create(filepath.Clean(dest))
     if err != nil {
         log.Fatal(err)
     }
@@ -265,15 +265,15 @@ func install_helm_content(working_dir string, stamped_chart_content string, stam
                 }
                 parent := filepath.Dir(current)
                 if filepath.Base(parent) == "templates" {
-                    templates_root = parent
+                    templates_root = filepath.ToSlash(parent)
                     break
                 }
-                current = parent
+                current = filepath.ToSlash(parent)
             }
         }
 
         if !strings.HasPrefix(template_shortpath, templates_root) {
-            log.Fatal("A template file has an unexpected prefix", template_shortpath, "does not start with", templates_root)
+            log.Fatal("A template file has an unexpected prefix ", template_shortpath, " does not start with ", templates_root)
         }
 
         target_file, err := filepath.Rel(templates_root, template_shortpath)
