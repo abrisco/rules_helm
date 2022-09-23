@@ -15,14 +15,3 @@ filegroup(
     ],
     visibility = ["//:__subpackages__"],
 )
-
-filegroup(
-    name = "distro",
-    srcs = glob([
-        "**/*.bzl",
-        "**/*.bazel",
-    ]) + [
-        "//helm/private:distro",
-    ],
-    visibility = ["//:__subpackages__"],
-)

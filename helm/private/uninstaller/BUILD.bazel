@@ -23,12 +23,3 @@ filegroup(
     srcs = glob(["**/*.bzl"]),
     visibility = ["//:__subpackages__"],
 )
-
-filegroup(
-    name = "distro",
-    srcs = glob([
-        "**/*.template",
-        "**/*.bazel",
-    ]),
-    visibility = ["//:__subpackages__"],
-)
