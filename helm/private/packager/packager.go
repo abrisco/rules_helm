@@ -1,20 +1,19 @@
 package main
 
 import (
-    "encoding/json"
-    "errors"
-    "flag"
-    "fmt"
-    "io"
-    "log"
-    "os"
-    "os/exec"
-    "path"
-    "path/filepath"
-    "regexp"
-    "strings"
+	"encoding/json"
+	"errors"
+	"flag"
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"strings"
 
-    "gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v3"
 )
 
 type ImageManifest struct {
@@ -196,7 +195,7 @@ func copy_file(source string, dest string) {
         log.Fatal(err)
     }
 
-    parent := path.Dir(dest)
+    parent := filepath.Dir(dest)
     dir_err := os.MkdirAll(parent, 0755)
     if dir_err != nil {
         log.Fatal(dir_err)
@@ -227,13 +226,13 @@ func install_helm_content(working_dir string, stamped_chart_content string, stam
         log.Fatal(err)
     }
 
-    var chart_yaml = path.Join(working_dir, "Chart.yaml")
+    var chart_yaml = filepath.Join(working_dir, "Chart.yaml")
     chart_err := os.WriteFile(chart_yaml, []byte(stamped_chart_content), 0644)
     if chart_err != nil {
         log.Fatal(chart_err)
     }
 
-    var values_yaml = path.Join(working_dir, "values.yaml")
+    var values_yaml = filepath.Join(working_dir, "values.yaml")
     value_err := os.WriteFile(values_yaml, []byte(stamped_values_content), 0644)
     if value_err != nil {
         log.Fatal(value_err)
@@ -250,7 +249,7 @@ func install_helm_content(working_dir string, stamped_chart_content string, stam
         log.Fatal(err)
     }
 
-    var templates_dir = path.Join(working_dir, "templates")
+    var templates_dir = filepath.Join(working_dir, "templates")
     var templates_root = ""
 
     // Copy all templates
@@ -264,8 +263,8 @@ func install_helm_content(working_dir string, stamped_chart_content string, stam
                 if len(current) == 0 {
                     log.Fatal("Failed to find templates directory for ", template_shortpath)
                 }
-                parent := path.Dir(current)
-                if path.Base(parent) == "templates" {
+                parent := filepath.Dir(current)
+                if filepath.Base(parent) == "templates" {
                     templates_root = parent
                     break
                 }
@@ -282,7 +281,7 @@ func install_helm_content(working_dir string, stamped_chart_content string, stam
             log.Fatal(err)
         }
 
-        copy_file(template_path, path.Join(templates_dir, target_file))
+        copy_file(template_path, filepath.Join(templates_dir, target_file))
     }
 
     // Copy over any dependency chart files
@@ -299,7 +298,7 @@ func install_helm_content(working_dir string, stamped_chart_content string, stam
         }
 
         for _, dep := range deps {
-            copy_file(dep, path.Join(working_dir, "charts", path.Base(dep)))
+            copy_file(dep, filepath.Join(working_dir, "charts", filepath.Base(dep)))
         }
     }
 }
@@ -357,7 +356,7 @@ func main() {
         log.Fatal(err)
     }
 
-    dir := path.Join(cwd, ".rules_helm_pkg_dir")
+    dir := filepath.Join(cwd, "_rules_helm_pkg_dir")
 
     chart_content, err := os.ReadFile(args.chart)
     if err != nil {
@@ -379,11 +378,11 @@ func main() {
 
     // Create a directory in which to run helm package
     var chart_name = get_chart_name(stamped_chart_content)
-    var tmp_path = path.Join(dir, chart_name)
+    var tmp_path = filepath.Join(dir, chart_name)
     install_helm_content(tmp_path, stamped_chart_content, stamped_values_content, args.templates_manifest, args.deps_manifest)
 
     // Build the helm package
-    command := exec.Command(path.Join(cwd, args.helm), "package", ".")
+    command := exec.Command(filepath.Join(cwd, args.helm), "package", ".")
     command.Dir = tmp_path
     out, err := command.Output()
     if err != nil {
@@ -402,5 +401,5 @@ func main() {
     copy_file(pkg, args.output)
 
     // Write output metadata to retain information about the helm package
-    write_results_metadata(path.Base(pkg), args.metadata_output)
+    write_results_metadata(filepath.Base(pkg), args.metadata_output)
 }
