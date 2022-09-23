@@ -286,7 +286,7 @@ str: A json encoded string which represents `Chart.yaml` contents.
 ## helm_chart
 
 <pre>
-helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-tags">tags</a>, <a href="#helm_chart-install_name">install_name</a>)
+helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-tags">tags</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-kwargs">kwargs</a>)
 </pre>
 
 Rules for producing a helm package and some convenience targets.
@@ -310,6 +310,7 @@ Rules for producing a helm package and some convenience targets.
 | <a id="helm_chart-deps"></a>deps |  A list of helm package dependencies.   |  <code>None</code> |
 | <a id="helm_chart-tags"></a>tags |  Tags to apply to all targets.   |  <code>[]</code> |
 | <a id="helm_chart-install_name"></a>install_name |  The <code>helm install</code> name to use. <code>name</code> will be used if unset.   |  <code>None</code> |
+| <a id="helm_chart-kwargs"></a>kwargs |  Additional keyword arguments for <code>helm_package</code>.   |  none |
 
 
 <a id="helm_register_toolchains"></a>

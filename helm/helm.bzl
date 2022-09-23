@@ -3,7 +3,7 @@
 load("//helm/private:helm_install.bzl", "helm_install", "helm_push", "helm_reinstall", "helm_uninstall")
 load("//helm/private:helm_package.bzl", "helm_package")
 
-def helm_chart(name, images = [], deps = None, tags = [], install_name = None):
+def helm_chart(name, images = [], deps = None, tags = [], install_name = None, **kwargs):
     """Rules for producing a helm package and some convenience targets.
 
     | target | rule |
@@ -20,6 +20,7 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None):
         deps (list, optional): A list of helm package dependencies.
         tags (list, optional): Tags to apply to all targets.
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
+        **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
     helm_package(
         name = name,
@@ -29,12 +30,13 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None):
         tags = tags,
         templates = native.glob(["templates/**"]),
         values = "values.yaml",
+        **kwargs
     )
 
     helm_push(
         name = name + ".push",
         package = name,
-        tags = tags,
+        tags = depset(tags + ["manual"]).to_list(),
     )
 
     if not install_name:
@@ -44,20 +46,20 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None):
         name = name + ".install",
         install_name = install_name,
         package = name,
-        tags = tags,
+        tags = depset(tags + ["manual"]).to_list(),
     )
 
     helm_uninstall(
         name = name + ".uninstall",
         install_name = install_name,
-        tags = tags,
+        tags = depset(tags + ["manual"]).to_list(),
     )
 
     helm_reinstall(
         name = name + ".reinstall",
         install_name = install_name,
         package = name,
-        tags = tags,
+        tags = depset(tags + ["manual"]).to_list(),
     )
 
 def chart_content(
