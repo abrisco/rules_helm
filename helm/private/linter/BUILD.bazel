@@ -1,10 +1,11 @@
-load("@rules_python//python:defs.bzl", "py_binary")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 
 package(default_visibility = ["//visibility:public"])
 
-py_binary(
+go_binary(
     name = "linter",
-    srcs = ["linter.py"],
+    srcs = ["linter.go"],
+    deps = ["@io_bazel_rules_go//go/tools/bazel"],
 )
 
 filegroup(

@@ -1,0 +1,15 @@
+load("//helm:defs.bzl", "chart_content", "helm_lint_test", "helm_package")
+
+helm_package(
+    name = "inline_chart",
+    chart_json = chart_content(
+        name = "inline_chart",
+    ),
+    templates = glob(["templates/**"]),
+    values = "values.yaml",
+)
+
+helm_lint_test(
+    name = "inline_chart_test",
+    chart = ":inline_chart",
+)

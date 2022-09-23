@@ -29,17 +29,42 @@ def rules_helm_dependencies():
     maybe(
         http_archive,
         name = "rules_python",
-        sha256 = "15f84594af9da06750ceb878abbf129241421e3abbd6e36893041188db67f2fb",
-        strip_prefix = "rules_python-0.7.0",
-        url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.7.0.tar.gz",
+        sha256 = "b593d13bb43c94ce94b483c2858e53a9b811f6f10e1e0eedc61073bd90e58d9c",
+        strip_prefix = "rules_python-0.12.0",
+        url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.12.0.tar.gz",
+    )
+
+    maybe(
+        http_archive,
+        name = "io_bazel_rules_go",
+        sha256 = "099a9fb96a376ccbbb7d291ed4ecbdfd42f6bc822ab77ae6f1b5cb9e914e94fa",
+        urls = [
+            "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.35.0/rules_go-v0.35.0.zip",
+            "https://github.com/bazelbuild/rules_go/releases/download/v0.35.0/rules_go-v0.35.0.zip",
+        ],
+    )
+
+    maybe(
+        http_archive,
+        name = "bazel_gazelle",
+        sha256 = "efbbba6ac1a4fd342d5122cbdfdb82aeb2cf2862e35022c752eaddffada7c3f3",
+        urls = ["https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.27.0/bazel-gazelle-v0.27.0.tar.gz"],
+    )
+
+    maybe(
+        http_archive,
+        name = "go_yaml_yaml",
+        urls = ["https://github.com/go-yaml/yaml/archive/refs/tags/v3.0.1.tar.gz"],
+        strip_prefix = "yaml-3.0.1",
+        sha256 = "cf05411540d3e6ef8f1fd88434b34f94cedaceb540329031d80e23b74540c4e5",
+        build_file = Label("//3rdparty/yaml:BUILD.yaml.bazel"),
     )
 
     maybe(
         http_archive,
         name = "io_bazel_rules_docker",
-        sha256 = "85ffff62a4c22a74dbd98d05da6cf40f497344b3dbf1e1ab0a37ab2a1a6ca014",
-        strip_prefix = "rules_docker-0.23.0",
-        urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.23.0/rules_docker-v0.23.0.tar.gz"],
+        sha256 = "b1e80761a8a8243d03ebca8845e9cc1ba6c82ce7c5179ce2b295cd36f7e394bf",
+        urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.25.0/rules_docker-v0.25.0.tar.gz"],
     )
 
 _HELM_TOOLCHAIN_BUILD_CONTENT = """\
@@ -86,18 +111,18 @@ def _helm_toolchain_repository_impl(repository_ctx):
 
 helm_toolchain_repository = repository_rule(
     implementation = _helm_toolchain_repository_impl,
-    doc = "",
+    doc = "A repository rule for generating a Helm toolchain definition.",
     attrs = {
         "exec_compatible_with": attr.string_list(
-            doc = "",
+            doc = "A list of constraints for the execution platform for this toolchain.",
             default = [],
         ),
         "platform": attr.string(
-            doc = "",
+            doc = "Platform the Helm executable was built for.",
             mandatory = True,
         ),
         "target_compatible_with": attr.string_list(
-            doc = "",
+            doc = "A list of constraints for the target platform for this toolchain.",
             default = [],
         ),
     },

@@ -4,65 +4,145 @@ load("@io_bazel_rules_docker//container:providers.bzl", "PushInfo")
 load("//helm:providers.bzl", "HelmPackageInfo")
 load("//helm/private:helm_utils.bzl", "is_stamping_enabled")
 
+def _render_json_to_yaml(ctx, name, inline_content):
+    target_file = ctx.actions.declare_file("{}/{}.yaml".format(
+        name,
+        ctx.label.name,
+    ))
+    content_json = ctx.actions.declare_file("{}/.{}.json".format(
+        name,
+        ctx.label.name,
+    ))
+    ctx.actions.write(
+        output = content_json,
+        content = inline_content,
+    )
+    args = ctx.actions.args()
+    args.add("-input", content_json)
+    args.add("-output", target_file)
+    ctx.actions.run(
+        executable = ctx.executable._json_to_yaml,
+        mnemonic = "HelmPackageJsonToYaml",
+        arguments = [args],
+        inputs = [content_json],
+        outputs = [target_file],
+    )
+
+    return target_file
+
 def _helm_package_impl(ctx):
+    if ctx.attr.values and ctx.attr.values_json:
+        fail("helm_package rules cannot use both `values` and `values_json` attributes. Update {} to use one.".format(
+            ctx.label,
+        ))
+
+    if ctx.attr.chart and ctx.attr.chart_json:
+        fail("helm_package rules cannot use both `values` and `values_json` attributes. Update {} to use one.".format(
+            ctx.label,
+        ))
+
+    if ctx.attr.values:
+        values_yaml = ctx.file.values
+    elif ctx.attr.values_json:
+        values_yaml = _render_json_to_yaml(ctx, "values", ctx.attr.values_json)
+    else:
+        fail("helm_package rules requires either `values` or `values_json` attributes. Update {} to use one.".format(
+            ctx.label,
+        ))
+
+    if ctx.attr.chart:
+        chart_yaml = ctx.file.chart
+    elif ctx.attr.chart_json:
+        chart_yaml = _render_json_to_yaml(ctx, "Chart", ctx.attr.chart_json)
+    else:
+        fail("helm_package rules requires either `chart` or `chart_json` attributes. Update {} to use one.".format(
+            ctx.label,
+        ))
+
     args = ctx.actions.args()
 
     output = ctx.actions.declare_file(ctx.label.name + ".tgz")
     metadata_output = ctx.actions.declare_file(ctx.label.name + ".metadata.json")
-    args.add("--output", output)
-    args.add("--metadata_output", metadata_output)
+    args.add("-output", output)
+    args.add("-metadata_output", metadata_output)
 
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
-    args.add("--helm", toolchain.helm)
+    args.add("-helm", toolchain.helm)
 
-    args.add("--chart", ctx.file.chart)
-    args.add("--values", ctx.file.values)
+    args.add("-chart", chart_yaml)
+    args.add("-values", values_yaml)
 
-    for file in ctx.files.templates:
-        args.add("--template", file)
+    templates_manifest = ctx.actions.declare_file("{}/templates_manifest.json".format(ctx.label.name))
+    ctx.actions.write(
+        output = templates_manifest,
+        content = json.encode_indent({file.path: file.short_path for file in ctx.files.templates}, indent = " " * 4),
+    )
+    args.add("-templates_manifest", templates_manifest)
 
     deps = []
-    for dep in ctx.attr.deps:
-        pkg_info = dep[HelmPackageInfo]
-        args.add("--dep", pkg_info.chart)
-        deps.append(pkg_info.chart)
-
-    image_inputs = []
-    for image in ctx.attr.images:
-        image_manifest = ctx.actions.declare_file("{}/{}".format(
-            ctx.label.name,
-            str(image.label).strip("@").replace("/", "_").replace(":", "_") + ".image_manifest",
-        ))
-        push_info = image[PushInfo]
+    if ctx.attr.deps:
+        deps.extend([dep[HelmPackageInfo].chart for dep in ctx.attr.deps])
+        deps_manifest = ctx.actions.declare_file("{}/deps_manifest.json".format(ctx.label.name))
         ctx.actions.write(
-            image_manifest,
-            json.encode_indent(struct(
-                label = str(image.label),
-                registry = push_info.registry,
-                repository = push_info.repository,
-                digest = push_info.digest.path,
-            ), indent = " " * 4),
+            output = deps_manifest,
+            content = json.encode_indent([dep.path for dep in deps], indent = " " * 4),
         )
-        image_inputs.extend([image_manifest, push_info.digest])
-        args.add("--image_manifest", image_manifest)
+        args.add("-deps_manifest", deps_manifest)
+        deps.append(deps_manifest)
+
+    # Create documents for each image the package depends on
+    image_inputs = []
+    if ctx.attr.images:
+        single_image_manifests = []
+        for image in ctx.attr.images:
+            single_image_manifest = ctx.actions.declare_file("{}/{}".format(
+                ctx.label.name,
+                str(image.label).strip("@").replace("/", "_").replace(":", "_") + ".image_manifest",
+            ))
+            push_info = image[PushInfo]
+            ctx.actions.write(
+                output = single_image_manifest,
+                content = json.encode_indent(struct(
+                    label = str(image.label),
+                    registry = push_info.registry,
+                    repository = push_info.repository,
+                    digest = push_info.digest.path,
+                ), indent = " " * 4),
+            )
+            image_inputs.extend([single_image_manifest, push_info.digest])
+            single_image_manifests.append(single_image_manifest)
+
+        image_manifest = ctx.actions.declare_file("{}/image_manifest.json".format(
+            ctx.label.name,
+        ))
+        ctx.actions.write(
+            output = image_manifest,
+            content = json.encode_indent([manifest.path for manifest in single_image_manifests], indent = " " * 4),
+        )
+        image_inputs.append(image_manifest)
+        image_inputs.extend(single_image_manifests)
+        args.add("-image_manifest", image_manifest)
 
     stamps = []
     if is_stamping_enabled(ctx.attr):
-        args.add("--volatile_status_file", ctx.version_file)
-        args.add("--stable_status_file", ctx.info_file)
+        args.add("-volatile_status_file", ctx.version_file)
+        args.add("-stable_status_file", ctx.info_file)
         stamps.extend([ctx.version_file, ctx.info_file])
 
-    args.add("--workspace_name", ctx.workspace_name)
+    args.add("-workspace_name", ctx.workspace_name)
 
     ctx.actions.run(
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
         inputs = depset(
-            ctx.files.templates + stamps + image_inputs + deps + [ctx.file.chart, ctx.file.values],
+            ctx.files.templates + stamps + image_inputs + deps + [chart_yaml, values_yaml, templates_manifest],
         ),
         tools = depset([toolchain.helm]),
         mnemonic = "HelmPackage",
         arguments = [args],
+        progress_message = "Creating Helm Package for {}".format(
+            ctx.label,
+        ),
     )
 
     return [
@@ -84,6 +164,9 @@ helm_package = rule(
         "chart": attr.label(
             doc = "The `Chart.yaml` file of the helm chart",
             allow_single_file = ["Chart.yaml"],
+        ),
+        "chart_json": attr.string(
+            doc = "A json encoded string to use as the `Chart.yaml` file of the helm chart",
         ),
         "deps": attr.label_list(
             doc = "Other helm packages this package depends on.",
@@ -117,8 +200,17 @@ helm_package = rule(
             allow_files = True,
         ),
         "values": attr.label(
-            doc = "The `values.yaml` file for the current package.",
+            doc = "The `values.yaml` file for the current package. This attribute is mutally exclusive with `values_json`.",
             allow_single_file = ["values.yaml"],
+        ),
+        "values_json": attr.string(
+            doc = "A json encoded string to use as the `values.yaml` file. This attribute is mutally exclusive with `values`.",
+        ),
+        "_json_to_yaml": attr.label(
+            doc = "A tools for converting json files to yaml files.",
+            cfg = "exec",
+            executable = True,
+            default = Label("//helm/private/json_to_yaml"),
         ),
         "_packager": attr.label(
             doc = "A process wrapper for producing the helm package's `tgz` file",
@@ -129,222 +221,6 @@ helm_package = rule(
         "_stamp_flag": attr.label(
             doc = "A setting used to determine whether or not the `--stamp` flag is enabled",
             default = Label("//helm/private:stamp"),
-        ),
-    },
-    toolchains = [
-        str(Label("//helm:toolchain_type")),
-    ],
-)
-
-def _helm_install_impl(ctx):
-    toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
-
-    if toolchain.helm.basename.endswith(".exe"):
-        installer = ctx.actions.declare_file(ctx.label.name + ".bat")
-    else:
-        installer = ctx.actions.declare_file(ctx.label.name + ".sh")
-
-    install_name = ctx.attr.install_name or ctx.label.name
-
-    pkg_info = ctx.attr.package[HelmPackageInfo]
-
-    image_pushers = []
-    image_runfiles = []
-    for image in pkg_info.images:
-        image_pushers.append(image[DefaultInfo].files_to_run.executable)
-        image_runfiles.append(image[DefaultInfo].default_runfiles)
-
-    ctx.actions.expand_template(
-        template = ctx.file._installer,
-        output = installer,
-        substitutions = {
-            "{chart}": pkg_info.chart.short_path,
-            "{helm}": toolchain.helm.short_path,
-            "{image_pushers}": "\n".join([pusher.short_path for pusher in image_pushers]),
-            "{install_name}": install_name,
-        },
-        is_executable = True,
-    )
-
-    runfiles = ctx.runfiles([installer, toolchain.helm, pkg_info.chart] + image_pushers)
-    for ir in image_runfiles:
-        runfiles = runfiles.merge(ir)
-
-    return [
-        DefaultInfo(
-            files = depset([installer]),
-            runfiles = runfiles,
-            executable = installer,
-        ),
-    ]
-
-helm_install = rule(
-    doc = "Produce a script for performing a helm install action",
-    implementation = _helm_install_impl,
-    executable = True,
-    attrs = {
-        "install_name": attr.string(
-            doc = "",
-        ),
-        "package": attr.label(
-            doc = "",
-            providers = [HelmPackageInfo],
-            mandatory = True,
-        ),
-        "_installer": attr.label(
-            doc = "",
-            allow_single_file = True,
-            default = Label("//helm/private/installer:template"),
-        ),
-    },
-    toolchains = [
-        str(Label("//helm:toolchain_type")),
-    ],
-)
-
-def _helm_uninstall_impl(ctx):
-    toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
-
-    if toolchain.helm.basename.endswith(".exe"):
-        uninstaller = ctx.actions.declare_file(ctx.label.name + ".bat")
-    else:
-        uninstaller = ctx.actions.declare_file(ctx.label.name + ".sh")
-
-    install_name = ctx.attr.install_name or ctx.label.name
-
-    ctx.actions.expand_template(
-        template = ctx.file._uninstaller,
-        output = uninstaller,
-        substitutions = {
-            "{helm}": toolchain.helm.short_path,
-            "{install_name}": install_name,
-        },
-        is_executable = True,
-    )
-
-    return [
-        DefaultInfo(
-            files = depset([uninstaller]),
-            runfiles = ctx.runfiles([uninstaller, toolchain.helm]),
-            executable = uninstaller,
-        ),
-    ]
-
-helm_uninstall = rule(
-    doc = "Produce a script for performing a helm uninstall action",
-    implementation = _helm_uninstall_impl,
-    executable = True,
-    attrs = {
-        "install_name": attr.string(
-            doc = "",
-        ),
-        "_uninstaller": attr.label(
-            doc = "",
-            allow_single_file = True,
-            default = Label("//helm/private/uninstaller:template"),
-        ),
-    },
-    toolchains = [
-        str(Label("//helm:toolchain_type")),
-    ],
-)
-
-def _helm_push_impl(ctx):
-    toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
-
-    if toolchain.helm.basename.endswith(".exe"):
-        pusher = ctx.actions.declare_file(ctx.label.name + ".bat")
-    else:
-        pusher = ctx.actions.declare_file(ctx.label.name + ".sh")
-
-    pkg_info = ctx.attr.package[HelmPackageInfo]
-
-    image_pushers = []
-    image_runfiles = []
-    for image in pkg_info.images:
-        image_pushers.append(image[DefaultInfo].files_to_run.executable)
-        image_runfiles.append(image[DefaultInfo].default_runfiles)
-
-    ctx.actions.expand_template(
-        template = ctx.file._pusher,
-        output = pusher,
-        substitutions = {
-            "{image_pushers}": "\n".join([pusher.short_path for pusher in image_pushers]),
-        },
-        is_executable = True,
-    )
-
-    runfiles = ctx.runfiles([pusher] + image_pushers)
-    for ir in image_runfiles:
-        runfiles = runfiles.merge(ir)
-
-    return [
-        DefaultInfo(
-            files = depset([pusher]),
-            runfiles = runfiles,
-            executable = pusher,
-        ),
-    ]
-
-helm_push = rule(
-    doc = "Produce a script for pushing all docker images used by a helm chart",
-    implementation = _helm_push_impl,
-    executable = True,
-    attrs = {
-        "package": attr.label(
-            doc = "",
-            providers = [HelmPackageInfo],
-            mandatory = True,
-        ),
-        "_pusher": attr.label(
-            doc = "",
-            allow_single_file = True,
-            default = Label("//helm/private/pusher:template"),
-        ),
-    },
-    toolchains = [
-        str(Label("//helm:toolchain_type")),
-    ],
-)
-
-def _helm_lint_aspect_impl(target, ctx):
-    if HelmPackageInfo not in target:
-        return []
-
-    helm_pkg_info = target[HelmPackageInfo]
-    toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
-
-    output = ctx.actions.declare_file(ctx.label.name + ".helm_lint.ok")
-
-    args = ctx.actions.args()
-    args.add("--helm", toolchain.helm)
-    args.add("--package", helm_pkg_info.chart)
-    args.add("--output", output)
-
-    ctx.actions.run(
-        outputs = [output],
-        executable = ctx.executable._linter,
-        mnemonic = "HelmLintCheck",
-        inputs = [helm_pkg_info.chart],
-        tools = [toolchain.helm],
-        arguments = [args],
-    )
-
-    return [
-        OutputGroupInfo(
-            helm_lint_checks = depset([output]),
-        ),
-    ]
-
-helm_lint_aspect = aspect(
-    doc = "An aspect for running `helm lint` on helm package targets",
-    implementation = _helm_lint_aspect_impl,
-    attrs = {
-        "_linter": attr.label(
-            doc = "",
-            cfg = "exec",
-            executable = True,
-            default = Label("//helm/private/linter:linter"),
         ),
     },
     toolchains = [
