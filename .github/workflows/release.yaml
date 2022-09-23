@@ -30,7 +30,7 @@ jobs:
           echo "RELEASE_VERSION=${version}" >> $GITHUB_ENV
       - name: Create release artifact
         run: |
-          bazel ${BAZEL_STARTUP_FLAGS} run //distro:publish -- ${{ github.workspace }}/.github/
+          tar -czf ${{ github.workspace }}/.github/rules_helm.tar.gz --exclude=".git" --exclude=".github" --exclude="examples" -C ${{ github.workspace }} .
           sha256="$(shasum --algorithm 256 ${{ github.workspace }}/.github/rules_helm.tar.gz | awk '{ print $1 }')"
           echo "ARCHIVE_SHA256=${sha256}" >> $GITHUB_ENV
       - name: Generate release notes
