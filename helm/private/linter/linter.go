@@ -169,22 +169,8 @@ func lint(directory string, package_name string, helm string, output string) {
 }
 
 func get_runfile(runfile_path string) string {
-
-    // First check if the file exists at the given path
-    if _, err := os.Stat(runfile_path); err != nil {
-        if path.IsAbs(runfile_path) {
-            return runfile_path
-        }
-
-        cwd, err := os.Getwd()
-        if err != nil {
-            log.Fatal(err)
-        }
-
-        return path.Join(cwd, runfile_path)
-    }
-
-    // If the file doesn't exist, look it up via runfiles
+    
+    // Use the runfiles library to locate files
     runfile, err := bazel.Runfile(runfile_path)
     if err != nil {
         log.Fatal("When reading file ", runfile_path, " got error ", err)
