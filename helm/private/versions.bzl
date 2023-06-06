@@ -1,6 +1,6 @@
 """Constants for accessing helm binaries"""
 
-DEFAULT_HELM_VERSION = "3.10.0"
+DEFAULT_HELM_VERSION = "3.12.0"
 
 DEFAULT_HELM_URL_TEMPLATES = [
     "https://get.helm.sh/helm-v{version}-{platform}.{compression}",
@@ -44,6 +44,182 @@ HELM_VERSIONS = {
         ),
         "windows-amd64": struct(
             sha256 = "9d841d55eb7cd6e07be0364bbfa85bceca7e184d50b43b13d20f044403937309",
+            constraints = ["@platforms//os:windows"],
+        ),
+    },
+    "3.10.1": {
+        "darwin-amd64": struct(
+            sha256 = "e7f2db0df45a5011c1df8c82efde1e306a93a31eba4696d27cd751917e549ac6",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:x86_64"],
+        ),
+        "darwin-arm64": struct(
+            sha256 = "28a079a61c393d125c5d5e1a8e20a04b72c709ccfa8e7822f3f17bb1ad2bbc22",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:aarch64"],
+        ),
+        "linux-amd64": struct(
+            sha256 = "c12d2cd638f2d066fec123d0bd7f010f32c643afdf288d39a4610b1f9cb32af3",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+        ),
+        "linux-arm64": struct(
+            sha256 = "d04b38d439ab8655abb4cb9ccc1efa8a3fe95f3f68af46d9137c6b7985491833",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
+        ),
+        "windows-amd64": struct(
+            sha256 = "4c6f89f005a86665e3e90c28d36446434945594aac960a8d5a2d1c4fb1e53522",
+            constraints = ["@platforms//os:windows"],
+        ),
+    },
+    "3.10.2": {
+        "darwin-amd64": struct(
+            sha256 = "e889960e4c1d7e2dfdb91b102becfaf22700cb86dc3e3553d9bebd7bab5a3803",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:x86_64"],
+        ),
+        "darwin-arm64": struct(
+            sha256 = "460441eea1764ca438e29fa0e38aa0d2607402f753cb656a4ab0da9223eda494",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:aarch64"],
+        ),
+        "linux-amd64": struct(
+            sha256 = "2315941a13291c277dac9f65e75ead56386440d3907e0540bf157ae70f188347",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+        ),
+        "linux-arm64": struct(
+            sha256 = "57fa17b6bb040a3788116557a72579f2180ea9620b4ee8a9b7244e5901df02e4",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
+        ),
+        "windows-amd64": struct(
+            sha256 = "f1a3190adecc26270bbef4f3ab2d1a56509f9d8df95413cdd6e3151f6f367862",
+            constraints = ["@platforms//os:windows"],
+        ),
+    },
+    "3.10.3": {
+        "darwin-amd64": struct(
+            sha256 = "77a94ebd37eab4d14aceaf30a372348917830358430fcd7e09761eed69f08be5",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:x86_64"],
+        ),
+        "darwin-arm64": struct(
+            sha256 = "4f3490654349d6fee8d4055862efdaaf9422eca1ffd2a15393394fd948ae3377",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:aarch64"],
+        ),
+        "linux-amd64": struct(
+            sha256 = "950439759ece902157cf915b209b8d694e6f675eaab5099fb7894f30eeaee9a2",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+        ),
+        "linux-arm64": struct(
+            sha256 = "260cda5ff2ed5d01dd0fd6e7e09bc80126e00d8bdc55f3269d05129e32f6f99d",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
+        ),
+        "windows-amd64": struct(
+            sha256 = "5d97aa26830c1cd6c520815255882f148040587fd7cdddb61ef66e4c081566e0",
+            constraints = ["@platforms//os:windows"],
+        ),
+    },
+    "3.11.0": {
+        "darwin-amd64": struct(
+            sha256 = "5a3d13545a302eb2623236353ccd3eaa01150c869f4d7f7a635073847fd7d932",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:x86_64"],
+        ),
+        "darwin-arm64": struct(
+            sha256 = "f4717f8d1dab79bace3ff5d9d48bebef62310421fd479205ef54a56204f97415",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:aarch64"],
+        ),
+        "linux-amd64": struct(
+            sha256 = "6c3440d829a56071a4386dd3ce6254eab113bc9b1fe924a6ee99f7ff869b9e0b",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+        ),
+        "linux-arm64": struct(
+            sha256 = "57d36ff801ce8c0201ce9917c5a2d3b4da33e5d4ea154320962c7d6fb13e1f2c",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
+        ),
+        "windows-amd64": struct(
+            sha256 = "55477fa4295fb3043835397a19e99a138bb4859fbe7cd2d099de28df9d8786f1",
+            constraints = ["@platforms//os:windows"],
+        ),
+    },
+    "3.11.1": {
+        "darwin-amd64": struct(
+            sha256 = "2548a90e5cc957ccc5016b47060665a9d2cd4d5b4d61dcc32f5de3144d103826",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:x86_64"],
+        ),
+        "darwin-arm64": struct(
+            sha256 = "43d0198a7a2ea2639caafa81bb0596c97bee2d4e40df50b36202343eb4d5c46b",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:aarch64"],
+        ),
+        "linux-amd64": struct(
+            sha256 = "0b1be96b66fab4770526f136f5f1a385a47c41923d33aab0dcb500e0f6c1bf7c",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+        ),
+        "linux-arm64": struct(
+            sha256 = "919173e8fb7a3b54d76af9feb92e49e86d5a80c5185020bae8c393fa0f0de1e8",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
+        ),
+        "windows-amd64": struct(
+            sha256 = "bc37d5d283e57c5dfa94f92ff704c8e273599ff8df3f8132cef5ca73f6a23d0a",
+            constraints = ["@platforms//os:windows"],
+        ),
+    },
+    "3.11.2": {
+        "darwin-amd64": struct(
+            sha256 = "404938fd2c6eff9e0dab830b0db943fca9e1572cd3d7ee40904705760faa390f",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:x86_64"],
+        ),
+        "darwin-arm64": struct(
+            sha256 = "f61a3aa55827de2d8c64a2063fd744b618b443ed063871b79f52069e90813151",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:aarch64"],
+        ),
+        "linux-amd64": struct(
+            sha256 = "781d826daec584f9d50a01f0f7dadfd25a3312217a14aa2fbb85107b014ac8ca",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+        ),
+        "linux-arm64": struct(
+            sha256 = "0a60baac83c3106017666864e664f52a4e16fbd578ac009f9a85456a9241c5db",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
+        ),
+        "windows-amd64": struct(
+            sha256 = "bca0c5b99a0e6621032f1767e61a1723b86c5f4ef565fa58be8be6d619a4276a",
+            constraints = ["@platforms//os:windows"],
+        ),
+    },
+    "3.11.3": {
+        "darwin-amd64": struct(
+            sha256 = "9d029df37664b50e427442a600e4e065fa75fd74dac996c831ac68359654b2c4",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:x86_64"],
+        ),
+        "darwin-arm64": struct(
+            sha256 = "267e4d50b68e8854b9cc44517da9ab2f47dec39787fed9f7eba42080d61ac7f8",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:aarch64"],
+        ),
+        "linux-amd64": struct(
+            sha256 = "ca2d5d40d4cdfb9a3a6205dd803b5bc8def00bd2f13e5526c127e9b667974a89",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+        ),
+        "linux-arm64": struct(
+            sha256 = "9f58e707dcbe9a3b7885c4e24ef57edfb9794490d72705b33a93fa1f3572cce4",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
+        ),
+        "windows-amd64": struct(
+            sha256 = "ae146d2a90600c6958bc801213daef467237cf475e26ab3f476dfb8e0d9549b7",
+            constraints = ["@platforms//os:windows"],
+        ),
+    },
+    "3.12.0": {
+        "darwin-amd64": struct(
+            sha256 = "8223beb796ff19b59e615387d29be8c2025c5d3aea08485a262583de7ba7d708",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:x86_64"],
+        ),
+        "darwin-arm64": struct(
+            sha256 = "879f61d2ad245cb3f5018ab8b66a87619f195904a4df3b077c98ec0780e36c37",
+            constraints = ["@platforms//os:macos", "@platforms//cpu:aarch64"],
+        ),
+        "linux-amd64": struct(
+            sha256 = "da36e117d6dbc57c8ec5bab2283222fbd108db86c83389eebe045ad1ef3e2c3b",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+        ),
+        "linux-arm64": struct(
+            sha256 = "658839fed8f9be2169f5df68e55cb2f0aa731a50df454caf183186766800bbd0",
+            constraints = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
+        ),
+        "windows-amd64": struct(
+            sha256 = "52138ba8caec50c358c7aee41aac28d6a8a037878ada3cf5ce6c1049fc772547",
             constraints = ["@platforms//os:windows"],
         ),
     },

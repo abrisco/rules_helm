@@ -2,19 +2,6 @@
 
 load("//helm:providers.bzl", "HelmPackageInfo")
 
-def _sanitize_runfile_path(file):
-    """Ensure paths are usable from a runfiles directory
-
-    Args:
-        file (File): The file who's path to sanitize
-
-    Returns:
-        str: A valid runfiles path for a test
-    """
-    if file.short_path.startswith("../"):
-        return file.short_path.replace("../", "external/", 1)
-    return file.short_path
-
 def _helm_lint_aspect_impl(target, ctx):
     if HelmPackageInfo not in target:
         return []
@@ -70,9 +57,9 @@ def _helm_lint_test_impl(ctx):
         output = args_file,
         content = "\n".join([
             "-helm",
-            _sanitize_runfile_path(toolchain.helm),
+            toolchain.helm.short_path,
             "-package",
-            _sanitize_runfile_path(helm_pkg_info.chart),
+            helm_pkg_info.chart.short_path,
         ]),
     )
 
