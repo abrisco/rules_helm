@@ -12,5 +12,11 @@ build --workspace_status_command=tools/workspace_status.sh
 startup --windows_enable_symlinks
 build --enable_runfiles
 
+# https://github.com/bazelbuild/bazel/issues/8195
+build --incompatible_disallow_empty_glob=true
+
+# https://github.com/bazelbuild/bazel/issues/12821
+build --nolegacy_external_runfiles
+
 # This flag should always go last
 try-import %workspace%/user.bazelrc
