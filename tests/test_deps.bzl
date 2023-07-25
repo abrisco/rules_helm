@@ -24,6 +24,6 @@ def helm_test_deps():
     oci_pull(
         name = "rules_helm_test_oci_container_base",
         digest = "sha256:2042a492bcdd847a01cd7f119cd48caa180da696ed2aedd085001a78664407d6",
-        image = "docker.io/alpine",
+        image = "alpine",
     )
 

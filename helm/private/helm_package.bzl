@@ -176,6 +176,9 @@ helm_package = rule(
             doc = "[@rules_docker//container:push.bzl%container_push](https://github.com/bazelbuild/rules_docker/blob/v0.22.0/docs/container.md#container_push) targets.",
             providers = [PushInfo],
         ),
+        "oci_images": attr.label_list(
+             doc = "[@rules_oci//oci:defs.bzl%oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets.",
+        ),
         "stamp": attr.int(
             doc = """\
                 Whether to encode build information into the helm actions. Possible values:
