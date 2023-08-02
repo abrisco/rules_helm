@@ -154,6 +154,7 @@ def _helm_package_impl(ctx):
             chart = output,
             metadata = metadata_output,
             images = ctx.attr.images,
+            oci_images = ctx.attr.oci_images
         ),
     ]
 

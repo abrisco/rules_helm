@@ -14,7 +14,14 @@ helm_chart(
         ":oci_image_a.push",
         ":oci_image_b.push"
     ]
+)
 
+helm_chart(
+    name = "with_oci_image_deps",
+    oci_images = [
+        ":oci_image_a.push",
+        ":oci_image_b.push"
+    ]
 )
 
 helm_lint_test(

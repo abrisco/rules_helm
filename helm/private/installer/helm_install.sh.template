@@ -3,5 +3,6 @@
 set -euo pipefail
 
 {image_pushers}
+{oci_image_pushers}
 
 eval exec {helm} install {install_name} {chart} "$@"
