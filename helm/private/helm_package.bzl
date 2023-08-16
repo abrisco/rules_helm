@@ -122,7 +122,32 @@ def _helm_package_impl(ctx):
         image_inputs.append(image_manifest)
         image_inputs.extend(single_image_manifests)
         args.add("-image_manifest", image_manifest)
+    if ctx.attr.oci_images:
+            single_image_manifests = []
+            for image in ctx.attr.oci_images:
+                single_image_manifest = ctx.actions.declare_file("{}/{}".format(
+                    ctx.label.name,
+                    str(image.label).strip("@").replace("/", "_").replace(":", "_") + ".oci_image_manifest",
+                ))
+                push_info = image[DefaultInfo]
+                ctx.actions.write(
+                    output = single_image_manifest,
+                    content = json.encode_indent(struct(
+                     label = str(image.label),
+                     paths = [manifest.path for manifest in push_info.default_runfiles.files.to_list()])
+                    )
+                )
+                image_inputs.extend(push_info.default_runfiles.files.to_list())
+                single_image_manifests.append(single_image_manifest)
 
+            image_manifest = ctx.actions.declare_file("{}/oci_image_manifest.json".format(ctx.label.name))
+            ctx.actions.write(
+                output = image_manifest,
+                content = json.encode_indent([manifest.path for manifest in single_image_manifests], indent = " " * 4),
+            )
+            image_inputs.append(image_manifest)
+            image_inputs.extend(single_image_manifests)
+            args.add("-oci_image_manifest", image_manifest)
     stamps = []
     if is_stamping_enabled(ctx.attr):
         args.add("-volatile_status_file", ctx.version_file)

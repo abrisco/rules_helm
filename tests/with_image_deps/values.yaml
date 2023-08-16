@@ -15,6 +15,10 @@ bazel_produced_images:
     url: "{@//tests/with_image_deps:image_a.push}"
   image_b:
     url: "{@//tests/with_image_deps:image_b.push}"
+  image_oci_a:
+    url: "{@//tests/with_image_deps:oci_image_a.push}"
+  image_oci_b:
+    url: "{@//tests/with_image_deps:oci_image_b.push}"
 
 imagePullSecrets: []
 nameOverride: ""
