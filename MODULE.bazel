@@ -1,0 +1,25 @@
+module(
+    name = "rules_helm",
+    version = "0.0.0",
+    compatibility_level = 1,
+)
+bazel_dep(name = "platforms", version = "0.0.4")
+bazel_dep(name = "stardoc", version = "0.6.2", repo_name = "io_bazel_stardoc")
+
+helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
+helm.options()
+use_repo(helm,
+        "helm_darwin_amd64_toolchain",
+        "helm_darwin_arm64_toolchain",
+        "helm_linux_amd64_toolchain",
+        "helm_linux_arm64_toolchain",
+        "helm_windows_amd64_toolchain",
+)
+
+
+register_toolchains("@helm_darwin_amd64_toolchain//:toolchain",
+                    "@helm_darwin_arm64_toolchain//:toolchain",
+                    "@helm_linux_amd64_toolchain//:toolchain",
+                    "@helm_linux_arm64_toolchain//:toolchain",
+                    "@helm_windows_amd64_toolchain//:toolchain"
+)
