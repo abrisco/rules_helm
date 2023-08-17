@@ -142,6 +142,12 @@ def _helm_reinstall_impl(ctx):
         image_pushers.append(image[DefaultInfo].files_to_run.executable)
         image_runfiles.append(image[DefaultInfo].default_runfiles)
 
+    oci_image_pushers = []
+    oci_image_runfiles = []
+    for oci_image in pkg_info.oci_images:
+         oci_image_pushers.append(oci_image[DefaultInfo].files_to_run.executable)
+         oci_image_runfiles.append(oci_image[DefaultInfo].default_runfiles)
+
     ctx.actions.expand_template(
         template = ctx.file._reinstaller,
         output = reinstaller,
@@ -149,13 +155,16 @@ def _helm_reinstall_impl(ctx):
             "{chart}": pkg_info.chart.short_path,
             "{helm}": toolchain.helm.short_path,
             "{image_pushers}": "\n".join([pusher.short_path for pusher in image_pushers]),
+            "{oci_image_pushers}": "\n".join([pusher.short_path for pusher in oci_image_pushers]),
             "{install_name}": install_name,
         },
         is_executable = True,
     )
 
-    runfiles = ctx.runfiles([reinstaller, toolchain.helm, pkg_info.chart] + image_pushers)
+    runfiles = ctx.runfiles([reinstaller, toolchain.helm, pkg_info.chart] + image_pushers + oci_image_pushers)
     for ir in image_runfiles:
+        runfiles = runfiles.merge(ir)
+    for ir in oci_image_runfiles:
         runfiles = runfiles.merge(ir)
 
     return [
@@ -211,17 +220,31 @@ def _helm_push_impl(ctx):
     else:
         image_commands = "echo 'No images to push for Helm chart'"
 
+    oci_image_pushers = []
+    oci_image_runfiles = []
+    for oci_image in pkg_info.oci_images:
+        oci_image_pushers.append(oci_image[DefaultInfo].files_to_run.executable)
+        oci_image_runfiles.append(oci_image[DefaultInfo].default_runfiles)
+
+    if oci_image_pushers:
+        oci_image_commands = "\n".join([pusher.short_path for pusher in oci_image_pushers])
+    else:
+        oci_image_commands = "echo 'No OCI images to push for Helm chart'"
+
     ctx.actions.expand_template(
         template = ctx.file._pusher,
         output = pusher,
         substitutions = {
             "{image_pushers}": image_commands,
+            "{oci_image_pushers}": oci_image_commands,
         },
         is_executable = True,
     )
 
-    runfiles = ctx.runfiles([pusher] + image_pushers)
+    runfiles = ctx.runfiles([pusher] + image_pushers + oci_image_pushers)
     for ir in image_runfiles:
+        runfiles = runfiles.merge(ir)
+    for ir in oci_image_runfiles:
         runfiles = runfiles.merge(ir)
 
     return [

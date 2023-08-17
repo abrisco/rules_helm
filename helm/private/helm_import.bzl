@@ -20,6 +20,7 @@ def _helm_import_impl(ctx):
         HelmPackageInfo(
             chart = ctx.file.chart,
             images = [],
+            oci_images = [],
             metadata = metadata_output,
         ),
     ]

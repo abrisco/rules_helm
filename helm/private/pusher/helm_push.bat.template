@@ -1,3 +1,4 @@
 ECHO OFF
 
 {image_pushers}
+{oci_image_pushers}
