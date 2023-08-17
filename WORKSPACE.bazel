@@ -37,20 +37,7 @@ oci_register_toolchains(
     # zot_version = LATEST_ZOT_VERSION,
 )
 
-load(
-    "@io_bazel_rules_docker//repositories:repositories.bzl",
-    container_repositories = "repositories",
-)
 load("//tests:test_deps.bzl", "helm_test_deps")
-
-container_repositories()
-
-load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
-
-container_deps(
-    # https://github.com/bazelbuild/rules_docker/issues/1902
-    go_repository_default_config = "@//:WORKSPACE.bazel",
-)
 
 helm_test_deps()
 

@@ -14,11 +14,6 @@ def _helm_install_impl(ctx):
 
     pkg_info = ctx.attr.package[HelmPackageInfo]
 
-    image_pushers = []
-    image_runfiles = []
-    for image in pkg_info.images:
-        image_pushers.append(image[DefaultInfo].files_to_run.executable)
-        image_runfiles.append(image[DefaultInfo].default_runfiles)
 
     oci_image_pushers = []
     oci_image_runfiles = []
@@ -32,16 +27,13 @@ def _helm_install_impl(ctx):
         substitutions = {
             "{chart}": pkg_info.chart.short_path,
             "{helm}": toolchain.helm.short_path,
-            "{image_pushers}": "\n".join([pusher.short_path for pusher in image_pushers]),
             "{oci_image_pushers}": "\n".join([pusher.short_path for pusher in oci_image_pushers]),
             "{install_name}": install_name,
         },
         is_executable = True,
     )
 
-    runfiles = ctx.runfiles([installer, toolchain.helm, pkg_info.chart] + image_pushers + oci_image_pushers)
-    for ir in image_runfiles:
-        runfiles = runfiles.merge(ir)
+    runfiles = ctx.runfiles([installer, toolchain.helm, pkg_info.chart] + oci_image_pushers)
     for ir in oci_image_runfiles:
         runfiles = runfiles.merge(ir)
 
@@ -136,12 +128,6 @@ def _helm_reinstall_impl(ctx):
 
     pkg_info = ctx.attr.package[HelmPackageInfo]
 
-    image_pushers = []
-    image_runfiles = []
-    for image in pkg_info.images:
-        image_pushers.append(image[DefaultInfo].files_to_run.executable)
-        image_runfiles.append(image[DefaultInfo].default_runfiles)
-
     oci_image_pushers = []
     oci_image_runfiles = []
     for oci_image in pkg_info.oci_images:
@@ -154,16 +140,13 @@ def _helm_reinstall_impl(ctx):
         substitutions = {
             "{chart}": pkg_info.chart.short_path,
             "{helm}": toolchain.helm.short_path,
-            "{image_pushers}": "\n".join([pusher.short_path for pusher in image_pushers]),
             "{oci_image_pushers}": "\n".join([pusher.short_path for pusher in oci_image_pushers]),
             "{install_name}": install_name,
         },
         is_executable = True,
     )
 
-    runfiles = ctx.runfiles([reinstaller, toolchain.helm, pkg_info.chart] + image_pushers + oci_image_pushers)
-    for ir in image_runfiles:
-        runfiles = runfiles.merge(ir)
+    runfiles = ctx.runfiles([reinstaller, toolchain.helm, pkg_info.chart] + oci_image_pushers)
     for ir in oci_image_runfiles:
         runfiles = runfiles.merge(ir)
 
@@ -209,17 +192,6 @@ def _helm_push_impl(ctx):
 
     pkg_info = ctx.attr.package[HelmPackageInfo]
 
-    image_pushers = []
-    image_runfiles = []
-    for image in pkg_info.images:
-        image_pushers.append(image[DefaultInfo].files_to_run.executable)
-        image_runfiles.append(image[DefaultInfo].default_runfiles)
-
-    if image_pushers:
-        image_commands = "\n".join([pusher.short_path for pusher in image_pushers])
-    else:
-        image_commands = "echo 'No images to push for Helm chart'"
-
     oci_image_pushers = []
     oci_image_runfiles = []
     for oci_image in pkg_info.oci_images:
@@ -235,15 +207,12 @@ def _helm_push_impl(ctx):
         template = ctx.file._pusher,
         output = pusher,
         substitutions = {
-            "{image_pushers}": image_commands,
             "{oci_image_pushers}": oci_image_commands,
         },
         is_executable = True,
     )
 
-    runfiles = ctx.runfiles([pusher] + image_pushers + oci_image_pushers)
-    for ir in image_runfiles:
-        runfiles = runfiles.merge(ir)
+    runfiles = ctx.runfiles([pusher] + oci_image_pushers)
     for ir in oci_image_runfiles:
         runfiles = runfiles.merge(ir)
 
@@ -256,7 +225,7 @@ def _helm_push_impl(ctx):
     ]
 
 helm_push = rule(
-    doc = "Produce a script for pushing all docker images used by a helm chart",
+    doc = "Produce a script for pushing all oci images used by a helm chart",
     implementation = _helm_push_impl,
     executable = True,
     attrs = {

@@ -59,13 +59,6 @@ def rules_helm_dependencies():
         build_file = Label("//3rdparty/yaml:BUILD.yaml.bazel"),
     )
 
-    maybe(
-        http_archive,
-        name = "io_bazel_rules_docker",
-        sha256 = "b1e80761a8a8243d03ebca8845e9cc1ba6c82ce7c5179ce2b295cd36f7e394bf",
-        urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.25.0/rules_docker-v0.25.0.tar.gz"],
-    )
-
 _HELM_TOOLCHAIN_BUILD_CONTENT = """\
 load("@rules_helm//helm:toolchain.bzl", "helm_toolchain")
 

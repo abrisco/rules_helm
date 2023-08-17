@@ -67,7 +67,6 @@ func parse_args() Arguments {
 	flag.StringVar(&args.helm, "helm", "", "The path to a helm executable")
 	flag.StringVar(&args.output, "output", "", "The path to the Bazel `HelmPackage` action output")
 	flag.StringVar(&args.metadata_output, "metadata_output", "", "The path to the Bazel `HelmPackage` action metadata output")
-	flag.StringVar(&args.image_manifest, "image_manifest", "", "Information about Bazel produced container images used by the helm chart")
 	flag.StringVar(&args.oci_image_manifest, "oci_image_manifest", "", "Information about Bazel produced container oci images used by the helm chart")
 	flag.StringVar(&args.stable_status_file, "stable_status_file", "", "The stable status file (`ctx.info_file`)")
 	flag.StringVar(&args.volatile_status_file, "volatile_status_file", "", "The stable status file (`ctx.version_file`)")
@@ -139,17 +138,6 @@ func load_image_stamps(image_manifest string, workspace_name string, applyReadMa
 	return images
 }
 
-func readImageManifest(content []byte) ImageManifest {
-	var manifest ImageManifest
-	err2 := json.Unmarshal(content, &manifest)
-	if err2 != nil {
-		log.Fatal("Error during Unmarshal(): ", err2)
-	}
-	digest, _ := os.ReadFile(manifest.Digest)
-	manifest.Digest = string(digest)
-	return manifest
-}
-
 func readOciImageManifest(content []byte) ImageManifest {
 	imageManifest := ImageManifest{}
 	type LocalManifest = struct {
@@ -188,12 +176,8 @@ func readOciImageManifest(content []byte) ImageManifest {
 	return imageManifest
 }
 
-func apply_stamping(content string, stamps map[string]string, image_stamps map[string]string, oci_image_stamps map[string]string) string {
+func apply_stamping(content string, stamps map[string]string, oci_image_stamps map[string]string) string {
 	for key, val := range stamps {
-		content = strings.Replace(content, "{"+key+"}", val, -1)
-	}
-
-	for key, val := range image_stamps {
 		content = strings.Replace(content, "{"+key+"}", val, -1)
 	}
 
@@ -425,12 +409,11 @@ func main() {
 
 	// Collect all stamp values
 	var stamps = load_stamps(args.volatile_status_file, args.stable_status_file)
-	var image_stamps = load_image_stamps(args.image_manifest, args.workspace_name, readImageManifest)
 	var oci_image_stamps = load_image_stamps(args.oci_image_manifest, args.workspace_name, readOciImageManifest)
 
 	// Stamp any templates out of top level helm sources
-	var stamped_values_content = apply_stamping(string(values_content), stamps, image_stamps, oci_image_stamps)
-	var stamped_chart_content = sanitize_chart_content(apply_stamping(string(chart_content), stamps, image_stamps, oci_image_stamps))
+	var stamped_values_content = apply_stamping(string(values_content), stamps, oci_image_stamps)
+	var stamped_chart_content = sanitize_chart_content(apply_stamping(string(chart_content), stamps, oci_image_stamps))
 
 	// Create a directory in which to run helm package
 	var chart_name = get_chart_name(stamped_chart_content)

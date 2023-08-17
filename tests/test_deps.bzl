@@ -1,6 +1,5 @@
 """Dependencies for helm test/example targets"""
 
-load("@io_bazel_rules_docker//container:container.bzl", "container_pull")
 load("@rules_oci//oci:pull.bzl", "oci_pull")
 
 load("//helm:defs.bzl", "helm_import_repository")
@@ -15,12 +14,6 @@ def helm_test_deps():
         chart_name = "redis",
     )
 
-    container_pull(
-        name = "rules_helm_test_container_base",
-        registry = "docker.io",
-        repository = "alpine",
-        digest = "sha256:2042a492bcdd847a01cd7f119cd48caa180da696ed2aedd085001a78664407d6",
-    )
     oci_pull(
         name = "rules_helm_test_oci_container_base",
         digest = "sha256:2042a492bcdd847a01cd7f119cd48caa180da696ed2aedd085001a78664407d6",

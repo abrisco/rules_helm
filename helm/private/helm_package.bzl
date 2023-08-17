@@ -1,6 +1,5 @@
 """Helm rules"""
 
-load("@io_bazel_rules_docker//container:providers.bzl", "PushInfo")
 load("//helm:providers.bzl", "HelmPackageInfo")
 load("//helm/private:helm_utils.bzl", "is_stamping_enabled")
 
@@ -92,36 +91,6 @@ def _helm_package_impl(ctx):
 
     # Create documents for each image the package depends on
     image_inputs = []
-    if ctx.attr.images:
-        single_image_manifests = []
-        for image in ctx.attr.images:
-            single_image_manifest = ctx.actions.declare_file("{}/{}".format(
-                ctx.label.name,
-                str(image.label).strip("@").replace("/", "_").replace(":", "_") + ".image_manifest",
-            ))
-            push_info = image[PushInfo]
-            ctx.actions.write(
-                output = single_image_manifest,
-                content = json.encode_indent(struct(
-                    label = str(image.label),
-                    registry = push_info.registry,
-                    repository = push_info.repository,
-                    digest = push_info.digest.path,
-                ), indent = " " * 4),
-            )
-            image_inputs.extend([single_image_manifest, push_info.digest])
-            single_image_manifests.append(single_image_manifest)
-
-        image_manifest = ctx.actions.declare_file("{}/image_manifest.json".format(
-            ctx.label.name,
-        ))
-        ctx.actions.write(
-            output = image_manifest,
-            content = json.encode_indent([manifest.path for manifest in single_image_manifests], indent = " " * 4),
-        )
-        image_inputs.append(image_manifest)
-        image_inputs.extend(single_image_manifests)
-        args.add("-image_manifest", image_manifest)
     if ctx.attr.oci_images:
             single_image_manifests = []
             for image in ctx.attr.oci_images:
@@ -178,7 +147,6 @@ def _helm_package_impl(ctx):
         HelmPackageInfo(
             chart = output,
             metadata = metadata_output,
-            images = ctx.attr.images,
             oci_images = ctx.attr.oci_images
         ),
     ]
@@ -197,10 +165,6 @@ helm_package = rule(
         "deps": attr.label_list(
             doc = "Other helm packages this package depends on.",
             providers = [HelmPackageInfo],
-        ),
-        "images": attr.label_list(
-            doc = "[@rules_docker//container:push.bzl%container_push](https://github.com/bazelbuild/rules_docker/blob/v0.22.0/docs/container.md#container_push) targets.",
-            providers = [PushInfo],
         ),
         "oci_images": attr.label_list(
              doc = "[@rules_oci//oci:defs.bzl%oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets.",
