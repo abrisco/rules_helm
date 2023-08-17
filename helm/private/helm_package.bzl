@@ -217,6 +217,6 @@ helm_package = rule(
         ),
     },
     toolchains = [
-        str(Label("//helm:toolchain_type")),
+        str(Label("@rules_helm//helm:toolchain_type")),
     ],
 )
