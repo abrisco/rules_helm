@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"io"
 	"log"
 	"os"
@@ -13,8 +15,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"gopkg.in/yaml.v3"
 )
 
 type ImageManifest struct {
@@ -54,6 +54,7 @@ type Arguments struct {
 	stable_status_file   string
 	volatile_status_file string
 	workspace_name       string
+	oci_image_manifest   string
 }
 
 func parse_args() Arguments {
@@ -66,11 +67,10 @@ func parse_args() Arguments {
 	flag.StringVar(&args.helm, "helm", "", "The path to a helm executable")
 	flag.StringVar(&args.output, "output", "", "The path to the Bazel `HelmPackage` action output")
 	flag.StringVar(&args.metadata_output, "metadata_output", "", "The path to the Bazel `HelmPackage` action metadata output")
-	flag.StringVar(&args.image_manifest, "image_manifest", "", "Information about Bazel produced container images used by the helm chart")
+	flag.StringVar(&args.oci_image_manifest, "oci_image_manifest", "", "Information about Bazel produced container oci images used by the helm chart")
 	flag.StringVar(&args.stable_status_file, "stable_status_file", "", "The stable status file (`ctx.info_file`)")
 	flag.StringVar(&args.volatile_status_file, "volatile_status_file", "", "The stable status file (`ctx.version_file`)")
 	flag.StringVar(&args.workspace_name, "workspace_name", "", "The name of the current Bazel workspace")
-
 	flag.Parse()
 
 	return args
@@ -105,7 +105,9 @@ func load_stamps(volatile_status_file string, stable_status_file string) map[str
 	return stamps
 }
 
-func load_image_stamps(image_manifest string, workspace_name string) map[string]string {
+type readManifest func([]byte) ImageManifest
+
+func load_image_stamps(image_manifest string, workspace_name string, applyReadManifest readManifest) map[string]string {
 	images := make(map[string]string)
 
 	if len(image_manifest) == 0 {
@@ -116,34 +118,70 @@ func load_image_stamps(image_manifest string, workspace_name string) map[string]
 	if err != nil {
 		log.Fatal("error reading ", image_manifest, err)
 	}
-
-	var images_manfiest ImagesManifest
-	json.Unmarshal(content, &images_manfiest)
-	if err != nil {
-		log.Fatal("Error during Unmarshal(): ", err)
-	}
-
-	for _, manifest := range images_manfiest {
-
-		var registry_url = fmt.Sprintf("%s/%s@%s", manifest.Registry, manifest.Repository, manifest.Digest)
-		images[manifest.Label] = registry_url
-
+	var paths []string
+	_ = json.Unmarshal(content, &paths)
+	for _, path := range paths {
+		content, err := os.ReadFile(path)
+		if err != nil {
+			log.Fatalf("Error during ReadFile %s: %s", path, err)
+		}
+		manifest := applyReadManifest(content)
+		var registryUrl = fmt.Sprintf("%s/%s@%s", manifest.Registry, manifest.Repository, manifest.Digest)
+		images[manifest.Label] = registryUrl
 		// Allow local labels to be resolved using workspace absolute labels.
 		if strings.HasPrefix(manifest.Label, "@") {
-			var abs_label = fmt.Sprintf("@%s%s", workspace_name, manifest.Label)
-			images[abs_label] = registry_url
+			var absLabel = fmt.Sprintf("@%s%s", workspace_name, manifest.Label)
+			images[absLabel] = registryUrl
 		}
 	}
 
 	return images
 }
 
-func apply_stamping(content string, stamps map[string]string, image_stamps map[string]string) string {
+func readOciImageManifest(content []byte) ImageManifest {
+	imageManifest := ImageManifest{}
+	type LocalManifest = struct {
+		Label string
+		Paths []string
+	}
+	localManifest := LocalManifest{}
+	manifestDir := ""
+	yqPath := ""
+	_ = json.Unmarshal(content, &localManifest)
+	imageManifest.Label = strings.Clone(localManifest.Label)
+	for _, path := range localManifest.Paths {
+		file, _ := os.Open(strings.Clone(path))
+		stat, _ := file.Stat()
+		if strings.HasSuffix(stat.Name(), ".sh") {
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				text := scanner.Text()
+				if strings.HasPrefix(text, "readonly FIXED_ARGS") {
+					image := strings.SplitN(strings.Replace(strings.Replace(strings.Split(strings.Clone(text), " ")[2], "\"", "", -1), ")", "", -1), "/", 2)
+					imageManifest.Registry = image[0]
+					imageManifest.Repository = image[1]
+				}
+			}
+		}
+		if stat.IsDir() {
+			manifestDir = strings.Clone(path)
+		}
+		if strings.HasSuffix(stat.Name(), "yq") {
+			yqPath = strings.Clone(path)
+		}
+		digest, _ := exec.Command(yqPath, ".manifests[0].digest", manifestDir+"/index.json").Output()
+		imageManifest.Digest = strings.Replace(string(digest), "\n", "", -1)
+		file.Close()
+	}
+	return imageManifest
+}
+
+func apply_stamping(content string, stamps map[string]string, oci_image_stamps map[string]string) string {
 	for key, val := range stamps {
 		content = strings.Replace(content, "{"+key+"}", val, -1)
 	}
 
-	for key, val := range image_stamps {
+	for key, val := range oci_image_stamps {
 		content = strings.Replace(content, "{"+key+"}", val, -1)
 	}
 
@@ -371,11 +409,11 @@ func main() {
 
 	// Collect all stamp values
 	var stamps = load_stamps(args.volatile_status_file, args.stable_status_file)
-	var image_stamps = load_image_stamps(args.image_manifest, args.workspace_name)
+	var oci_image_stamps = load_image_stamps(args.oci_image_manifest, args.workspace_name, readOciImageManifest)
 
 	// Stamp any templates out of top level helm sources
-	var stamped_values_content = apply_stamping(string(values_content), stamps, image_stamps)
-	var stamped_chart_content = sanitize_chart_content(apply_stamping(string(chart_content), stamps, image_stamps))
+	var stamped_values_content = apply_stamping(string(values_content), stamps, oci_image_stamps)
+	var stamped_chart_content = sanitize_chart_content(apply_stamping(string(chart_content), stamps, oci_image_stamps))
 
 	// Create a directory in which to run helm package
 	var chart_name = get_chart_name(stamped_chart_content)

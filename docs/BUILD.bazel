@@ -7,7 +7,6 @@ bzl_library(
     srcs = [
         "//:bzl_srcs",
         "@bazel_tools//tools:bzl_srcs",
-        "@io_bazel_rules_docker//container:container.docs",
     ],
     visibility = ["//visibility:public"],
 )

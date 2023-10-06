@@ -1,15 +1,16 @@
-load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push")
 load("//helm:defs.bzl", "helm_chart", "helm_lint_test")
 
 exports_files(["Chart.lock"])
 
 helm_chart(
     name = "with_image_deps",
-    images = [
-        ":image_a.push",
-        ":image_b.push",
-    ],
+    oci_images = [
+        ":oci_image_a.push",
+        ":oci_image_b.push"
+    ]
 )
+
 
 helm_lint_test(
     name = "with_image_deps_test",
@@ -21,22 +22,22 @@ _IMAGES = [
     "image_b",
 ]
 
+
 [
-    container_image(
-        name = name,
-        base = "@rules_helm_test_container_base//image",
+    oci_image(
+        name = "oci_{}".format(name),
+        base = "@rules_helm_test_oci_container_base",
     )
     for name in _IMAGES
 ]
 
+
 [
-    container_push(
-        name = "{}.push".format(name),
-        format = "Docker",
-        image = ":{}".format(name),
-        registry = "docker.io",
-        repository = "rules_helm/test/{}".format(name),
-        tag = "latest",
+    oci_push(
+        name = "oci_{}.push".format(name),
+        image = ":oci_{}".format(name),
+        repository = "docker.io/rules_helm/test/{}".format(name),
+        remote_tags = ["latest"],
     )
     for name in _IMAGES
 ]

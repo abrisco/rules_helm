@@ -3,7 +3,7 @@
 load("//helm/private:helm_install.bzl", "helm_install", "helm_push", "helm_reinstall", "helm_uninstall")
 load("//helm/private:helm_package.bzl", "helm_package")
 
-def helm_chart(name, images = [], deps = None, tags = [], install_name = None, **kwargs):
+def helm_chart(name, oci_images = [], deps = None, tags = [], install_name = None, **kwargs):
     """Rules for producing a helm package and some convenience targets.
 
     | target | rule |
@@ -16,7 +16,7 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None, *
 
     Args:
         name (str): The name of the [helm_package](#helm_package) target.
-        images (list, optional): A list of [container_push](https://github.com/bazelbuild/rules_docker/blob/v0.22.0/docs/container.md#container_push) targets
+        oci_images (list, optional): A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets
         deps (list, optional): A list of helm package dependencies.
         tags (list, optional): Tags to apply to all targets.
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
@@ -26,7 +26,7 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None, *
         name = name,
         chart = "Chart.yaml",
         deps = deps,
-        images = images,
+        oci_images = oci_images,
         tags = tags,
         templates = native.glob(["templates/**"]),
         values = "values.yaml",

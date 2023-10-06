@@ -9,3 +9,4 @@ user.bazelrc
 **/charts/**
 # Lock files are not used by Bazel. Instead, lock information is required by repository rules
 Chart.lock
+.idea/
