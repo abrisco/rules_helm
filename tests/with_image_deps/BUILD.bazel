@@ -1,5 +1,6 @@
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push")
 load("//helm:defs.bzl", "helm_chart", "helm_lint_test")
+load("//tests:test_defs.bzl", "helm_package_regex_test")
 
 exports_files(["Chart.lock"])
 
@@ -14,6 +15,15 @@ helm_chart(
 helm_lint_test(
     name = "with_image_deps_test",
     chart = ":with_image_deps",
+)
+
+helm_package_regex_test(
+    name = "with_image_deps_regex_test",
+    package = ":with_image_deps",
+    values_patterns = [
+        r"image_a:\s+url:\s+\"docker.io/rules_helm/test/image_a@sha256:[a-z0-9]{64}\"",
+        r"image_b:\s+url:\s+\"docker.io/rules_helm/test/image_b@sha256:[a-z0-9]{64}\"",
+    ],
 )
 
 _IMAGES = [
