@@ -128,12 +128,40 @@ func load_image_stamps(image_manifest string, workspace_name string, applyReadMa
 		manifest := applyReadManifest(content)
 		var registryUrl = fmt.Sprintf("%s/%s@%s", manifest.Registry, manifest.Repository, manifest.Digest)
 		images[manifest.Label] = registryUrl
-		// Allow local labels to be resolved using workspace absolute labels.
+
+		// There are many ways to represent the same target from a label. Here we
+		// attempt to handle a variety of cases.
 		if strings.HasPrefix(manifest.Label, "@") {
-			var absLabel = fmt.Sprintf("@%s%s", workspace_name, manifest.Label)
-			images[absLabel] = registryUrl
+			if strings.HasPrefix(manifest.Label, "@//") {
+				var absLabel = fmt.Sprintf("@%s%s", workspace_name, strings.Replace(manifest.Label, "@//", "//", 1))
+				images[absLabel] = registryUrl
+				var localLabel = fmt.Sprintf("@%s%s", workspace_name, strings.Replace(manifest.Label, "@//", "//", 1))
+				images[localLabel] = registryUrl
+				var absRelativeLabel = fmt.Sprintf("@@%s", strings.Replace(manifest.Label, "@//", "//", 1))
+				images[absRelativeLabel] = registryUrl
+			}
+			if strings.HasPrefix(manifest.Label, "@@//") {
+				var absLabel = fmt.Sprintf("@@%s%s", workspace_name, strings.Replace(manifest.Label, "@@//", "//", 1))
+				images[absLabel] = registryUrl
+				var localLabel = fmt.Sprintf("@%s%s", workspace_name, strings.Replace(manifest.Label, "@@//", "//", 1))
+				images[localLabel] = registryUrl
+				var relativeLabel = fmt.Sprintf("@%s", strings.Replace(manifest.Label, "@@//", "//", 1))
+				images[relativeLabel] = registryUrl
+			}
+
+			// Comes from bzlmod
+			if strings.HasPrefix(manifest.Label, "@@_main//") {
+				var absLabel = fmt.Sprintf("@@%s%s", workspace_name, strings.Replace(manifest.Label, "@@_main//", "//", 1))
+				images[absLabel] = registryUrl
+				var localLabel = fmt.Sprintf("@%s%s", workspace_name, strings.Replace(manifest.Label, "@@_main//", "//", 1))
+				images[localLabel] = registryUrl
+				var relativeLabel = fmt.Sprintf("@%s", strings.Replace(manifest.Label, "@@_main//", "//", 1))
+				images[relativeLabel] = registryUrl
+			}
 		}
 	}
+
+	log.Println(images)
 
 	return images
 }
