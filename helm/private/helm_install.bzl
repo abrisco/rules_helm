@@ -14,7 +14,6 @@ def _helm_install_impl(ctx):
 
     pkg_info = ctx.attr.package[HelmPackageInfo]
 
-
     oci_image_pushers = []
     oci_image_runfiles = []
     for oci_image in pkg_info.oci_images:
@@ -27,8 +26,8 @@ def _helm_install_impl(ctx):
         substitutions = {
             "{chart}": pkg_info.chart.short_path,
             "{helm}": toolchain.helm.short_path,
-            "{oci_image_pushers}": "\n".join([pusher.short_path for pusher in oci_image_pushers]),
             "{install_name}": install_name,
+            "{oci_image_pushers}": "\n".join([pusher.short_path for pusher in oci_image_pushers]),
         },
         is_executable = True,
     )
@@ -131,8 +130,8 @@ def _helm_reinstall_impl(ctx):
     oci_image_pushers = []
     oci_image_runfiles = []
     for oci_image in pkg_info.oci_images:
-         oci_image_pushers.append(oci_image[DefaultInfo].files_to_run.executable)
-         oci_image_runfiles.append(oci_image[DefaultInfo].default_runfiles)
+        oci_image_pushers.append(oci_image[DefaultInfo].files_to_run.executable)
+        oci_image_runfiles.append(oci_image[DefaultInfo].default_runfiles)
 
     ctx.actions.expand_template(
         template = ctx.file._reinstaller,
@@ -140,8 +139,8 @@ def _helm_reinstall_impl(ctx):
         substitutions = {
             "{chart}": pkg_info.chart.short_path,
             "{helm}": toolchain.helm.short_path,
-            "{oci_image_pushers}": "\n".join([pusher.short_path for pusher in oci_image_pushers]),
             "{install_name}": install_name,
+            "{oci_image_pushers}": "\n".join([pusher.short_path for pusher in oci_image_pushers]),
         },
         is_executable = True,
     )
