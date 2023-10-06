@@ -1,6 +1,6 @@
 ECHO OFF
 
-{oci_image_pushers}
+{image_pushers}
 
 {helm} uninstall {install_name}
 {helm} install {install_name} {chart} %@%

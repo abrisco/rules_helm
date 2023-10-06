@@ -91,12 +91,12 @@ def _helm_package_impl(ctx):
 
     # Create documents for each image the package depends on
     image_inputs = []
-    if ctx.attr.oci_images:
+    if ctx.attr.images:
         single_image_manifests = []
-        for image in ctx.attr.oci_images:
+        for image in ctx.attr.images:
             single_image_manifest = ctx.actions.declare_file("{}/{}".format(
                 ctx.label.name,
-                str(image.label).strip("@").replace("/", "_").replace(":", "_") + ".oci_image_manifest",
+                str(image.label).strip("@").replace("/", "_").replace(":", "_") + ".image_manifest",
             ))
             push_info = image[DefaultInfo]
             ctx.actions.write(
@@ -111,14 +111,14 @@ def _helm_package_impl(ctx):
             image_inputs.extend(push_info.default_runfiles.files.to_list())
             single_image_manifests.append(single_image_manifest)
 
-        image_manifest = ctx.actions.declare_file("{}/oci_image_manifest.json".format(ctx.label.name))
+        image_manifest = ctx.actions.declare_file("{}/image_manifest.json".format(ctx.label.name))
         ctx.actions.write(
             output = image_manifest,
             content = json.encode_indent([manifest.path for manifest in single_image_manifests], indent = " " * 4),
         )
         image_inputs.append(image_manifest)
         image_inputs.extend(single_image_manifests)
-        args.add("-oci_image_manifest", image_manifest)
+        args.add("-image_manifest", image_manifest)
     stamps = []
     if is_stamping_enabled(ctx.attr):
         args.add("-volatile_status_file", ctx.version_file)
@@ -149,7 +149,7 @@ def _helm_package_impl(ctx):
         HelmPackageInfo(
             chart = output,
             metadata = metadata_output,
-            oci_images = ctx.attr.oci_images,
+            images = ctx.attr.images,
         ),
     ]
 
@@ -168,7 +168,7 @@ helm_package = rule(
             doc = "Other helm packages this package depends on.",
             providers = [HelmPackageInfo],
         ),
-        "oci_images": attr.label_list(
+        "images": attr.label_list(
             doc = "[@rules_oci//oci:defs.bzl%oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets.",
         ),
         "stamp": attr.int(
