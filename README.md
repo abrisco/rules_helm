@@ -326,7 +326,7 @@ Register helm toolchains.
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="helm_register_toolchains-version"></a>version |  The version of Helm to use   |  `"3.12.0"` |
+| <a id="helm_register_toolchains-version"></a>version |  The version of Helm to use   |  `"3.13.0"` |
 | <a id="helm_register_toolchains-helm_url_templates"></a>helm_url_templates |  A list of url templates where helm can be downloaded.   |  `["https://get.helm.sh/helm-v{version}-{platform}.{compression}"]` |
 
 
