@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-{oci_image_pushers}
+{image_pushers}

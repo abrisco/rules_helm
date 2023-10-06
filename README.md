@@ -134,7 +134,7 @@ A rule for performing `helm lint` on a helm package
 ## helm_package
 
 <pre>
-helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-deps">deps</a>, <a href="#helm_package-chart">chart</a>, <a href="#helm_package-chart_json">chart_json</a>, <a href="#helm_package-oci_images">oci_images</a>, <a href="#helm_package-stamp">stamp</a>, <a href="#helm_package-templates">templates</a>, <a href="#helm_package-values">values</a>, <a href="#helm_package-values_json">values_json</a>)
+helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-deps">deps</a>, <a href="#helm_package-chart">chart</a>, <a href="#helm_package-chart_json">chart_json</a>, <a href="#helm_package-images">images</a>, <a href="#helm_package-stamp">stamp</a>, <a href="#helm_package-templates">templates</a>, <a href="#helm_package-values">values</a>, <a href="#helm_package-values_json">values_json</a>)
 </pre>
 
 
@@ -148,7 +148,7 @@ helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-deps"
 | <a id="helm_package-deps"></a>deps |  Other helm packages this package depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_package-chart"></a>chart |  The `Chart.yaml` file of the helm chart   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="helm_package-chart_json"></a>chart_json |  A json encoded string to use as the `Chart.yaml` file of the helm chart   | String | optional |  `""`  |
-| <a id="helm_package-oci_images"></a>oci_images |  [@rules_oci//oci:defs.bzl%oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="helm_package-images"></a>images |  [@rules_oci//oci:defs.bzl%oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_package-stamp"></a>stamp |  Whether to encode build information into the helm actions. Possible values:<br><br>- `stamp = 1`: Always stamp the build information into the helm actions, even in                 [--nostamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) builds.                 This setting should be avoided, since it potentially kills remote caching for the target and                 any downstream actions that depend on it.<br><br>- `stamp = 0`: Always replace build information by constant values. This gives good build result caching.<br><br>- `stamp = -1`: Embedding of build information is controlled by the                 [--[no]stamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) flag.<br><br>Stamped targets are not rebuilt unless their dependencies change.   | Integer | optional |  `-1`  |
 | <a id="helm_package-templates"></a>templates |  All templates associated with the current helm chart. E.g., the `./templates` directory   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_package-values"></a>values |  The `values.yaml` file for the current package. This attribute is mutally exclusive with `values_json`.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
@@ -237,7 +237,7 @@ Produce a script for performing a helm uninstall action
 ## HelmPackageInfo
 
 <pre>
-HelmPackageInfo(<a href="#HelmPackageInfo-chart">chart</a>, <a href="#HelmPackageInfo-metadata">metadata</a>, <a href="#HelmPackageInfo-oci_images">oci_images</a>)
+HelmPackageInfo(<a href="#HelmPackageInfo-chart">chart</a>, <a href="#HelmPackageInfo-images">images</a>, <a href="#HelmPackageInfo-metadata">metadata</a>)
 </pre>
 
 A provider for helm packages
@@ -248,8 +248,8 @@ A provider for helm packages
 | Name  | Description |
 | :------------- | :------------- |
 | <a id="HelmPackageInfo-chart"></a>chart |  File: The result of `helm package`    |
+| <a id="HelmPackageInfo-images"></a>images |  list[Target]: A list of [@rules_oci//oci:defs.bzl%oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags)]) targets    |
 | <a id="HelmPackageInfo-metadata"></a>metadata |  File: A json encoded file containing metadata about the helm chart    |
-| <a id="HelmPackageInfo-oci_images"></a>oci_images |  list[Target]: A list of [@rules_oci//oci:defs.bzl%oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags)]) targets    |
 
 
 <a id="chart_content"></a>
@@ -284,7 +284,7 @@ str: A json encoded string which represents `Chart.yaml` contents.
 ## helm_chart
 
 <pre>
-helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-oci_images">oci_images</a>, <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-tags">tags</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-kwargs">kwargs</a>)
+helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-tags">tags</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-kwargs">kwargs</a>)
 </pre>
 
 Rules for producing a helm package and some convenience targets.
@@ -304,7 +304,7 @@ Rules for producing a helm package and some convenience targets.
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
 | <a id="helm_chart-name"></a>name |  The name of the [helm_package](#helm_package) target.   |  none |
-| <a id="helm_chart-oci_images"></a>oci_images |  A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets   |  `[]` |
+| <a id="helm_chart-images"></a>images |  A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets   |  `[]` |
 | <a id="helm_chart-deps"></a>deps |  A list of helm package dependencies.   |  `None` |
 | <a id="helm_chart-tags"></a>tags |  Tags to apply to all targets.   |  `[]` |
 | <a id="helm_chart-install_name"></a>install_name |  The `helm install` name to use. `name` will be used if unset.   |  `None` |

@@ -5,9 +5,9 @@ exports_files(["Chart.lock"])
 
 helm_chart(
     name = "with_image_deps",
-    oci_images = [
-        ":oci_image_a.push",
-        ":oci_image_b.push",
+    images = [
+        ":image_a.push",
+        ":image_b.push",
     ],
 )
 
@@ -23,16 +23,16 @@ _IMAGES = [
 
 [
     oci_image(
-        name = "oci_{}".format(name),
-        base = "@rules_helm_test_oci_container_base",
+        name = name,
+        base = "@rules_helm_test_container_base",
     )
     for name in _IMAGES
 ]
 
 [
     oci_push(
-        name = "oci_{}.push".format(name),
-        image = ":oci_{}".format(name),
+        name = "{}.push".format(name),
+        image = ":{}".format(name),
         remote_tags = ["latest"],
         repository = "docker.io/rules_helm/test/{}".format(name),
     )
