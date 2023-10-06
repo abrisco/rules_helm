@@ -1,7 +1,6 @@
 """Dependencies for helm test/example targets"""
 
 load("@rules_oci//oci:pull.bzl", "oci_pull")
-
 load("//helm:defs.bzl", "helm_import_repository")
 
 def helm_test_deps():
@@ -19,4 +18,3 @@ def helm_test_deps():
         digest = "sha256:2042a492bcdd847a01cd7f119cd48caa180da696ed2aedd085001a78664407d6",
         image = "alpine",
     )
-

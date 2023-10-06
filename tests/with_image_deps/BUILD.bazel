@@ -7,10 +7,9 @@ helm_chart(
     name = "with_image_deps",
     oci_images = [
         ":oci_image_a.push",
-        ":oci_image_b.push"
-    ]
+        ":oci_image_b.push",
+    ],
 )
-
 
 helm_lint_test(
     name = "with_image_deps_test",
@@ -22,7 +21,6 @@ _IMAGES = [
     "image_b",
 ]
 
-
 [
     oci_image(
         name = "oci_{}".format(name),
@@ -31,13 +29,12 @@ _IMAGES = [
     for name in _IMAGES
 ]
 
-
 [
     oci_push(
         name = "oci_{}.push".format(name),
         image = ":oci_{}".format(name),
-        repository = "docker.io/rules_helm/test/{}".format(name),
         remote_tags = ["latest"],
+        repository = "docker.io/rules_helm/test/{}".format(name),
     )
     for name in _IMAGES
 ]
