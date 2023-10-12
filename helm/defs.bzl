@@ -4,7 +4,7 @@ Bazel rules for producing [helm charts][helm]
 
 [helm]: https://helm.sh/
 
-## Setup
+## Setup WORKSPACE
 
 ```starlark
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
@@ -25,6 +25,16 @@ helm_register_toolchains()
 load("@rules_helm//helm:repositories_transitive.bzl", "rules_helm_transitive_dependencies")
 
 rules_helm_transitive_dependencies()
+```
+
+## Setup MODULE
+```starlak
+bazel_dep(name = "rules_helm", version = "0.0.5")
+git_override(
+    module_name="rules_helm",
+    commit = "406b10722ea523e317218426607afd685f1884af",
+    remote = "https://github.com/abrisco/rules_helm/"
+)
 ```
 
 ## Rules
