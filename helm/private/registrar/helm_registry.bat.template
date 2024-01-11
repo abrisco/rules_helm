@@ -1,0 +1,5 @@
+ECHO OFF
+
+
+{helm} push {chart} {registry_url}
+

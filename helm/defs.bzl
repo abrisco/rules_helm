@@ -69,6 +69,10 @@ load(
     _helm_uninstall = "helm_uninstall",
 )
 load(
+    "//helm/private:helm_registry.bzl",
+    _helm_push_registry = "helm_push_registry",
+)
+load(
     "//helm/private:helm_lint.bzl",
     _helm_lint_aspect = "helm_lint_aspect",
     _helm_lint_test = "helm_lint_test",
@@ -100,6 +104,7 @@ helm_chart = _helm_chart
 helm_import = _helm_import
 helm_import_repository = _helm_import_repository
 helm_install = _helm_install
+helm_push_registry = _helm_push_registry
 helm_lint_aspect = _helm_lint_aspect
 helm_lint_test = _helm_lint_test
 helm_package = _helm_package

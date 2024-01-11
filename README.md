@@ -41,20 +41,26 @@ git_override(
 
 ## Rules
 
-- [helm_chart](#helm_chart)
-- [helm_import_repository](#helm_import_repository)
-- [helm_import](#helm_import)
-- [helm_install](#helm_install)
-- [helm_lint_aspect](#helm_lint_aspect)
-- [helm_lint_test](#helm_lint_test)
-- [helm_package](#helm_package)
-- [helm_push](#helm_push)
-- [helm_register_toolchains](#helm_register_toolchains)
-- [helm_reinstall](#helm_reinstall)
-- [helm_toolchain](#helm_toolchain)
-- [helm_uninstall](#helm_uninstall)
-- [rules_helm_dependencies](#rules_helm_dependencies)
-- [chart_content](#chart_content)
+- [rules\_helm](#rules_helm)
+  - [Setup WORKSPACE](#setup-workspace)
+  - [Setup MODULE](#setup-module)
+  - [Rules](#rules)
+  - [helm\_import](#helm_import)
+  - [helm\_import\_repository](#helm_import_repository)
+  - [helm\_install](#helm_install)
+  - [helm\_lint\_test](#helm_lint_test)
+  - [helm\_package](#helm_package)
+  - [helm\_push](#helm_push)
+  - [helm\_push\_registry](#helm_push_registry)
+  - [helm\_reinstall](#helm_reinstall)
+  - [helm\_toolchain](#helm_toolchain)
+  - [helm\_uninstall](#helm_uninstall)
+  - [HelmPackageInfo](#helmpackageinfo)
+  - [chart\_content](#chart_content)
+  - [helm\_chart](#helm_chart)
+  - [helm\_register\_toolchains](#helm_register_toolchains)
+  - [rules\_helm\_dependencies](#rules_helm_dependencies)
+  - [helm\_lint\_aspect](#helm_lint_aspect)
 
 <a id="helm_import"></a>
 
@@ -117,7 +123,7 @@ Produce a script for performing a helm install action
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_install-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="helm_install-install_name"></a>install_name |  The name to use for the `helm install` command. The target name will be used if unset.   | String | optional |  `""`  |
-| <a id="helm_install-package"></a>package |  The helm pacage to install.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="helm_install-package"></a>package |  The helm package to install.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
 <a id="helm_lint_test"></a>
@@ -183,6 +189,25 @@ Produce a script for pushing all oci images used by a helm chart
 | <a id="helm_push-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="helm_push-package"></a>package |  The helm package to upload images from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
+<a id="helm_push_registry"></a>
+
+## helm_push_registry
+
+<pre>
+helm_push(<a href="#helm_push-registry-name">name</a>, <a href="#helm_push-registry-package">package</a> <a href="#helm_push-registry-url">registry_url</a>)
+</pre>
+
+Produce a script for pushing a packaged chart to an oci registry
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="helm_push-registry-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_push-registry-package"></a>package |  The helm package to upload images from. | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="helm_push-registry-url"></a>registry_url | The full URL of the oci registry. E.g, `oci://myregistry.domain.com/mychart` | String | required |  |
+
 
 <a id="helm_reinstall"></a>
 
@@ -201,7 +226,7 @@ Produce a script for performing a helm uninstall and install actions
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_reinstall-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="helm_reinstall-install_name"></a>install_name |  The name to use for the `helm install` command. The target name will be used if unset.   | String | optional |  `""`  |
-| <a id="helm_reinstall-package"></a>package |  The helm pacage to reinstall.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="helm_reinstall-package"></a>package |  The helm package to reinstall.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
 <a id="helm_toolchain"></a>
@@ -303,6 +328,7 @@ Rules for producing a helm package and some convenience targets.
 | --- | --- |
 | `{name}` | [helm_package](#helm_package) |
 | `{name}.push` | [helm_push](#helm_push) |
+| `{name}.push_registry` | [helm_push_registry](#helm_push_registry) |
 | `{name}.install` | [helm_install](#helm_install) |
 | `{name}.uninstall` | [helm_uninstall](#helm_uninstall) |
 | `{name}.reinstall` | [helm_reinstall](#helm_reinstall) |

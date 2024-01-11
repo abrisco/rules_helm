@@ -53,7 +53,7 @@ helm_install = rule(
             doc = "The name to use for the `helm install` command. The target name will be used if unset.",
         ),
         "package": attr.label(
-            doc = "The helm pacage to install.",
+            doc = "The helm package to install.",
             providers = [HelmPackageInfo],
             mandatory = True,
         ),
@@ -166,7 +166,7 @@ helm_reinstall = rule(
             doc = "The name to use for the `helm install` command. The target name will be used if unset.",
         ),
         "package": attr.label(
-            doc = "The helm pacage to reinstall.",
+            doc = "The helm package to reinstall.",
             providers = [HelmPackageInfo],
             mandatory = True,
         ),
