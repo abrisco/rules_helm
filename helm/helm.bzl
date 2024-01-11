@@ -1,6 +1,7 @@
 """Helm rules"""
 
 load("//helm/private:helm_install.bzl", "helm_install", "helm_push", "helm_reinstall", "helm_uninstall")
+load("//helm/private:helm_registry.bzl", "helm_push_registry")
 load("//helm/private:helm_package.bzl", "helm_package")
 
 def helm_chart(name, images = [], deps = None, tags = [], install_name = None, **kwargs):
@@ -10,6 +11,7 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None, *
     | --- | --- |
     | `{name}` | [helm_package](#helm_package) |
     | `{name}.push` | [helm_push](#helm_push) |
+    | `{name}.push_registry` | [push_registry](#push_registry) |
     | `{name}.install` | [helm_install](#helm_install) |
     | `{name}.uninstall` | [helm_uninstall](#helm_uninstall) |
     | `{name}.reinstall` | [helm_reinstall](#helm_reinstall) |
@@ -35,6 +37,12 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None, *
 
     helm_push(
         name = name + ".push",
+        package = name,
+        tags = depset(tags + ["manual"]).to_list(),
+    )
+
+    helm_push_registry(
+        name = name + ".push_registry",
         package = name,
         tags = depset(tags + ["manual"]).to_list(),
     )
