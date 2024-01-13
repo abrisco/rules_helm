@@ -1,6 +1,6 @@
 """Constants for accessing helm binaries"""
 
-DEFAULT_HELM_VERSION = "3.13.0"
+DEFAULT_HELM_VERSION = "3.13.3"
 
 DEFAULT_HELM_URL_TEMPLATES = [
     "https://get.helm.sh/helm-v{version}-{platform}.{compression}",
@@ -470,6 +470,108 @@ HELM_VERSIONS = {
         "windows-amd64": _artifact(
             platform = "windows-amd64",
             sha256 = "8989f94407d31da2697a7354fba5f5c436b27ea193f76de6f1d37a51898a97a1",
+        ),
+    },
+    "3.13.1": {
+        "darwin-amd64": _artifact(
+            platform = "darwin-amd64",
+            sha256 = "e207e009b931162b0383b463c333a2792355200e91dbcf167c97c150e9f5fedb",
+        ),
+        "darwin-arm64": _artifact(
+            platform = "darwin-arm64",
+            sha256 = "46596d6d2d9aa545eb74f40684858fac0841df373ca760af1259d3493161d8c9",
+        ),
+        "linux-amd64": _artifact(
+            platform = "linux-amd64",
+            sha256 = "98c363564d00afd0cc3088e8f830f2a0eeb5f28755b3d8c48df89866374a1ed0",
+        ),
+        "linux-arm": _artifact(
+            platform = "linux-arm",
+            sha256 = "a9c188c1a79d2eb1721aece7c4e7cfcd56fa76d1e37bd7c9c05d3969bb0499b4",
+        ),
+        "linux-arm64": _artifact(
+            platform = "linux-arm64",
+            sha256 = "8c4a0777218b266a7b977394aaf0e9cef30ed2df6e742d683e523d75508d6efe",
+        ),
+        "linux-i386": _artifact(
+            platform = "linux-i386",
+            sha256 = "384e1f97b6dafad62ccdd856e9453b68143e4dbdc7b9cf9a2a2f79c2aa7c2cc9",
+        ),
+        "linux-ppc64le": _artifact(
+            platform = "linux-ppc64le",
+            sha256 = "f0d4ae95b4db25d03ced987e30d424564bd4727af6a4a0b7fca41f14203306fb",
+        ),
+        "windows-amd64": _artifact(
+            platform = "windows-amd64",
+            sha256 = "6e16fbc5e50a5841be2dc725e790234f09aa2a5ebe289493c90f65ecae7b156f",
+        ),
+    },
+    "3.13.2": {
+        "darwin-amd64": _artifact(
+            platform = "darwin-amd64",
+            sha256 = "977c2faa49993aa8baa2c727f8f35a357576d6278d4d8618a5a010a56ad2dbee",
+        ),
+        "darwin-arm64": _artifact(
+            platform = "darwin-arm64",
+            sha256 = "00f00c66165ba0dcd9efdbef66a5508fb4fe4425991c0e599e0710f8ff7aa02e",
+        ),
+        "linux-amd64": _artifact(
+            platform = "linux-amd64",
+            sha256 = "55a8e6dce87a1e52c61e0ce7a89bf85b38725ba3e8deb51d4a08ade8a2c70b2d",
+        ),
+        "linux-arm": _artifact(
+            platform = "linux-arm",
+            sha256 = "06e8436bde78d53ddb5095ba146fe6c7001297c7dceb9ef6b68992c3ecfde770",
+        ),
+        "linux-arm64": _artifact(
+            platform = "linux-arm64",
+            sha256 = "f5654aaed63a0da72852776e1d3f851b2ea9529cb5696337202703c2e1ed2321",
+        ),
+        "linux-i386": _artifact(
+            platform = "linux-i386",
+            sha256 = "7d1307e708d4eb043686c8635df567773221397d5d0151d37000b7c472170b3a",
+        ),
+        "linux-ppc64le": _artifact(
+            platform = "linux-ppc64le",
+            sha256 = "11d96134cc4ec106c23cd8c163072e9aed6cd73e36a3da120e5876d426203f37",
+        ),
+        "windows-amd64": _artifact(
+            platform = "windows-amd64",
+            sha256 = "1ef931cb40bfa049fa5ee337ec16181345d7d0c8ab863fe9b04abe320fa2ae6e",
+        ),
+    },
+    "3.13.3": {
+        "darwin-amd64": _artifact(
+            platform = "darwin-amd64",
+            sha256 = "da654c9e0fd4fcb50cc5dba051c1c9cf398e21ffa5064b47ac89a9697e139d39",
+        ),
+        "darwin-arm64": _artifact(
+            platform = "darwin-arm64",
+            sha256 = "61ba210cd65c53be5c0021c8fc8e0b94f4c122aff32f5ed0e4ea81728108ea20",
+        ),
+        "linux-amd64": _artifact(
+            platform = "linux-amd64",
+            sha256 = "bbb6e7c6201458b235f335280f35493950dcd856825ddcfd1d3b40ae757d5c7d",
+        ),
+        "linux-arm": _artifact(
+            platform = "linux-arm",
+            sha256 = "0170b15f3951be399e27e0cfdc21edb211d3b6b2698e078f993d9558d9446e3f",
+        ),
+        "linux-arm64": _artifact(
+            platform = "linux-arm64",
+            sha256 = "44aaa094ae24d01e8c36e327e1837fd3377a0f9152626da088384c5bc6d94562",
+        ),
+        "linux-i386": _artifact(
+            platform = "linux-i386",
+            sha256 = "a92929ba472ff4d31b83bcdd957f94ebb8c396c371c840afd04fa6a7fba61515",
+        ),
+        "linux-ppc64le": _artifact(
+            platform = "linux-ppc64le",
+            sha256 = "85afc540af42ebbb6e6a4fe270b04ce1fa27fa72845cd1d352feea0f55df1ffc",
+        ),
+        "windows-amd64": _artifact(
+            platform = "windows-amd64",
+            sha256 = "abb5e06a3587d8da7cca60c801cfbaa5178f4252c367b2469b3f123da2357cac",
         ),
     },
     "3.4.2": {
