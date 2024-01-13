@@ -30,13 +30,9 @@ rules_helm_transitive_dependencies()
 ```
 
 ## Setup MODULE
-```starlak
-bazel_dep(name = "rules_helm", version = "0.0.5")
-git_override(
-    module_name="rules_helm",
-    commit = "406b10722ea523e317218426607afd685f1884af",
-    remote = "https://github.com/abrisco/rules_helm/"
-)
+
+```starlark
+bazel_dep(name = "rules_helm", version = "{version}")
 ```
 
 ## Rules
