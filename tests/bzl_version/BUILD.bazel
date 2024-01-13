@@ -1,0 +1,10 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("//:version.bzl", "VERSION")
+
+go_test(
+    name = "bzl_version_test",
+    srcs = ["bzl_version_test.go"],
+    data = ["//:MODULE.bazel"],
+    env = {"VERSION": VERSION},
+    deps = ["@io_bazel_rules_go//go/runfiles"],
+)
