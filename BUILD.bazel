@@ -1,5 +1,8 @@
 exports_files(
-    ["README.md"],
+    [
+        "README.md",
+        "MODULE.bazel",
+    ],
     visibility = ["//:__subpackages__"],
 )
 
