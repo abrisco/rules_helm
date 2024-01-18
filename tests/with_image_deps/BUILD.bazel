@@ -1,3 +1,4 @@
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push")
 load("//helm:defs.bzl", "helm_chart", "helm_lint_test")
 load("//tests:test_defs.bzl", "helm_package_regex_test")
@@ -8,7 +9,7 @@ helm_chart(
     name = "with_image_deps",
     images = [
         ":image_a.push",
-        ":image_b.push",
+        "//tests/with_image_deps:image_b.push",
     ],
 )
 
@@ -39,12 +40,22 @@ _IMAGES = [
     for name in _IMAGES
 ]
 
-[
-    oci_push(
-        name = "{}.push".format(name),
-        image = ":{}".format(name),
-        remote_tags = ["latest"],
-        repository = "docker.io/rules_helm/test/{}".format(name),
-    )
-    for name in _IMAGES
-]
+oci_push(
+    name = "image_a.push",
+    image = ":image_a",
+    remote_tags = ["latest"],
+    repository = "docker.io/rules_helm/test/image_a",
+)
+
+write_file(
+    name = "image_b.repository",
+    out = "image_b.repository.txt",
+    content = ["docker.io/rules_helm/test/image_b"],
+)
+
+oci_push(
+    name = "image_b.push",
+    image = ":image_b",
+    remote_tags = ["latest"],
+    repository_file = ":image_b.repository.txt",
+)

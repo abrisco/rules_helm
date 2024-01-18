@@ -5,6 +5,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"path"
 
 	"gopkg.in/yaml.v3"
 )
@@ -27,6 +28,11 @@ func main() {
 	}
 
 	yaml_content, err := yaml.Marshal(&json_obj)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = os.MkdirAll(path.Dir(*output), 0755)
 	if err != nil {
 		log.Fatal(err)
 	}

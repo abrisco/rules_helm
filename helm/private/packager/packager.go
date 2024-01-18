@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -18,13 +17,29 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type ImageManifest struct {
+type ImageInfo struct {
 	Label      string
-	Registry   string
 	Repository string
 	Digest     string
 }
-type ImagesManifest []ImageManifest
+
+type ImageManifest struct {
+	Label          string `json:"label"`
+	RepositoryPath string `json:"repository_path"`
+	ImageRootPath  string `json:"image_root_path"`
+}
+
+type ImageIndexManifest struct {
+	MediaType string `json:"mediaType"`
+	Size      int    `json:"size"`
+	Digest    string `json:"digest"`
+}
+
+type ImageIndex struct {
+	SchemaVersion int                  `json:"schemaVersion"`
+	MediaType     string               `json:"mediaType"`
+	Manifests     []ImageIndexManifest `json:"manifests"`
+}
 
 type TemplatesManfiest map[string]string
 type DepsManfiest []string
@@ -44,52 +59,51 @@ type HelmChart struct {
 }
 
 type Arguments struct {
-	templates_manifest   string
-	chart                string
-	values               string
-	deps_manifest        string
-	helm                 string
-	output               string
-	metadata_output      string
-	image_manifest       string
-	stable_status_file   string
-	volatile_status_file string
-	workspace_name       string
+	TemplatesManifest  string
+	Chart              string
+	Values             string
+	DepsManifest       string
+	Helm               string
+	Output             string
+	MetadataOutput     string
+	ImageManifest      string
+	StableStatusFile   string
+	VolatileStatusFile string
+	WorkspaceName      string
 }
 
-func parse_args() Arguments {
+func parseArgs() Arguments {
 	var args Arguments
 
-	flag.StringVar(&args.templates_manifest, "templates_manifest", "", "A helm file containing a list of all helm template files")
-	flag.StringVar(&args.chart, "chart", "", "The helm `chart.yaml` file")
-	flag.StringVar(&args.values, "values", "", "The helm `values.yaml` file.")
-	flag.StringVar(&args.deps_manifest, "deps_manifest", "", "A file containing a list of all helm dependency (`charts/*.tgz`) files")
-	flag.StringVar(&args.helm, "helm", "", "The path to a helm executable")
-	flag.StringVar(&args.output, "output", "", "The path to the Bazel `HelmPackage` action output")
-	flag.StringVar(&args.metadata_output, "metadata_output", "", "The path to the Bazel `HelmPackage` action metadata output")
-	flag.StringVar(&args.image_manifest, "image_manifest", "", "Information about Bazel produced container oci images used by the helm chart")
-	flag.StringVar(&args.stable_status_file, "stable_status_file", "", "The stable status file (`ctx.info_file`)")
-	flag.StringVar(&args.volatile_status_file, "volatile_status_file", "", "The stable status file (`ctx.version_file`)")
-	flag.StringVar(&args.workspace_name, "workspace_name", "", "The name of the current Bazel workspace")
+	flag.StringVar(&args.TemplatesManifest, "templates_manifest", "", "A helm file containing a list of all helm template files")
+	flag.StringVar(&args.Chart, "chart", "", "The helm `chart.yaml` file")
+	flag.StringVar(&args.Values, "values", "", "The helm `values.yaml` file.")
+	flag.StringVar(&args.DepsManifest, "deps_manifest", "", "A file containing a list of all helm dependency (`charts/*.tgz`) files")
+	flag.StringVar(&args.Helm, "helm", "", "The path to a helm executable")
+	flag.StringVar(&args.Output, "output", "", "The path to the Bazel `HelmPackage` action output")
+	flag.StringVar(&args.MetadataOutput, "metadata_output", "", "The path to the Bazel `HelmPackage` action metadata output")
+	flag.StringVar(&args.ImageManifest, "image_manifest", "", "Information about Bazel produced container oci images used by the helm chart")
+	flag.StringVar(&args.StableStatusFile, "stable_status_file", "", "The stable status file (`ctx.info_file`)")
+	flag.StringVar(&args.VolatileStatusFile, "volatile_status_file", "", "The stable status file (`ctx.version_file`)")
+	flag.StringVar(&args.WorkspaceName, "workspace_name", "", "The name of the current Bazel workspace")
 	flag.Parse()
 
 	return args
 }
 
-func load_stamps(volatile_status_file string, stable_status_file string) map[string]string {
-	stamps := make(map[string]string)
+func loadStamps(volatileStatusFile string, stableStatusFile string) ([]ReplacementGroup, error) {
+	replacementGroups := []ReplacementGroup{}
 
-	stamp_files := []string{volatile_status_file, stable_status_file}
-	for _, stamp_file := range stamp_files {
-
+	stampFiles := []string{volatileStatusFile, stableStatusFile}
+	for _, stampFile := range stampFiles {
 		// The files may not be defined
-		if len(stamp_file) == 0 {
+		if len(stampFile) == 0 {
 			continue
 		}
 
-		content, err := os.ReadFile(stamp_file)
+		content, err := os.ReadFile(stampFile)
 		if err != nil {
-			log.Fatal("error reading ", stamp_file, err)
+			return nil, fmt.Errorf("Error reading file %s: %w", stampFile, err)
 		}
 
 		for _, line := range strings.Split(string(content), "\n") {
@@ -98,148 +112,181 @@ func load_stamps(volatile_status_file string, stable_status_file string) map[str
 				continue
 			}
 			key, val := split[0], split[1]
-			stamps[key] = val
+			replacementGroups = append(replacementGroups, ReplacementGroup{
+				Name: key,
+				Replacements: map[string]string{
+					key: val,
+				},
+			})
 		}
 	}
 
-	return stamps
+	return replacementGroups, nil
 }
 
-type readManifest func([]byte) ImageManifest
-
-func load_image_stamps(image_manifest string, workspace_name string, applyReadManifest readManifest) map[string]string {
-	images := make(map[string]string)
-
-	if len(image_manifest) == 0 {
-		return images
+func loadImageInfos(imageManifestPath string) ([]ImageInfo, error) {
+	if len(imageManifestPath) == 0 {
+		return nil, fmt.Errorf("No image manifest path provided")
 	}
 
-	content, err := os.ReadFile(image_manifest)
+	imageInfos := []ImageInfo{}
+
+	content, err := os.ReadFile(imageManifestPath)
 	if err != nil {
-		log.Fatal("error reading ", image_manifest, err)
+		return nil, fmt.Errorf("Error reading file %s: %w", imageManifestPath, err)
 	}
+
 	var paths []string
-	_ = json.Unmarshal(content, &paths)
+	err = json.Unmarshal(content, &paths)
+	if err != nil {
+		return nil, fmt.Errorf("Error unmarshalling file %s: %w", imageManifestPath, err)
+	}
+
 	for _, path := range paths {
-		content, err := os.ReadFile(path)
+		imageManifest, err := loadImageManifest(path)
 		if err != nil {
-			log.Fatalf("Error during ReadFile %s: %s", path, err)
+			return nil, fmt.Errorf("Error loading image manifest %s: %w", path, err)
 		}
-		manifest := applyReadManifest(content)
-		var registryUrl = fmt.Sprintf("%s/%s@%s", manifest.Registry, manifest.Repository, manifest.Digest)
-		images[manifest.Label] = registryUrl
 
-		// There are many ways to represent the same target from a label. Here we
-		// attempt to handle a variety of cases.
-		if strings.HasPrefix(manifest.Label, "@") {
-			if strings.HasPrefix(manifest.Label, "@//") {
-				var absLabel = fmt.Sprintf("@%s%s", workspace_name, strings.Replace(manifest.Label, "@//", "//", 1))
-				images[absLabel] = registryUrl
-				var localLabel = fmt.Sprintf("@%s%s", workspace_name, strings.Replace(manifest.Label, "@//", "//", 1))
-				images[localLabel] = registryUrl
-				var absRelativeLabel = fmt.Sprintf("@@%s", strings.Replace(manifest.Label, "@//", "//", 1))
-				images[absRelativeLabel] = registryUrl
-			}
-			if strings.HasPrefix(manifest.Label, "@@//") {
-				var absLabel = fmt.Sprintf("@@%s%s", workspace_name, strings.Replace(manifest.Label, "@@//", "//", 1))
-				images[absLabel] = registryUrl
-				var localLabel = fmt.Sprintf("@%s%s", workspace_name, strings.Replace(manifest.Label, "@@//", "//", 1))
-				images[localLabel] = registryUrl
-				var relativeLabel = fmt.Sprintf("@%s", strings.Replace(manifest.Label, "@@//", "//", 1))
-				images[relativeLabel] = registryUrl
-			}
-
-			// Comes from bzlmod
-			if strings.HasPrefix(manifest.Label, "@@_main//") {
-				var absLabel = fmt.Sprintf("@@%s%s", workspace_name, strings.Replace(manifest.Label, "@@_main//", "//", 1))
-				images[absLabel] = registryUrl
-				var localLabel = fmt.Sprintf("@%s%s", workspace_name, strings.Replace(manifest.Label, "@@_main//", "//", 1))
-				images[localLabel] = registryUrl
-				var relativeLabel = fmt.Sprintf("@%s", strings.Replace(manifest.Label, "@@_main//", "//", 1))
-				images[relativeLabel] = registryUrl
-			}
+		imageInfo, err := imageManifestToImageInfo(imageManifest)
+		if err != nil {
+			return nil, fmt.Errorf("Error converting image manifest %s: %w", path, err)
 		}
+
+		imageInfos = append(imageInfos, imageInfo)
 	}
 
-	log.Println(images)
-
-	return images
+	return imageInfos, nil
 }
 
-func readOciImageManifest(content []byte) ImageManifest {
-	imageManifest := ImageManifest{}
-	type LocalManifest = struct {
-		Label string
-		Paths []string
+func loadImageManifest(imageManifestPath string) (ImageManifest, error) {
+	var manifest ImageManifest
+	content, err := os.ReadFile(imageManifestPath)
+	if err != nil {
+		return manifest, fmt.Errorf("Error reading file %s: %w", imageManifestPath, err)
 	}
-	localManifest := LocalManifest{}
-	manifestDir := ""
-	yqPath := ""
-	_ = json.Unmarshal(content, &localManifest)
-	imageManifest.Label = strings.Clone(localManifest.Label)
-	for _, path := range localManifest.Paths {
-		file, _ := os.Open(strings.Clone(path))
-		stat, _ := file.Stat()
-		if strings.HasSuffix(stat.Name(), ".sh") {
-			scanner := bufio.NewScanner(file)
-			for scanner.Scan() {
-				text := scanner.Text()
-				if strings.HasPrefix(text, "readonly FIXED_ARGS") {
-					image := strings.SplitN(strings.Replace(strings.Replace(strings.Split(strings.Clone(text), " ")[2], "\"", "", -1), ")", "", -1), "/", 2)
-					imageManifest.Registry = image[0]
-					imageManifest.Repository = image[1]
-				}
+	err = json.Unmarshal(content, &manifest)
+	if err != nil {
+		return manifest, fmt.Errorf("Error unmarshalling file %s: %w", imageManifestPath, err)
+	}
+
+	return manifest, nil
+}
+
+func imageManifestToImageInfo(imageManifest ImageManifest) (ImageInfo, error) {
+	var imageInfo ImageInfo
+	imageInfo.Label = imageManifest.Label
+
+	repository, err := os.ReadFile(imageManifest.RepositoryPath)
+	if err != nil {
+		return imageInfo, fmt.Errorf("Error reading file %s: %w", imageManifest.RepositoryPath, err)
+	}
+	imageInfo.Repository = string(repository)
+
+	imageIndexPath := path.Join(imageManifest.ImageRootPath, "index.json")
+	imageIndexContent, err := os.ReadFile(imageIndexPath)
+	if err != nil {
+		return imageInfo, fmt.Errorf("Error reading file %s: %w", imageIndexPath, err)
+	}
+
+	var imageIndex ImageIndex
+	err = json.Unmarshal(imageIndexContent, &imageIndex)
+	if err != nil {
+		return imageInfo, fmt.Errorf("Error unmarshalling file %s: %w", imageIndexPath, err)
+	}
+
+	imageInfo.Digest = imageIndex.Manifests[0].Digest
+	return imageInfo, nil
+}
+
+type ReplacementGroup struct {
+	Name         string
+	Replacements map[string]string
+}
+
+func loadImageStamps(imageManifestPath string) ([]ReplacementGroup, error) {
+	imageInfos, err := loadImageInfos(imageManifestPath)
+	if err != nil {
+		return nil, fmt.Errorf("Error loading image infos: %w", err)
+	}
+
+	replacementGroups := []ReplacementGroup{}
+
+	for _, imageInfo := range imageInfos {
+		workspaceLabel := strings.Replace(imageInfo.Label, "@@", "@", 1)
+		bzmodLabel := fmt.Sprintf("@%s", imageInfo.Label)
+		imageUrl := fmt.Sprintf("%s@%s", imageInfo.Repository, imageInfo.Digest)
+
+		replacementGroups = append(replacementGroups, ReplacementGroup{
+			Name: imageInfo.Label,
+			Replacements: map[string]string{
+				workspaceLabel: imageUrl,
+				bzmodLabel:     imageUrl,
+			},
+		})
+	}
+
+	return replacementGroups, nil
+}
+
+func replaceKeyValues(content string, replacementGroups []ReplacementGroup, mustReplace bool) (string, error) {
+	for _, replacementGroup := range replacementGroups {
+		replaced := false
+
+		for key, val := range replacementGroup.Replacements {
+			replaceKey := fmt.Sprintf("{%s}", key)
+			if strings.Contains(content, key) {
+				replaced = true
 			}
+			content = strings.ReplaceAll(content, replaceKey, val)
 		}
-		if stat.IsDir() {
-			manifestDir = strings.Clone(path)
+
+		if !replaced && mustReplace {
+			return content, fmt.Errorf("Failed to find key %s in content", replacementGroup.Name)
 		}
-		if strings.HasSuffix(stat.Name(), "yq") {
-			yqPath = strings.Clone(path)
-		}
-		digest, _ := exec.Command(yqPath, ".manifests[0].digest", manifestDir+"/index.json").Output()
-		imageManifest.Digest = strings.Replace(string(digest), "\n", "", -1)
-		file.Close()
 	}
-	return imageManifest
+
+	return content, nil
 }
 
-func apply_stamping(content string, stamps map[string]string, image_stamps map[string]string) string {
-	for key, val := range stamps {
-		content = strings.Replace(content, "{"+key+"}", val, -1)
+func applyStamping(content string, stamps []ReplacementGroup, imageStamps []ReplacementGroup, requireImageStamps bool) (string, error) {
+	content, err := replaceKeyValues(content, stamps, false)
+	if err != nil {
+		return content, fmt.Errorf("Error replacing stamps: %w", err)
 	}
 
-	for key, val := range image_stamps {
-		content = strings.Replace(content, "{"+key+"}", val, -1)
+	content, err = replaceKeyValues(content, imageStamps, requireImageStamps)
+	if err != nil {
+		return content, fmt.Errorf("Error replacing image stamps: %w", err)
 	}
 
-	return content
+	return content, nil
 }
 
-func sanitize_chart_content(content string) string {
+func sanitizeChartContent(content string) (string, error) {
 	var chart HelmChart
 	err := yaml.Unmarshal([]byte(content), &chart)
 	if err != nil {
-		log.Fatal(err)
+		return "", fmt.Errorf("Error unmarshalling chart content: %w", err)
 	}
 
 	re := regexp.MustCompile(`.*{.+}.*`)
 
 	// TODO: This should probably happen for all values
-	version_match := re.FindAllString(chart.Version, 1)
-	if len(version_match) != 0 {
-		var replacement = version_match[0]
+	versionMatch := re.FindAllString(chart.Version, 1)
+	if len(versionMatch) != 0 {
+		var replacement = versionMatch[0]
 		replacement = strings.ReplaceAll(replacement, "{", "")
 		replacement = strings.ReplaceAll(replacement, "}", "")
 		replacement = strings.ReplaceAll(replacement, "_", "-")
 
-		content = strings.ReplaceAll(content, version_match[0], replacement)
+		content = strings.ReplaceAll(content, versionMatch[0], replacement)
 	}
 
-	return content
+	return content, nil
 }
 
-func get_chart_name(content string) string {
+func getChartName(content string) (string, error) {
 	for _, line := range strings.Split(content, "\n") {
 		if !strings.HasPrefix(line, "name:") {
 			continue
@@ -247,130 +294,139 @@ func get_chart_name(content string) string {
 
 		_, name, found := strings.Cut(line, "name:")
 		if !found {
-			log.Fatal("The line should start with 'name:' at this point")
+			return "", errors.New("Failed to find chart name from content:" + content)
 		}
-		return strings.Trim(name, " '\"\n")
+		return strings.Trim(name, " '\"\n"), nil
 	}
 
-	log.Fatal("Failed to find chart name from content:", content)
-	return ""
+	return "", errors.New("Failed to find chart name from content:" + content)
 }
 
-func copy_file(source string, dest string) {
-	src_file, err := os.Open(source)
+func copyFile(source string, dest string) error {
+	srcFile, err := os.Open(source)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Error opening source file %s: %w", source, err)
 	}
+	defer srcFile.Close()
 
 	parent := path.Dir(dest)
-	dir_err := os.MkdirAll(parent, 0755)
-	if dir_err != nil {
-		log.Fatal(dir_err)
-	}
-
-	dest_file, err := os.Create(dest)
+	err = os.MkdirAll(parent, 0755)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Error creating parent directory %s: %w", parent, err)
 	}
 
-	_, err = io.Copy(dest_file, src_file)
+	destFile, err := os.Create(dest)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Error creating destination file %s: %w", dest, err)
 	}
 
-	err = dest_file.Sync()
+	defer destFile.Close()
+
+	_, err = io.Copy(destFile, srcFile)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Error copying file %s to %s: %w", source, dest, err)
 	}
 
-	src_file.Close()
-	dest_file.Close()
+	err = destFile.Sync()
+	if err != nil {
+		return fmt.Errorf("Error syncing file %s: %w", dest, err)
+	}
+
+	return nil
 }
 
-func install_helm_content(working_dir string, stamped_chart_content string, stamped_values_content string, templates_manifest string, deps_manifest string) {
-	err := os.MkdirAll(working_dir, 0755)
+func installHelmContent(workingDir string, stampedChartContent string, stampedValuesContent string, templatesManifest string, depsManifest string) error {
+	err := os.MkdirAll(workingDir, 0755)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Error creating working directory %s: %w", workingDir, err)
 	}
 
-	var chart_yaml = path.Join(working_dir, "Chart.yaml")
-	chart_err := os.WriteFile(chart_yaml, []byte(stamped_chart_content), 0644)
-	if chart_err != nil {
-		log.Fatal(chart_err)
-	}
-
-	var values_yaml = path.Join(working_dir, "values.yaml")
-	value_err := os.WriteFile(values_yaml, []byte(stamped_values_content), 0644)
-	if value_err != nil {
-		log.Fatal(value_err)
-	}
-
-	manifest_content, err := os.ReadFile(templates_manifest)
+	chartYaml := path.Join(workingDir, "Chart.yaml")
+	err = os.WriteFile(chartYaml, []byte(stampedChartContent), 0644)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Error writing chart file %s: %w", chartYaml, err)
+	}
+
+	valuesYaml := path.Join(workingDir, "values.yaml")
+	err = os.WriteFile(valuesYaml, []byte(stampedValuesContent), 0644)
+	if err != nil {
+		return fmt.Errorf("Error writing values file %s: %w", valuesYaml, err)
+	}
+
+	manifestContent, err := os.ReadFile(templatesManifest)
+	if err != nil {
+		return fmt.Errorf("Error reading templates manifest %s: %w", templatesManifest, err)
 	}
 
 	var templates TemplatesManfiest
-	err = json.Unmarshal(manifest_content, &templates)
+	err = json.Unmarshal(manifestContent, &templates)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Error unmarshalling templates manifest %s: %w", templatesManifest, err)
 	}
 
-	var templates_dir = path.Join(working_dir, "templates")
-	var templates_root = ""
+	templatesDir := path.Join(workingDir, "templates")
+	templatesRoot := ""
 
 	// Copy all templates
-	for template_path, template_shortpath := range templates {
+	for templatePath, templateShortpath := range templates {
 
 		// Locate the templates directory so we can start copying files
 		// into the new templates directory at the right location
-		if len(templates_root) == 0 {
-			var current = template_shortpath
+		if len(templatesRoot) == 0 {
+			var current = templateShortpath
 			for {
 				if len(current) == 0 {
-					log.Fatal("Failed to find templates directory for ", template_shortpath)
+					return errors.New("Failed to find templates directory")
 				}
 				parent := path.Dir(current)
 				if path.Base(parent) == "templates" {
-					templates_root = parent
+					templatesRoot = parent
 					break
 				}
 				current = parent
 			}
 		}
 
-		if !strings.HasPrefix(template_shortpath, templates_root) {
-			log.Fatal("A template file has an unexpected prefix", template_shortpath, "does not start with", templates_root)
+		if !strings.HasPrefix(templateShortpath, templatesRoot) {
+			return errors.New("Template path does not start with templates root")
 		}
 
-		target_file, err := filepath.Rel(templates_root, template_shortpath)
+		targetFile, err := filepath.Rel(templatesRoot, templateShortpath)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		copy_file(template_path, path.Join(templates_dir, target_file))
+		err = copyFile(templatePath, path.Join(templatesDir, targetFile))
+		if err != nil {
+			return fmt.Errorf("Error copying template %s: %w", templatePath, err)
+		}
 	}
 
 	// Copy over any dependency chart files
-	if len(deps_manifest) > 0 {
-		manifest_content, err := os.ReadFile(deps_manifest)
+	if len(depsManifest) > 0 {
+		manifestContent, err := os.ReadFile(depsManifest)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Error reading deps manifest %s: %w", depsManifest, err)
 		}
 
 		var deps DepsManfiest
-		err = json.Unmarshal(manifest_content, &deps)
+		err = json.Unmarshal(manifestContent, &deps)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Error unmarshalling deps manifest %s: %w", depsManifest, err)
 		}
 
 		for _, dep := range deps {
-			copy_file(dep, path.Join(working_dir, "charts", path.Base(dep)))
+			err = copyFile(dep, path.Join(workingDir, "charts", path.Base(dep)))
+			if err != nil {
+				return fmt.Errorf("Error copying dep %s: %w", dep, err)
+			}
 		}
 	}
+
+	return nil
 }
 
-func find_generated_package(logging string) (string, error) {
+func findGeneratedPackage(logging string) (string, error) {
 	if strings.Contains(logging, ":") {
 		// This line assumes the logging from helm will be a single line of
 		// text which starts with `Successfully packaged chart and saved it to:`
@@ -384,37 +440,39 @@ func find_generated_package(logging string) (string, error) {
 	return "", errors.New("failed to find package")
 }
 
-func write_results_metadata(package_base string, metadata_output string) {
+func writeResultsMetadata(packageBase string, metadataOutput string) error {
 	re := regexp.MustCompile(`(.*)-([\d][\d\w\-\.]+)\.tgz`)
-	match := re.FindAllStringSubmatch(package_base, 2)
+	match := re.FindAllStringSubmatch(packageBase, 2)
 
 	if len(match) == 0 {
-		log.Fatal("Unable to parse file name: ", package_base)
+		return errors.New("Failed to parse package name")
 	}
 
-	var result_metadata = HelmResultMetadata{
+	var resultMetadata = HelmResultMetadata{
 		Name:    match[0][1],
 		Version: match[0][2],
 	}
 	// TODO: This is only used to get lowercase keys in the seralized json.
 	// There's surely a better way to do this.
 	var serializable = make(map[string]string)
-	serializable["name"] = result_metadata.Name
-	serializable["version"] = result_metadata.Version
+	serializable["name"] = resultMetadata.Name
+	serializable["version"] = resultMetadata.Version
 
 	text, err := json.MarshalIndent(serializable, "", "    ")
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Error marshalling metadata: %w", err)
 	}
 
-	write_err := os.WriteFile(metadata_output, text, 0644)
-	if write_err != nil {
-		log.Fatal(write_err)
+	err = os.WriteFile(metadataOutput, text, 0644)
+	if err != nil {
+		return fmt.Errorf("Error writing metadata file: %w", err)
 	}
+
+	return nil
 }
 
 func main() {
-	var args = parse_args()
+	var args = parseArgs()
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
@@ -425,32 +483,56 @@ func main() {
 
 	dir := path.Join(cwd, ".rules_helm_pkg_dir")
 
-	chart_content, err := os.ReadFile(args.chart)
+	chartContent, err := os.ReadFile(args.Chart)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	values_content, err := os.ReadFile(args.values)
+	valuesContent, err := os.ReadFile(args.Values)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Collect all stamp values
-	var stamps = load_stamps(args.volatile_status_file, args.stable_status_file)
-	var image_stamps = load_image_stamps(args.image_manifest, args.workspace_name, readOciImageManifest)
+	stamps, err := loadStamps(args.VolatileStatusFile, args.StableStatusFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	imageStamps, err := loadImageStamps(args.ImageManifest)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Stamp any templates out of top level helm sources
-	var stamped_values_content = apply_stamping(string(values_content), stamps, image_stamps)
-	var stamped_chart_content = sanitize_chart_content(apply_stamping(string(chart_content), stamps, image_stamps))
+	stampedValuesContent, err := applyStamping(string(valuesContent), stamps, imageStamps, true)
+	if err != nil {
+		log.Fatal(err)
+	}
+	stampedChartContent, err := applyStamping(string(chartContent), stamps, imageStamps, false)
+	if err != nil {
+		log.Fatal(err)
+	}
+	stampedChartContent, err = sanitizeChartContent(stampedChartContent)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create a directory in which to run helm package
-	var chart_name = get_chart_name(stamped_chart_content)
-	var tmp_path = path.Join(dir, chart_name)
-	install_helm_content(tmp_path, stamped_chart_content, stamped_values_content, args.templates_manifest, args.deps_manifest)
+	chartName, err := getChartName(stampedChartContent)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tmpPath := path.Join(dir, chartName)
+	err = installHelmContent(tmpPath, stampedChartContent, stampedValuesContent, args.TemplatesManifest, args.DepsManifest)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Build the helm package
-	command := exec.Command(path.Join(cwd, args.helm), "package", ".")
-	command.Dir = tmp_path
+	command := exec.Command(path.Join(cwd, args.Helm), "package", ".")
+	command.Dir = tmpPath
 	out, err := command.Output()
 	if err != nil {
 		os.Stderr.WriteString(string(out))
@@ -458,15 +540,21 @@ func main() {
 	}
 
 	// Locate the package file
-	pkg, err := find_generated_package(string(out))
+	pkg, err := findGeneratedPackage(string(out))
 	if err != nil {
 		os.Stderr.WriteString(string(out))
 		log.Fatal(err)
 	}
 
 	// Write output metadata file to satisfy the Bazel output
-	copy_file(pkg, args.output)
+	err = copyFile(pkg, args.Output)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Write output metadata to retain information about the helm package
-	write_results_metadata(path.Base(pkg), args.metadata_output)
+	err = writeResultsMetadata(path.Base(pkg), args.MetadataOutput)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
