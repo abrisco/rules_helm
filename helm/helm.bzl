@@ -2,14 +2,16 @@
 
 load("//helm/private:helm_install.bzl", "helm_install", "helm_push", "helm_reinstall", "helm_uninstall")
 load("//helm/private:helm_package.bzl", "helm_package")
+load("//helm/private:helm_registry.bzl", "helm_push_registry")
 
-def helm_chart(name, images = [], deps = None, tags = [], install_name = None, **kwargs):
+def helm_chart(name, images = [], deps = None, tags = [], install_name = None, registry_url = None, **kwargs):
     """Rules for producing a helm package and some convenience targets.
 
     | target | rule |
     | --- | --- |
     | `{name}` | [helm_package](#helm_package) |
     | `{name}.push` | [helm_push](#helm_push) |
+    | `{name}.push_registry` | [helm_push_registry](#helm_push_registry) |
     | `{name}.install` | [helm_install](#helm_install) |
     | `{name}.uninstall` | [helm_uninstall](#helm_uninstall) |
     | `{name}.reinstall` | [helm_reinstall](#helm_reinstall) |
@@ -20,6 +22,8 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None, *
         deps (list, optional): A list of helm package dependencies.
         tags (list, optional): Tags to apply to all targets.
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
+        registry_url (str, Optional): The registry url for the helm chart. `{name}.push_registry`
+            is only defined when a value is passed here.
         **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
     helm_package(
@@ -38,6 +42,14 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None, *
         package = name,
         tags = depset(tags + ["manual"]).to_list(),
     )
+
+    if registry_url:
+        helm_push_registry(
+            name = name + ".push_registry",
+            package = name,
+            registry_url = registry_url,
+            tags = depset(tags + ["manual"]).to_list(),
+        )
 
     if not install_name:
         install_name = name.replace("_", "-")

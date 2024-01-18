@@ -5,4 +5,4 @@ set -euo pipefail
 {image_pushers}
 
 eval {helm} uninstall {install_name}
-eval {helm} install {install_name} {chart} "$@"
+eval exec {helm} install {install_name} {chart} "$@"

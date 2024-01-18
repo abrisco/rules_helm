@@ -43,6 +43,7 @@ bazel_dep(name = "rules_helm", version = "{version}")
 - [helm_lint_test](#helm_lint_test)
 - [helm_package](#helm_package)
 - [helm_push](#helm_push)
+- [helm_push_registry](#helm_push_registry)
 - [helm_register_toolchains](#helm_register_toolchains)
 - [helm_reinstall](#helm_reinstall)
 - [helm_toolchain](#helm_toolchain)
@@ -74,6 +75,10 @@ load(
     _helm_package = "helm_package",
 )
 load(
+    "//helm/private:helm_registry.bzl",
+    _helm_push_registry = "helm_push_registry",
+)
+load(
     ":helm.bzl",
     _chart_content = "chart_content",
     _helm_chart = "helm_chart",
@@ -99,6 +104,7 @@ helm_install = _helm_install
 helm_lint_aspect = _helm_lint_aspect
 helm_lint_test = _helm_lint_test
 helm_package = _helm_package
+helm_push_registry = _helm_push_registry
 helm_push = _helm_push
 helm_register_toolchains = _helm_register_toolchains
 helm_reinstall = _helm_reinstall
