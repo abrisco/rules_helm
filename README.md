@@ -37,26 +37,21 @@ bazel_dep(name = "rules_helm", version = "{version}")
 
 ## Rules
 
-- [rules\_helm](#rules_helm)
-  - [Setup WORKSPACE](#setup-workspace)
-  - [Setup MODULE](#setup-module)
-  - [Rules](#rules)
-  - [helm\_import](#helm_import)
-  - [helm\_import\_repository](#helm_import_repository)
-  - [helm\_install](#helm_install)
-  - [helm\_lint\_test](#helm_lint_test)
-  - [helm\_package](#helm_package)
-  - [helm\_push](#helm_push)
-  - [helm\_push\_registry](#helm_push_registry)
-  - [helm\_reinstall](#helm_reinstall)
-  - [helm\_toolchain](#helm_toolchain)
-  - [helm\_uninstall](#helm_uninstall)
-  - [HelmPackageInfo](#helmpackageinfo)
-  - [chart\_content](#chart_content)
-  - [helm\_chart](#helm_chart)
-  - [helm\_register\_toolchains](#helm_register_toolchains)
-  - [rules\_helm\_dependencies](#rules_helm_dependencies)
-  - [helm\_lint\_aspect](#helm_lint_aspect)
+- [helm_chart](#helm_chart)
+- [helm_import_repository](#helm_import_repository)
+- [helm_import](#helm_import)
+- [helm_install](#helm_install)
+- [helm_lint_aspect](#helm_lint_aspect)
+- [helm_lint_test](#helm_lint_test)
+- [helm_package](#helm_package)
+- [helm_push](#helm_push)
+- [helm_push_registry](#helm_push_registry)
+- [helm_register_toolchains](#helm_register_toolchains)
+- [helm_reinstall](#helm_reinstall)
+- [helm_toolchain](#helm_toolchain)
+- [helm_uninstall](#helm_uninstall)
+- [rules_helm_dependencies](#rules_helm_dependencies)
+- [chart_content](#chart_content)
 
 <a id="helm_import"></a>
 
@@ -185,24 +180,25 @@ Produce a script for pushing all oci images used by a helm chart
 | <a id="helm_push-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="helm_push-package"></a>package |  The helm package to upload images from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
+
 <a id="helm_push_registry"></a>
 
 ## helm_push_registry
 
 <pre>
-helm_push(<a href="#helm_push-registry-name">name</a>, <a href="#helm_push-registry-package">package</a> <a href="#helm_push-registry-url">registry_url</a>)
+helm_push_registry(<a href="#helm_push_registry-name">name</a>, <a href="#helm_push_registry-package">package</a>, <a href="#helm_push_registry-registry_url">registry_url</a>)
 </pre>
 
-Produce a script for pushing a packaged chart to an oci registry
+Produce a script for performing a helm push to a registry
 
 **ATTRIBUTES**
 
 
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_push-registry-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="helm_push-registry-package"></a>package |  The helm package to upload images from. | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
-| <a id="helm_push-registry-url"></a>registry_url | The full URL of the oci registry. E.g, `oci://myregistry.domain.com/mychart` | String | required |  |
+| <a id="helm_push_registry-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_push_registry-package"></a>package |  The helm package to push to the registry.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="helm_push_registry-registry_url"></a>registry_url |  The URL of the registry.   | String | required |  |
 
 
 <a id="helm_reinstall"></a>
@@ -315,7 +311,7 @@ str: A json encoded string which represents `Chart.yaml` contents.
 ## helm_chart
 
 <pre>
-helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-tags">tags</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-kwargs">kwargs</a>)
+helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-tags">tags</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-kwargs">kwargs</a>)
 </pre>
 
 Rules for producing a helm package and some convenience targets.
@@ -340,6 +336,7 @@ Rules for producing a helm package and some convenience targets.
 | <a id="helm_chart-deps"></a>deps |  A list of helm package dependencies.   |  `None` |
 | <a id="helm_chart-tags"></a>tags |  Tags to apply to all targets.   |  `[]` |
 | <a id="helm_chart-install_name"></a>install_name |  The `helm install` name to use. `name` will be used if unset.   |  `None` |
+| <a id="helm_chart-registry_url"></a>registry_url |  The registry url for the helm chart. `{name}.push_registry` is only defined when a value is passed here.   |  `None` |
 | <a id="helm_chart-kwargs"></a>kwargs |  Additional keyword arguments for `helm_package`.   |  none |
 
 

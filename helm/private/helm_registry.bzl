@@ -35,10 +35,10 @@ def _helm_push_registry_impl(ctx):
     ]
 
 helm_push_registry = rule(
-  doc = "Produce a script for performing a helm push to a registry",
-  implementation = _helm_push_registry_impl,
-  executable = True,
-  attrs = {
+    doc = "Produce a script for performing a helm push to a registry",
+    implementation = _helm_push_registry_impl,
+    executable = True,
+    attrs = {
         "package": attr.label(
             doc = "The helm package to push to the registry.",
             providers = [HelmPackageInfo],
@@ -53,8 +53,8 @@ helm_push_registry = rule(
             allow_single_file = True,
             default = Label("//helm/private/registrar:template"),
         ),
-  },
-  toolchains = [
+    },
+    toolchains = [
         str(Label("//helm:toolchain_type")),
-  ],
+    ],
 )

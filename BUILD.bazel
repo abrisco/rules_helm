@@ -8,7 +8,10 @@ exports_files(
 
 filegroup(
     name = "bzl_srcs",
-    srcs = glob(["**/*.bzl"]) + [
+    srcs = glob(
+        include = ["**/*.bzl"],
+        exclude = ["bazel-*/**"],
+    ) + [
         "//helm:bzl_srcs",
     ],
     visibility = ["//visibility:public"],
