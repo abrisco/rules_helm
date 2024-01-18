@@ -3,6 +3,48 @@
 load("//helm:providers.bzl", "HelmPackageInfo")
 load("//helm/private:helm_utils.bzl", "is_stamping_enabled")
 
+OciPushRepositoryInfo = provider(
+    doc = "Repository and image information for a given oci_push target",
+    fields = {
+        "image_root": "File: The directory containing the image files for the oci_push target",
+        "repository_file": "File: The file containing the repository path for the oci_push target",
+    },
+)
+
+def _oci_push_repository_aspect_impl(target, ctx):
+    if hasattr(ctx.rule.attr, "repository") and ctx.rule.attr.repository:
+        output = ctx.actions.declare_file("{}.rules_helm.repository.txt".format(target.label.name))
+        ctx.actions.write(
+            output = output,
+            content = ctx.rule.attr.repository,
+        )
+    elif hasattr(ctx.rule.file, "repository_file") and ctx.rule.file.repository_file:
+        output = ctx.rule.file.repository_file
+    else:
+        fail("oci_push target {} must have a `repository` attribute or a `repository_file` file".format(
+            target.label,
+        ))
+
+    if not hasattr(ctx.rule.file, "image"):
+        fail("oci_push target {} must have an `image` attribute".format(
+            target.label,
+        ))
+
+    return [OciPushRepositoryInfo(
+        repository_file = output,
+        image_root = ctx.rule.file.image,
+    )]
+
+# This aspect exists because rules_oci seems reluctant to create a provider
+# that cleanly publishes this information but for the helm rules, it's
+# absolutely necessary that an image's repository and digest are knowable.
+# If rules_oci decides to define their own provider for this (which they should)
+# then this should be deleted in favor of that.
+_oci_push_repository_aspect = aspect(
+    doc = "Provides the repository and image_root for a given oci_push target",
+    implementation = _oci_push_repository_aspect_impl,
+)
+
 def _render_json_to_yaml(ctx, name, inline_content):
     target_file = ctx.actions.declare_file("{}/{}.yaml".format(
         name,
@@ -91,34 +133,38 @@ def _helm_package_impl(ctx):
 
     # Create documents for each image the package depends on
     image_inputs = []
-    if ctx.attr.images:
-        single_image_manifests = []
-        for image in ctx.attr.images:
-            single_image_manifest = ctx.actions.declare_file("{}/{}".format(
-                ctx.label.name,
-                str(image.label).strip("@").replace("/", "_").replace(":", "_") + ".image_manifest",
-            ))
-            push_info = image[DefaultInfo]
-            ctx.actions.write(
-                output = single_image_manifest,
-                content = json.encode_indent(
-                    struct(
-                        label = str(image.label),
-                        paths = [manifest.path for manifest in push_info.default_runfiles.files.to_list()],
-                    ),
-                ),
-            )
-            image_inputs.extend(push_info.default_runfiles.files.to_list())
-            single_image_manifests.append(single_image_manifest)
-
-        image_manifest = ctx.actions.declare_file("{}/image_manifest.json".format(ctx.label.name))
+    single_image_manifests = []
+    for image in ctx.attr.images:
+        image_inputs.extend([
+            image[OciPushRepositoryInfo].repository_file,
+            image[OciPushRepositoryInfo].image_root,
+        ])
+        single_image_manifest = ctx.actions.declare_file("{}/{}".format(
+            ctx.label.name,
+            str(image.label).strip("@").replace("/", "_").replace(":", "_") + ".image_manifest",
+        ))
+        push_info = image[DefaultInfo]
         ctx.actions.write(
-            output = image_manifest,
-            content = json.encode_indent([manifest.path for manifest in single_image_manifests], indent = " " * 4),
+            output = single_image_manifest,
+            content = json.encode_indent(
+                struct(
+                    label = str(image.label),
+                    repository_path = image[OciPushRepositoryInfo].repository_file.path,
+                    image_root_path = image[OciPushRepositoryInfo].image_root.path,
+                ),
+            ),
         )
-        image_inputs.append(image_manifest)
-        image_inputs.extend(single_image_manifests)
-        args.add("-image_manifest", image_manifest)
+        image_inputs.extend(push_info.default_runfiles.files.to_list())
+        single_image_manifests.append(single_image_manifest)
+
+    image_manifest = ctx.actions.declare_file("{}/image_manifest.json".format(ctx.label.name))
+    ctx.actions.write(
+        output = image_manifest,
+        content = json.encode_indent([manifest.path for manifest in single_image_manifests], indent = " " * 4),
+    )
+    image_inputs.append(image_manifest)
+    image_inputs.extend(single_image_manifests)
+    args.add("-image_manifest", image_manifest)
     stamps = []
     if is_stamping_enabled(ctx.attr):
         args.add("-volatile_status_file", ctx.version_file)
@@ -155,7 +201,7 @@ def _helm_package_impl(ctx):
 
 helm_package = rule(
     implementation = _helm_package_impl,
-    doc = "",
+    doc = "Rules for creating Helm chart packages.",
     attrs = {
         "chart": attr.label(
             doc = "The `Chart.yaml` file of the helm chart",
@@ -169,7 +215,11 @@ helm_package = rule(
             providers = [HelmPackageInfo],
         ),
         "images": attr.label_list(
-            doc = "[@rules_oci//oci:defs.bzl%oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets.",
+            doc = """\
+                A list of \
+                [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) \
+                targets.""",
+            aspects = [_oci_push_repository_aspect],
         ),
         "stamp": attr.int(
             doc = """\
