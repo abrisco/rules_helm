@@ -4,7 +4,7 @@ load("//helm/private:helm_install.bzl", "helm_install", "helm_push", "helm_reins
 load("//helm/private:helm_package.bzl", "helm_package")
 load("//helm/private:helm_registry.bzl", "helm_push_registry")
 
-def helm_chart(name, images = [], deps = None, tags = [], install_name = None, registry_url = None, **kwargs):
+def helm_chart(name, chart = None, chart_json = None, values = None, values_json = None, images = [], deps = None, tags = [], install_name = None, registry_url = None, **kwargs):
     """Rules for producing a helm package and some convenience targets.
 
     | target | rule |
@@ -18,6 +18,10 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None, r
 
     Args:
         name (str): The name of the [helm_package](#helm_package) target.
+        chart (str, optional): The path to the chart directory. Defaults to `Chart.yaml`.
+        chart_json (str, optional): The json encoded contents of `Chart.yaml`.
+        values (str, optional): The path to the values file. Defaults to `values.yaml`.
+        values_json (str, optional): The json encoded contents of `values.yaml`.
         images (list, optional): A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets
         deps (list, optional): A list of helm package dependencies.
         tags (list, optional): Tags to apply to all targets.
@@ -26,14 +30,22 @@ def helm_chart(name, images = [], deps = None, tags = [], install_name = None, r
             is only defined when a value is passed here.
         **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
+    if chart == None and chart_json == None:
+        chart = "Chart.yaml"
+
+    if values == None and values_json == None:
+        values = "values.yaml"
+
     helm_package(
         name = name,
-        chart = "Chart.yaml",
+        chart = chart,
+        chart_json = chart_json,
         deps = deps,
         images = images,
         tags = tags,
         templates = native.glob(["templates/**"]),
-        values = "values.yaml",
+        values = values,
+        values_json = values_json,
         **kwargs
     )
 

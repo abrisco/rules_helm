@@ -78,7 +78,7 @@ def _helm_package_impl(ctx):
         ))
 
     if ctx.attr.chart and ctx.attr.chart_json:
-        fail("helm_package rules cannot use both `values` and `values_json` attributes. Update {} to use one.".format(
+        fail("helm_package rules cannot use both `chart` and `chart_json` attributes. Update {} to use one.".format(
             ctx.label,
         ))
 
