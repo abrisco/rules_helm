@@ -49,19 +49,45 @@ type HelmResultMetadata struct {
 	Version string
 }
 
+type HelmMaintainer struct {
+	Name  string `yaml:"name"`
+	Email string `yaml:"email,omitempty"`
+	Url   string `yaml:"url,omitempty"`
+}
+
+type HelmDependency struct {
+	Name         string   `yaml:"name"`
+	Version      string   `yaml:"version"`
+	Repository   string   `yaml:"repository,omitempty"`
+	Condition    string   `yaml:"condition,omitempty"`
+	Tags         []string `yaml:"tags,omitempty"`
+	ImportValues []string `yaml:"import-values,omitempty"`
+	Alias        string   `yaml:"alias,omitempty"`
+}
+
 type HelmChart struct {
-	ApiVersion  string
-	Name        string
-	Description string
-	Type        string
-	Version     string
-	AppVersion  string
+	ApiVersion   string            `yaml:"apiVersion"`
+	Name         string            `yaml:"name"`
+	Version      string            `yaml:"version"`
+	KubeVersion  string            `yaml:"kubeVersion,omitempty"`
+	Description  string            `yaml:"description,omitempty"`
+	Type         string            `yaml:"type,omitempty"`
+	Keywords     []string          `yaml:"keywords,omitempty"`
+	Home         string            `yaml:"home,omitempty"`
+	Sources      []string          `yaml:"sources,omitempty"`
+	Dependencies []HelmDependency  `yaml:"dependencies,omitempty"`
+	Maintainers  []HelmMaintainer  `yaml:"maintainers,omitempty"`
+	Icon         string            `yaml:"icon,omitempty"`
+	AppVersion   string            `yaml:"appVersion,omitempty"`
+	Deprecated   bool              `yaml:"deprecated,omitempty"`
+	Annotations  map[string]string `yaml:"annotations,omitempty"`
 }
 
 type Arguments struct {
 	TemplatesManifest  string
 	Chart              string
 	Values             string
+	Substitutions      string
 	DepsManifest       string
 	Helm               string
 	Output             string
@@ -78,6 +104,7 @@ func parseArgs() Arguments {
 	flag.StringVar(&args.TemplatesManifest, "templates_manifest", "", "A helm file containing a list of all helm template files")
 	flag.StringVar(&args.Chart, "chart", "", "The helm `chart.yaml` file")
 	flag.StringVar(&args.Values, "values", "", "The helm `values.yaml` file.")
+	flag.StringVar(&args.Substitutions, "substitutions", "", "A json file containing key value pairs to substitute into the values file")
 	flag.StringVar(&args.DepsManifest, "deps_manifest", "", "A file containing a list of all helm dependency (`charts/*.tgz`) files")
 	flag.StringVar(&args.Helm, "helm", "", "The path to a helm executable")
 	flag.StringVar(&args.Output, "output", "", "The path to the Bazel `HelmPackage` action output")
@@ -249,6 +276,30 @@ func replaceKeyValues(content string, replacementGroups []ReplacementGroup, must
 	return content, nil
 }
 
+func applySubstitutions(content string, substitutions_file string) (string, error) {
+	if len(substitutions_file) == 0 {
+		return content, nil
+	}
+
+	contentBytes, err := os.ReadFile(substitutions_file)
+	if err != nil {
+		return content, fmt.Errorf("Error reading substitutions file %s: %w", substitutions_file, err)
+	}
+
+	var substitutions map[string]string
+	err = json.Unmarshal(contentBytes, &substitutions)
+	if err != nil {
+		return content, fmt.Errorf("Error unmarshalling substitutions file %s: %w", substitutions_file, err)
+	}
+
+	for key, val := range substitutions {
+		replaceKey := fmt.Sprintf("{%s}", key)
+		content = strings.ReplaceAll(content, replaceKey, val)
+	}
+
+	return content, nil
+}
+
 func applyStamping(content string, stamps []ReplacementGroup, imageStamps []ReplacementGroup, requireImageStamps bool) (string, error) {
 	content, err := replaceKeyValues(content, stamps, false)
 	if err != nil {
@@ -286,20 +337,14 @@ func sanitizeChartContent(content string) (string, error) {
 	return content, nil
 }
 
-func getChartName(content string) (string, error) {
-	for _, line := range strings.Split(content, "\n") {
-		if !strings.HasPrefix(line, "name:") {
-			continue
-		}
-
-		_, name, found := strings.Cut(line, "name:")
-		if !found {
-			return "", errors.New("Failed to find chart name from content:" + content)
-		}
-		return strings.Trim(name, " '\"\n"), nil
+func loadChart(content string) (HelmChart, error) {
+	var chart HelmChart
+	err := yaml.Unmarshal([]byte(content), &chart)
+	if err != nil {
+		return chart, fmt.Errorf("Error unmarshalling chart content: %w", err)
 	}
 
-	return "", errors.New("Failed to find chart name from content:" + content)
+	return chart, nil
 }
 
 func copyFile(source string, dest string) error {
@@ -488,10 +533,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	valuesContent, err := os.ReadFile(args.Values)
+	valuesBytes, err := os.ReadFile(args.Values)
 	if err != nil {
 		log.Fatal(err)
 	}
+	valuesContent := string(valuesBytes)
 
 	// Collect all stamp values
 	stamps, err := loadStamps(args.VolatileStatusFile, args.StableStatusFile)
@@ -500,6 +546,12 @@ func main() {
 	}
 
 	imageStamps, err := loadImageStamps(args.ImageManifest)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Apply substitutions.
+	valuesContent, err = applySubstitutions(valuesContent, args.Substitutions)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -518,13 +570,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Create a directory in which to run helm package
-	chartName, err := getChartName(stampedChartContent)
+	chart, err := loadChart(stampedChartContent)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	tmpPath := path.Join(dir, chartName)
+	// Create a directory in which to run helm package
+	tmpPath := path.Join(dir, chart.Name)
 	err = installHelmContent(tmpPath, stampedChartContent, stampedValuesContent, args.TemplatesManifest, args.DepsManifest)
 	if err != nil {
 		log.Fatal(err)
@@ -533,7 +585,7 @@ func main() {
 	// Build the helm package
 	command := exec.Command(path.Join(cwd, args.Helm), "package", ".")
 	command.Dir = tmpPath
-	out, err := command.Output()
+	out, err := command.CombinedOutput()
 	if err != nil {
 		os.Stderr.WriteString(string(out))
 		log.Fatal(err)

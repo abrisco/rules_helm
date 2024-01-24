@@ -54,6 +54,11 @@ bazel_dep(name = "rules_helm", version = "{version}")
 """
 
 load(
+    "//helm/private:chart_file.bzl",
+    _chart_content = "chart_content",
+    _chart_file = "chart_file",
+)
+load(
     "//helm/private:helm_import.bzl",
     _helm_import = "helm_import",
     _helm_import_repository = "helm_import_repository",
@@ -80,7 +85,6 @@ load(
 )
 load(
     ":helm.bzl",
-    _chart_content = "chart_content",
     _helm_chart = "helm_chart",
 )
 load(
@@ -113,3 +117,4 @@ helm_uninstall = _helm_uninstall
 HelmPackageInfo = _HelmPackageInfo
 rules_helm_dependencies = _rules_helm_dependencies
 chart_content = _chart_content
+chart_file = _chart_file
