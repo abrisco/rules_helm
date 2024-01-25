@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -euxo pipefail
 
 {image_pushers}
 
-eval exec {helm} install {install_name} {chart} "$@"
+eval exec {helm} $(cat {helm_opts}) install $(cat {install_opts}) {install_name} {chart} "$@"

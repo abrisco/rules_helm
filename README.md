@@ -126,7 +126,7 @@ A rule for fetching external Helm charts from an arbitrary repository.
 ## helm_install
 
 <pre>
-helm_install(<a href="#helm_install-name">name</a>, <a href="#helm_install-install_name">install_name</a>, <a href="#helm_install-package">package</a>)
+helm_install(<a href="#helm_install-name">name</a>, <a href="#helm_install-helm_opts">helm_opts</a>, <a href="#helm_install-install_name">install_name</a>, <a href="#helm_install-opts">opts</a>, <a href="#helm_install-package">package</a>)
 </pre>
 
 Produce a script for performing a helm install action
@@ -137,7 +137,9 @@ Produce a script for performing a helm install action
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_install-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_install-helm_opts"></a>helm_opts |  Additional arguments to pass to `helm` during install.   | List of strings | optional |  `[]`  |
 | <a id="helm_install-install_name"></a>install_name |  The name to use for the `helm install` command. The target name will be used if unset.   | String | optional |  `""`  |
+| <a id="helm_install-opts"></a>opts |  Additional arguments to pass to `helm install`.   | List of strings | optional |  `[]`  |
 | <a id="helm_install-package"></a>package |  The helm package to install.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
@@ -232,7 +234,7 @@ Produce a script for performing a helm push to a registry
 ## helm_reinstall
 
 <pre>
-helm_reinstall(<a href="#helm_reinstall-name">name</a>, <a href="#helm_reinstall-install_name">install_name</a>, <a href="#helm_reinstall-package">package</a>)
+helm_reinstall(<a href="#helm_reinstall-name">name</a>, <a href="#helm_reinstall-helm_opts">helm_opts</a>, <a href="#helm_reinstall-install_name">install_name</a>, <a href="#helm_reinstall-opts">opts</a>, <a href="#helm_reinstall-package">package</a>)
 </pre>
 
 Produce a script for performing a helm uninstall and install actions
@@ -243,7 +245,9 @@ Produce a script for performing a helm uninstall and install actions
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_reinstall-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_reinstall-helm_opts"></a>helm_opts |  Additional arguments to pass to `helm` during install.   | List of strings | optional |  `[]`  |
 | <a id="helm_reinstall-install_name"></a>install_name |  The name to use for the `helm install` command. The target name will be used if unset.   | String | optional |  `""`  |
+| <a id="helm_reinstall-opts"></a>opts |  Additional arguments to pass to `helm install`.   | List of strings | optional |  `[]`  |
 | <a id="helm_reinstall-package"></a>package |  The helm package to reinstall.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
@@ -271,7 +275,7 @@ A helm toolchain
 ## helm_uninstall
 
 <pre>
-helm_uninstall(<a href="#helm_uninstall-name">name</a>, <a href="#helm_uninstall-install_name">install_name</a>)
+helm_uninstall(<a href="#helm_uninstall-name">name</a>, <a href="#helm_uninstall-helm_opts">helm_opts</a>, <a href="#helm_uninstall-install_name">install_name</a>, <a href="#helm_uninstall-opts">opts</a>)
 </pre>
 
 Produce a script for performing a helm uninstall action
@@ -282,7 +286,9 @@ Produce a script for performing a helm uninstall action
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_uninstall-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_uninstall-helm_opts"></a>helm_opts |  Additional arguments to pass to `helm` during install.   | List of strings | optional |  `[]`  |
 | <a id="helm_uninstall-install_name"></a>install_name |  The name to use for the `helm install` command. The target name will be used if unset.   | String | optional |  `""`  |
+| <a id="helm_uninstall-opts"></a>opts |  Additional arguments to pass to `helm install`.   | List of strings | optional |  `[]`  |
 
 
 <a id="HelmPackageInfo"></a>
@@ -338,7 +344,7 @@ str: A json encoded string which represents `Chart.yaml` contents.
 
 <pre>
 helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">chart</a>, <a href="#helm_chart-chart_json">chart_json</a>, <a href="#helm_chart-values">values</a>, <a href="#helm_chart-values_json">values_json</a>, <a href="#helm_chart-substitutions">substitutions</a>, <a href="#helm_chart-templates">templates</a>, <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>,
-           <a href="#helm_chart-tags">tags</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">kwargs</a>)
+           <a href="#helm_chart-tags">tags</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-namespace">namespace</a>, <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-opts">opts</a>, <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">kwargs</a>)
 </pre>
 
 Rules for producing a helm package and some convenience targets.
@@ -370,6 +376,9 @@ Rules for producing a helm package and some convenience targets.
 | <a id="helm_chart-tags"></a>tags |  Tags to apply to all targets.   |  `[]` |
 | <a id="helm_chart-install_name"></a>install_name |  The `helm install` name to use. `name` will be used if unset.   |  `None` |
 | <a id="helm_chart-registry_url"></a>registry_url |  The registry url for the helm chart. `{name}.push_registry` is only defined when a value is passed here.   |  `None` |
+| <a id="helm_chart-namespace"></a>namespace |  <p align="center"> - </p>   |  `None` |
+| <a id="helm_chart-helm_opts"></a>helm_opts |  <p align="center"> - </p>   |  `[]` |
+| <a id="helm_chart-opts"></a>opts |  <p align="center"> - </p>   |  `[]` |
 | <a id="helm_chart-stamp"></a>stamp |  Whether to encode build information into the helm chart.   |  `None` |
 | <a id="helm_chart-kwargs"></a>kwargs |  Additional keyword arguments for `helm_package`.   |  none |
 

@@ -17,6 +17,9 @@ def helm_chart(
         tags = [],
         install_name = None,
         registry_url = None,
+        namespace = None,
+        helm_opts = [],
+        opts = [],
         stamp = None,
         **kwargs):
     """Rules for producing a helm package and some convenience targets.
@@ -92,6 +95,8 @@ def helm_chart(
         install_name = install_name,
         package = name,
         tags = tags_with_manual,
+        helm_opts = helm_opts,
+        opts = opts,
         **kwargs
     )
 
@@ -99,6 +104,8 @@ def helm_chart(
         name = name + ".uninstall",
         install_name = install_name,
         tags = tags_with_manual,
+        helm_opts = helm_opts,
+        opts = opts,
         **kwargs
     )
 
@@ -107,5 +114,7 @@ def helm_chart(
         install_name = install_name,
         package = name,
         tags = tags_with_manual,
+        helm_opts = helm_opts,
+        opts = opts,
         **kwargs
     )
