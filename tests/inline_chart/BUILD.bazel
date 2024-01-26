@@ -1,10 +1,13 @@
-load("//helm:defs.bzl", "chart_content", "helm_lint_test", "helm_package")
+load("//helm:defs.bzl", "chart_file", "helm_lint_test", "helm_package")
+
+chart_file(
+    name = "chart_file",
+    chart_name = "inline_chart",
+)
 
 helm_package(
     name = "inline_chart",
-    chart_json = chart_content(
-        name = "inline_chart",
-    ),
+    chart = ":chart_file",
     templates = glob(["templates/**"]),
     values = "values.yaml",
 )

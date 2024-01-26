@@ -4,7 +4,21 @@ load("//helm/private:helm_install.bzl", "helm_install", "helm_push", "helm_reins
 load("//helm/private:helm_package.bzl", "helm_package")
 load("//helm/private:helm_registry.bzl", "helm_push_registry")
 
-def helm_chart(name, chart = None, chart_json = None, values = None, values_json = None, images = [], deps = None, tags = [], install_name = None, registry_url = None, **kwargs):
+def helm_chart(
+        name,
+        chart = None,
+        chart_json = None,
+        values = None,
+        values_json = None,
+        substitutions = {},
+        templates = None,
+        images = [],
+        deps = None,
+        tags = [],
+        install_name = None,
+        registry_url = None,
+        stamp = None,
+        **kwargs):
     """Rules for producing a helm package and some convenience targets.
 
     | target | rule |
@@ -22,19 +36,22 @@ def helm_chart(name, chart = None, chart_json = None, values = None, values_json
         chart_json (str, optional): The json encoded contents of `Chart.yaml`.
         values (str, optional): The path to the values file. Defaults to `values.yaml`.
         values_json (str, optional): The json encoded contents of `values.yaml`.
+        substitutions (dict, optional): A dictionary of substitutions to apply to `values.yaml`.
+        templates (list, optional): A list of template files to include in the package.
         images (list, optional): A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets
         deps (list, optional): A list of helm package dependencies.
         tags (list, optional): Tags to apply to all targets.
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
         registry_url (str, Optional): The registry url for the helm chart. `{name}.push_registry`
             is only defined when a value is passed here.
+        stamp (int):  Whether to encode build information into the helm chart.
         **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
-    if chart == None and chart_json == None:
-        chart = "Chart.yaml"
+    if templates == None:
+        templates = native.glob(["templates/**"])
 
-    if values == None and values_json == None:
-        values = "values.yaml"
+    tags = kwargs.pop("tags", [])
+    tags_with_manual = depset(tags + ["manual"]).to_list()
 
     helm_package(
         name = name,
@@ -42,17 +59,20 @@ def helm_chart(name, chart = None, chart_json = None, values = None, values_json
         chart_json = chart_json,
         deps = deps,
         images = images,
-        tags = tags,
-        templates = native.glob(["templates/**"]),
+        templates = templates,
         values = values,
         values_json = values_json,
+        substitutions = substitutions,
+        stamp = stamp,
+        tags = tags,
         **kwargs
     )
 
     helm_push(
         name = name + ".push",
         package = name,
-        tags = depset(tags + ["manual"]).to_list(),
+        tags = tags_with_manual,
+        **kwargs
     )
 
     if registry_url:
@@ -60,7 +80,8 @@ def helm_chart(name, chart = None, chart_json = None, values = None, values_json
             name = name + ".push_registry",
             package = name,
             registry_url = registry_url,
-            tags = depset(tags + ["manual"]).to_list(),
+            tags = tags_with_manual,
+            **kwargs
         )
 
     if not install_name:
@@ -70,47 +91,21 @@ def helm_chart(name, chart = None, chart_json = None, values = None, values_json
         name = name + ".install",
         install_name = install_name,
         package = name,
-        tags = depset(tags + ["manual"]).to_list(),
+        tags = tags_with_manual,
+        **kwargs
     )
 
     helm_uninstall(
         name = name + ".uninstall",
         install_name = install_name,
-        tags = depset(tags + ["manual"]).to_list(),
+        tags = tags_with_manual,
+        **kwargs
     )
 
     helm_reinstall(
         name = name + ".reinstall",
         install_name = install_name,
         package = name,
-        tags = depset(tags + ["manual"]).to_list(),
+        tags = tags_with_manual,
+        **kwargs
     )
-
-def chart_content(
-        name,
-        api_version = "v2",
-        description = "A Helm chart for Kubernetes by Bazel.",
-        type = "application",
-        version = "0.1.0",
-        app_version = "0.16.0"):
-    """A convenience wrapper for defining Chart.yaml files with [helm_package.chart_json](#helm_package-chart_json).
-
-    Args:
-        name (str): The name of the chart
-        api_version (str, optional): The Helm API version
-        description (str, optional): A descritpion of the chart.
-        type (str, optional): The chart type.
-        version (str, optional): The chart version.
-        app_version (str, optional): The version number of the application being deployed.
-
-    Returns:
-        str: A json encoded string which represents `Chart.yaml` contents.
-    """
-    return json.encode({
-        "apiVersion": api_version,
-        "appVersion": app_version,
-        "description": description,
-        "name": name,
-        "type": type,
-        "version": version,
-    })

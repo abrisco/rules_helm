@@ -7,10 +7,12 @@ exports_files(["Chart.lock"])
 
 helm_chart(
     name = "with_image_deps",
+    chart = "Chart.yaml",
     images = [
         ":image_a.push",
         "//tests/with_image_deps:image_b.push",
     ],
+    values = "values.yaml",
 )
 
 helm_lint_test(

@@ -2,6 +2,7 @@
 
 load("//helm:providers.bzl", "HelmPackageInfo")
 load("//helm/private:helm_utils.bzl", "is_stamping_enabled")
+load("//helm/private:json_to_yaml.bzl", "json_to_yaml")
 
 OciPushRepositoryInfo = provider(
     doc = "Repository and image information for a given oci_push target",
@@ -45,60 +46,34 @@ _oci_push_repository_aspect = aspect(
     implementation = _oci_push_repository_aspect_impl,
 )
 
-def _render_json_to_yaml(ctx, name, inline_content):
-    target_file = ctx.actions.declare_file("{}/{}.yaml".format(
-        name,
-        ctx.label.name,
-    ))
-    content_json = ctx.actions.declare_file("{}/.{}.json".format(
-        name,
-        ctx.label.name,
-    ))
-    ctx.actions.write(
-        output = content_json,
-        content = inline_content,
-    )
-    args = ctx.actions.args()
-    args.add("-input", content_json)
-    args.add("-output", target_file)
-    ctx.actions.run(
-        executable = ctx.executable._json_to_yaml,
-        mnemonic = "HelmPackageJsonToYaml",
-        arguments = [args],
-        inputs = [content_json],
-        outputs = [target_file],
-    )
-
-    return target_file
-
 def _helm_package_impl(ctx):
-    if ctx.attr.values and ctx.attr.values_json:
-        fail("helm_package rules cannot use both `values` and `values_json` attributes. Update {} to use one.".format(
+    if (ctx.attr.chart and ctx.attr.chart_json) or (not ctx.attr.chart and not ctx.attr.chart_json):
+        fail("Helm package {} must have either a `chart` or `chart_json` attribute".format(
             ctx.label,
         ))
 
-    if ctx.attr.chart and ctx.attr.chart_json:
-        fail("helm_package rules cannot use both `chart` and `chart_json` attributes. Update {} to use one.".format(
+    if (ctx.attr.values and ctx.attr.values_json) or (not ctx.attr.values and not ctx.attr.values_json):
+        fail("Helm package {} must have either a `values` or `values_json` attribute".format(
             ctx.label,
         ))
 
-    if ctx.attr.values:
-        values_yaml = ctx.file.values
-    elif ctx.attr.values_json:
-        values_yaml = _render_json_to_yaml(ctx, "values", ctx.attr.values_json)
+    if ctx.attr.chart_json:
+        chart_yaml = json_to_yaml(
+            ctx = ctx,
+            name = "{}/Chart.yaml".format(ctx.label.name),
+            json_content = ctx.attr.chart_json,
+        )
     else:
-        fail("helm_package rules requires either `values` or `values_json` attributes. Update {} to use one.".format(
-            ctx.label,
-        ))
-
-    if ctx.attr.chart:
         chart_yaml = ctx.file.chart
-    elif ctx.attr.chart_json:
-        chart_yaml = _render_json_to_yaml(ctx, "Chart", ctx.attr.chart_json)
+
+    if ctx.attr.values_json:
+        values_yaml = json_to_yaml(
+            ctx = ctx,
+            name = "{}/values.yaml".format(ctx.label.name),
+            json_content = ctx.attr.values_json,
+        )
     else:
-        fail("helm_package rules requires either `chart` or `chart_json` attributes. Update {} to use one.".format(
-            ctx.label,
-        ))
+        values_yaml = ctx.file.values
 
     args = ctx.actions.args()
 
@@ -112,6 +87,13 @@ def _helm_package_impl(ctx):
 
     args.add("-chart", chart_yaml)
     args.add("-values", values_yaml)
+
+    substitutions_file = ctx.actions.declare_file("{}/substitutions.json".format(ctx.label.name))
+    ctx.actions.write(
+        output = substitutions_file,
+        content = json.encode_indent(ctx.attr.substitutions, indent = " " * 4),
+    )
+    args.add("-substitutions", substitutions_file)
 
     templates_manifest = ctx.actions.declare_file("{}/templates_manifest.json".format(ctx.label.name))
     ctx.actions.write(
@@ -177,7 +159,7 @@ def _helm_package_impl(ctx):
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
         inputs = depset(
-            ctx.files.templates + stamps + image_inputs + deps + [chart_yaml, values_yaml, templates_manifest],
+            ctx.files.templates + stamps + image_inputs + deps + [chart_yaml, values_yaml, templates_manifest, substitutions_file],
         ),
         tools = depset([toolchain.helm]),
         mnemonic = "HelmPackage",
@@ -205,10 +187,10 @@ helm_package = rule(
     attrs = {
         "chart": attr.label(
             doc = "The `Chart.yaml` file of the helm chart",
-            allow_single_file = ["Chart.yaml"],
+            allow_single_file = True,
         ),
         "chart_json": attr.string(
-            doc = "A json encoded string to use as the `Chart.yaml` file of the helm chart",
+            doc = "The `Chart.yaml` file of the helm chart as a json object",
         ),
         "deps": attr.label_list(
             doc = "Other helm packages this package depends on.",
@@ -240,16 +222,20 @@ helm_package = rule(
             default = -1,
             values = [1, 0, -1],
         ),
+        "substitutions": attr.string_dict(
+            doc = "A dictionary of substitutions to apply to the `values.yaml` file.",
+            default = {},
+        ),
         "templates": attr.label_list(
             doc = "All templates associated with the current helm chart. E.g., the `./templates` directory",
             allow_files = True,
         ),
         "values": attr.label(
-            doc = "The `values.yaml` file for the current package. This attribute is mutally exclusive with `values_json`.",
-            allow_single_file = ["values.yaml"],
+            doc = "The `values.yaml` file for the current package.",
+            allow_single_file = True,
         ),
         "values_json": attr.string(
-            doc = "A json encoded string to use as the `values.yaml` file. This attribute is mutally exclusive with `values`.",
+            doc = "The `values.yaml` file for the current package as a json object.",
         ),
         "_json_to_yaml": attr.label(
             doc = "A tools for converting json files to yaml files.",

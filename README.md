@@ -53,6 +53,30 @@ bazel_dep(name = "rules_helm", version = "{version}")
 - [rules_helm_dependencies](#rules_helm_dependencies)
 - [chart_content](#chart_content)
 
+<a id="chart_file"></a>
+
+## chart_file
+
+<pre>
+chart_file(<a href="#chart_file-name">name</a>, <a href="#chart_file-api_version">api_version</a>, <a href="#chart_file-app_version">app_version</a>, <a href="#chart_file-chart_name">chart_name</a>, <a href="#chart_file-description">description</a>, <a href="#chart_file-type">type</a>, <a href="#chart_file-version">version</a>)
+</pre>
+
+Create a Helm chart file.
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="chart_file-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="chart_file-api_version"></a>api_version |  The Helm API version   | String | optional |  `"v2"`  |
+| <a id="chart_file-app_version"></a>app_version |  The version number of the application being deployed.   | String | optional |  `"1.16.0"`  |
+| <a id="chart_file-chart_name"></a>chart_name |  The name of the chart   | String | optional |  `""`  |
+| <a id="chart_file-description"></a>description |  A descritpion of the chart.   | String | optional |  `"A Helm chart for Kubernetes by Bazel."`  |
+| <a id="chart_file-type"></a>type |  The chart type.   | String | optional |  `"application"`  |
+| <a id="chart_file-version"></a>version |  The chart version.   | String | optional |  `"0.1.0"`  |
+
+
 <a id="helm_import"></a>
 
 ## helm_import
@@ -141,7 +165,8 @@ A rule for performing `helm lint` on a helm package
 ## helm_package
 
 <pre>
-helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-deps">deps</a>, <a href="#helm_package-chart">chart</a>, <a href="#helm_package-chart_json">chart_json</a>, <a href="#helm_package-images">images</a>, <a href="#helm_package-stamp">stamp</a>, <a href="#helm_package-templates">templates</a>, <a href="#helm_package-values">values</a>, <a href="#helm_package-values_json">values_json</a>)
+helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-deps">deps</a>, <a href="#helm_package-chart">chart</a>, <a href="#helm_package-chart_json">chart_json</a>, <a href="#helm_package-images">images</a>, <a href="#helm_package-stamp">stamp</a>, <a href="#helm_package-substitutions">substitutions</a>, <a href="#helm_package-templates">templates</a>, <a href="#helm_package-values">values</a>,
+             <a href="#helm_package-values_json">values_json</a>)
 </pre>
 
 Rules for creating Helm chart packages.
@@ -154,12 +179,13 @@ Rules for creating Helm chart packages.
 | <a id="helm_package-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="helm_package-deps"></a>deps |  Other helm packages this package depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_package-chart"></a>chart |  The `Chart.yaml` file of the helm chart   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
-| <a id="helm_package-chart_json"></a>chart_json |  A json encoded string to use as the `Chart.yaml` file of the helm chart   | String | optional |  `""`  |
+| <a id="helm_package-chart_json"></a>chart_json |  The `Chart.yaml` file of the helm chart as a json object   | String | optional |  `""`  |
 | <a id="helm_package-images"></a>images |  A list of                 [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags)                 targets.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_package-stamp"></a>stamp |  Whether to encode build information into the helm actions. Possible values:<br><br>- `stamp = 1`: Always stamp the build information into the helm actions, even in                 [--nostamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) builds.                 This setting should be avoided, since it potentially kills remote caching for the target and                 any downstream actions that depend on it.<br><br>- `stamp = 0`: Always replace build information by constant values. This gives good build result caching.<br><br>- `stamp = -1`: Embedding of build information is controlled by the                 [--[no]stamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) flag.<br><br>Stamped targets are not rebuilt unless their dependencies change.   | Integer | optional |  `-1`  |
+| <a id="helm_package-substitutions"></a>substitutions |  A dictionary of substitutions to apply to the `values.yaml` file.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="helm_package-templates"></a>templates |  All templates associated with the current helm chart. E.g., the `./templates` directory   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="helm_package-values"></a>values |  The `values.yaml` file for the current package. This attribute is mutally exclusive with `values_json`.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
-| <a id="helm_package-values_json"></a>values_json |  A json encoded string to use as the `values.yaml` file. This attribute is mutally exclusive with `values`.   | String | optional |  `""`  |
+| <a id="helm_package-values"></a>values |  The `values.yaml` file for the current package.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
+| <a id="helm_package-values_json"></a>values_json |  The `values.yaml` file for the current package as a json object.   | String | optional |  `""`  |
 
 
 <a id="helm_push"></a>
@@ -299,7 +325,7 @@ A convenience wrapper for defining Chart.yaml files with [helm_package.chart_jso
 | <a id="chart_content-description"></a>description |  A descritpion of the chart.   |  `"A Helm chart for Kubernetes by Bazel."` |
 | <a id="chart_content-type"></a>type |  The chart type.   |  `"application"` |
 | <a id="chart_content-version"></a>version |  The chart version.   |  `"0.1.0"` |
-| <a id="chart_content-app_version"></a>app_version |  The version number of the application being deployed.   |  `"0.16.0"` |
+| <a id="chart_content-app_version"></a>app_version |  The version number of the application being deployed.   |  `"1.16.0"` |
 
 **RETURNS**
 
@@ -311,8 +337,8 @@ str: A json encoded string which represents `Chart.yaml` contents.
 ## helm_chart
 
 <pre>
-helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">chart</a>, <a href="#helm_chart-chart_json">chart_json</a>, <a href="#helm_chart-values">values</a>, <a href="#helm_chart-values_json">values_json</a>, <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-tags">tags</a>, <a href="#helm_chart-install_name">install_name</a>,
-           <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-kwargs">kwargs</a>)
+helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">chart</a>, <a href="#helm_chart-chart_json">chart_json</a>, <a href="#helm_chart-values">values</a>, <a href="#helm_chart-values_json">values_json</a>, <a href="#helm_chart-substitutions">substitutions</a>, <a href="#helm_chart-templates">templates</a>, <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>,
+           <a href="#helm_chart-tags">tags</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">kwargs</a>)
 </pre>
 
 Rules for producing a helm package and some convenience targets.
@@ -337,11 +363,14 @@ Rules for producing a helm package and some convenience targets.
 | <a id="helm_chart-chart_json"></a>chart_json |  The json encoded contents of `Chart.yaml`.   |  `None` |
 | <a id="helm_chart-values"></a>values |  The path to the values file. Defaults to `values.yaml`.   |  `None` |
 | <a id="helm_chart-values_json"></a>values_json |  The json encoded contents of `values.yaml`.   |  `None` |
+| <a id="helm_chart-substitutions"></a>substitutions |  A dictionary of substitutions to apply to `values.yaml`.   |  `{}` |
+| <a id="helm_chart-templates"></a>templates |  A list of template files to include in the package.   |  `None` |
 | <a id="helm_chart-images"></a>images |  A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets   |  `[]` |
 | <a id="helm_chart-deps"></a>deps |  A list of helm package dependencies.   |  `None` |
 | <a id="helm_chart-tags"></a>tags |  Tags to apply to all targets.   |  `[]` |
 | <a id="helm_chart-install_name"></a>install_name |  The `helm install` name to use. `name` will be used if unset.   |  `None` |
 | <a id="helm_chart-registry_url"></a>registry_url |  The registry url for the helm chart. `{name}.push_registry` is only defined when a value is passed here.   |  `None` |
+| <a id="helm_chart-stamp"></a>stamp |  Whether to encode build information into the helm chart.   |  `None` |
 | <a id="helm_chart-kwargs"></a>kwargs |  Additional keyword arguments for `helm_package`.   |  none |
 
 
