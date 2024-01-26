@@ -9,7 +9,9 @@ filegroup(
         "//helm/private/packager:bzl_srcs",
         "//helm/private/pusher:bzl_srcs",
         "//helm/private/registrar:bzl_srcs",
+        "//helm/private/stamper:bzl_srcs",
         "//helm/private/uninstaller:bzl_srcs",
+        "//helm/private/upgrader:bzl_srcs",
     ],
     visibility = ["//:__subpackages__"],
 )

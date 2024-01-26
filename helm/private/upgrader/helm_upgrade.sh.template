@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+{image_pushers}
+
+eval exec {helm} $(cat {helm_opts}) upgrade $(cat {upgrade_opts}) {install_name} {chart} "$@"

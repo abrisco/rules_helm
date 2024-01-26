@@ -108,6 +108,88 @@ helm_install = rule(
     ],
 )
 
+def _helm_upgrade_impl(ctx):
+    toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
+
+    helm_opts_file = _stamp_opts(ctx, "helm_opts", ctx.attr.helm_opts)
+    opts_file = _stamp_opts(ctx, "opts", ctx.attr.opts)
+
+    if toolchain.helm.basename.endswith(".exe"):
+        upgrader = ctx.actions.declare_file(ctx.label.name + ".bat")
+    else:
+        upgrader = ctx.actions.declare_file(ctx.label.name + ".sh")
+
+    install_name = ctx.attr.install_name or ctx.label.name
+
+    pkg_info = ctx.attr.package[HelmPackageInfo]
+
+    image_pushers = []
+    image_runfiles = []
+    for image in pkg_info.images:
+        image_pushers.append(image[DefaultInfo].files_to_run.executable)
+        image_runfiles.append(image[DefaultInfo].default_runfiles)
+
+    ctx.actions.expand_template(
+        template = ctx.file._upgrader,
+        output = upgrader,
+        substitutions = {
+            "{chart}": pkg_info.chart.short_path,
+            "{helm_opts}": helm_opts_file.short_path,
+            "{helm}": toolchain.helm.short_path,
+            "{image_pushers}": "\n".join([pusher.short_path for pusher in image_pushers]),
+            "{install_name}": install_name,
+            "{upgrade_opts}": opts_file.short_path,
+        },
+        is_executable = True,
+    )
+
+    runfiles = ctx.runfiles([upgrader, toolchain.helm, pkg_info.chart, helm_opts_file, opts_file] + image_pushers)
+    for ir in image_runfiles:
+        runfiles = runfiles.merge(ir)
+
+    return [
+        DefaultInfo(
+            files = depset([upgrader]),
+            runfiles = runfiles,
+            executable = upgrader,
+        ),
+    ]
+
+helm_upgrade = rule(
+    doc = "Produce a script for performing a helm upgrade action",
+    implementation = _helm_upgrade_impl,
+    executable = True,
+    attrs = {
+        "helm_opts": attr.string_list(
+            doc = "Additional arguments to pass to `helm` during upgrade.",
+        ),
+        "install_name": attr.string(
+            doc = "The name to use for the `helm upgrade` command. The target name will be used if unset.",
+        ),
+        "opts": attr.string_list(
+            doc = "Additional arguments to pass to `helm upgrade`.",
+        ),
+        "package": attr.label(
+            doc = "The helm package to upgrade.",
+            providers = [HelmPackageInfo],
+            mandatory = True,
+        ),
+        "_upgrader": attr.label(
+            doc = "A process wrapper to use for performing `helm upgrade`.",
+            allow_single_file = True,
+            default = Label("//helm/private/upgrader:template"),
+        ),
+        "_stamper": attr.label(
+            doc = "A process wrapper to use for stamping the upgrade.",
+            allow_single_file = True,
+            default = Label("//helm/private/stamper"),
+        ),
+    },
+    toolchains = [
+        str(Label("//helm:toolchain_type")),
+    ],
+)
+
 def _helm_uninstall_impl(ctx):
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
 
