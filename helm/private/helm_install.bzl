@@ -78,14 +78,14 @@ helm_install = rule(
     implementation = _helm_install_impl,
     executable = True,
     attrs = {
-        "opts": attr.string_list(
-            doc = "Additional arguments to pass to `helm install`.",
-        ),
         "helm_opts": attr.string_list(
             doc = "Additional arguments to pass to `helm` during install.",
         ),
         "install_name": attr.string(
             doc = "The name to use for the `helm install` command. The target name will be used if unset.",
+        ),
+        "opts": attr.string_list(
+            doc = "Additional arguments to pass to `helm install`.",
         ),
         "package": attr.label(
             doc = "The helm package to install.",
@@ -146,14 +146,14 @@ helm_uninstall = rule(
     implementation = _helm_uninstall_impl,
     executable = True,
     attrs = {
-        "opts": attr.string_list(
-            doc = "Additional arguments to pass to `helm install`.",
-        ),
         "helm_opts": attr.string_list(
             doc = "Additional arguments to pass to `helm` during install.",
         ),
         "install_name": attr.string(
             doc = "The name to use for the `helm install` command. The target name will be used if unset.",
+        ),
+        "opts": attr.string_list(
+            doc = "Additional arguments to pass to `helm uninstall`.",
         ),
         "_uninstaller": attr.label(
             doc = "A process wrapper to use for performing `helm uninstall`.",
@@ -223,14 +223,14 @@ helm_reinstall = rule(
     implementation = _helm_reinstall_impl,
     executable = True,
     attrs = {
-        "opts": attr.string_list(
-            doc = "Additional arguments to pass to `helm install`.",
-        ),
         "helm_opts": attr.string_list(
             doc = "Additional arguments to pass to `helm` during install.",
         ),
         "install_name": attr.string(
             doc = "The name to use for the `helm install` command. The target name will be used if unset.",
+        ),
+        "opts": attr.string_list(
+            doc = "Additional arguments to pass to helm uninstall / install commands.",
         ),
         "package": attr.label(
             doc = "The helm package to reinstall.",
