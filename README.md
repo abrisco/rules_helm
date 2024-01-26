@@ -401,10 +401,10 @@ Rules for producing a helm package and some convenience targets.
 | <a id="helm_chart-registry_url"></a>registry_url |  The registry url for the helm chart. `{name}.push_registry` is only defined when a value is passed here.   |  `None` |
 | <a id="helm_chart-helm_opts"></a>helm_opts |  Additional options to pass to helm.   |  `[]` |
 | <a id="helm_chart-opts"></a>opts |  Additional options to pass to `helm install`, `helm uninstall`, and `helm reinstall`.   |  `[]` |
-| <a id="helm_chart-install_opts"></a>install_opts |  <p align="center"> - </p>   |  `[]` |
-| <a id="helm_chart-upgrade_opts"></a>upgrade_opts |  <p align="center"> - </p>   |  `[]` |
-| <a id="helm_chart-reinstall_opts"></a>reinstall_opts |  <p align="center"> - </p>   |  `[]` |
-| <a id="helm_chart-uninstall_opts"></a>uninstall_opts |  <p align="center"> - </p>   |  `[]` |
+| <a id="helm_chart-install_opts"></a>install_opts |  Additional options to pass to `helm install`.   |  `[]` |
+| <a id="helm_chart-upgrade_opts"></a>upgrade_opts |  Additional options to pass to `helm upgrade`.   |  `[]` |
+| <a id="helm_chart-reinstall_opts"></a>reinstall_opts |  Additional options to pass to helm reinstall.   |  `[]` |
+| <a id="helm_chart-uninstall_opts"></a>uninstall_opts |  Additional options to pass to `helm uninstall`.   |  `[]` |
 | <a id="helm_chart-stamp"></a>stamp |  Whether to encode build information into the helm chart.   |  `None` |
 | <a id="helm_chart-kwargs"></a>kwargs |  Additional keyword arguments for `helm_package`.   |  none |
 
