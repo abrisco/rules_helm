@@ -174,15 +174,15 @@ helm_upgrade = rule(
             providers = [HelmPackageInfo],
             mandatory = True,
         ),
-        "_upgrader": attr.label(
-            doc = "A process wrapper to use for performing `helm upgrade`.",
-            allow_single_file = True,
-            default = Label("//helm/private/upgrader:template"),
-        ),
         "_stamper": attr.label(
             doc = "A process wrapper to use for stamping the upgrade.",
             allow_single_file = True,
             default = Label("//helm/private/stamper"),
+        ),
+        "_upgrader": attr.label(
+            doc = "A process wrapper to use for performing `helm upgrade`.",
+            allow_single_file = True,
+            default = Label("//helm/private/upgrader:template"),
         ),
     },
     toolchains = [

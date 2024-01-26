@@ -52,6 +52,10 @@ def helm_chart(
             is only defined when a value is passed here.
         helm_opts (list, optional): Additional options to pass to helm.
         opts (list, optional): Additional options to pass to `helm install`, `helm uninstall`, and `helm reinstall`.
+        install_opts (list, optional): Additional options to pass to `helm install`.
+        upgrade_opts (list, optional): Additional options to pass to `helm upgrade`.
+        reinstall_opts (list, optional): Additional options to pass to helm reinstall.
+        uninstall_opts (list, optional): Additional options to pass to `helm uninstall`.
         stamp (int):  Whether to encode build information into the helm chart.
         **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
