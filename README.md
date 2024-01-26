@@ -291,6 +291,28 @@ Produce a script for performing a helm uninstall action
 | <a id="helm_uninstall-opts"></a>opts |  Additional arguments to pass to `helm uninstall`.   | List of strings | optional |  `[]`  |
 
 
+<a id="helm_upgrade"></a>
+
+## helm_upgrade
+
+<pre>
+helm_upgrade(<a href="#helm_upgrade-name">name</a>, <a href="#helm_upgrade-helm_opts">helm_opts</a>, <a href="#helm_upgrade-install_name">install_name</a>, <a href="#helm_upgrade-opts">opts</a>, <a href="#helm_upgrade-package">package</a>)
+</pre>
+
+Produce a script for performing a helm upgrade action
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="helm_upgrade-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_upgrade-helm_opts"></a>helm_opts |  Additional arguments to pass to `helm` during upgrade.   | List of strings | optional |  `[]`  |
+| <a id="helm_upgrade-install_name"></a>install_name |  The name to use for the `helm upgrade` command. The target name will be used if unset.   | String | optional |  `""`  |
+| <a id="helm_upgrade-opts"></a>opts |  Additional arguments to pass to `helm upgrade`.   | List of strings | optional |  `[]`  |
+| <a id="helm_upgrade-package"></a>package |  The helm package to upgrade.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+
+
 <a id="HelmPackageInfo"></a>
 
 ## HelmPackageInfo
