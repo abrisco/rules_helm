@@ -53,9 +53,9 @@ def _helm_install_impl(ctx):
         substitutions = {
             "{chart}": pkg_info.chart.short_path,
             "{helm}": toolchain.helm.short_path,
+            "{helm_opts}": helm_opts_file.short_path,
             "{image_pushers}": "\n".join([pusher.short_path for pusher in image_pushers]),
             "{install_name}": install_name,
-            "{helm_opts}": helm_opts_file.short_path,
             "{install_opts}": opts_file.short_path,
         },
         is_executable = True,
@@ -126,8 +126,8 @@ def _helm_uninstall_impl(ctx):
         output = uninstaller,
         substitutions = {
             "{helm}": toolchain.helm.short_path,
-            "{install_name}": install_name,
             "{helm_opts}": helm_opts_file.short_path,
+            "{install_name}": install_name,
             "{uninstall_opts}": opts_file.short_path,
         },
         is_executable = True,
@@ -198,9 +198,9 @@ def _helm_reinstall_impl(ctx):
         substitutions = {
             "{chart}": pkg_info.chart.short_path,
             "{helm}": toolchain.helm.short_path,
+            "{helm_opts}": helm_opts_file.short_path,
             "{image_pushers}": "\n".join([pusher.short_path for pusher in image_pushers]),
             "{install_name}": install_name,
-            "{helm_opts}": helm_opts_file.short_path,
             "{reinstall_opts}": opts_file.short_path,
         },
         is_executable = True,
