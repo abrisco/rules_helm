@@ -256,9 +256,6 @@ helm_reinstall = rule(
 def _helm_push_impl(ctx):
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
 
-    helm_opts_file = _stamp_opts(ctx, "helm_opts", ctx.attr.helm_opts)
-    opts_file = _stamp_opts(ctx, "opts", ctx.attr.opts)
-
     if toolchain.helm.basename.endswith(".exe"):
         pusher = ctx.actions.declare_file(ctx.label.name + ".bat")
     else:
@@ -282,8 +279,6 @@ def _helm_push_impl(ctx):
         output = pusher,
         substitutions = {
             "{image_pushers}": image_commands,
-            "{helm_opts}": helm_opts_file.short_path,
-            "{install_opts}": opts_file.short_path,
         },
         is_executable = True,
     )
