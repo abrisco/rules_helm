@@ -52,8 +52,8 @@ def _helm_install_impl(ctx):
         output = installer,
         substitutions = {
             "{chart}": pkg_info.chart.short_path,
-            "{helm}": toolchain.helm.short_path,
             "{helm_opts}": helm_opts_file.short_path,
+            "{helm}": toolchain.helm.short_path,
             "{image_pushers}": "\n".join([pusher.short_path for pusher in image_pushers]),
             "{install_name}": install_name,
             "{install_opts}": opts_file.short_path,
@@ -125,8 +125,8 @@ def _helm_uninstall_impl(ctx):
         template = ctx.file._uninstaller,
         output = uninstaller,
         substitutions = {
-            "{helm}": toolchain.helm.short_path,
             "{helm_opts}": helm_opts_file.short_path,
+            "{helm}": toolchain.helm.short_path,
             "{install_name}": install_name,
             "{uninstall_opts}": opts_file.short_path,
         },
@@ -155,15 +155,15 @@ helm_uninstall = rule(
         "opts": attr.string_list(
             doc = "Additional arguments to pass to `helm uninstall`.",
         ),
-        "_uninstaller": attr.label(
-            doc = "A process wrapper to use for performing `helm uninstall`.",
-            allow_single_file = True,
-            default = Label("//helm/private/uninstaller:template"),
-        ),
         "_stamper": attr.label(
             doc = "A process wrapper to use for stamping the install.",
             allow_single_file = True,
             default = Label("//helm/private/stamper"),
+        ),
+        "_uninstaller": attr.label(
+            doc = "A process wrapper to use for performing `helm uninstall`.",
+            allow_single_file = True,
+            default = Label("//helm/private/uninstaller:template"),
         ),
     },
     toolchains = [
@@ -197,8 +197,8 @@ def _helm_reinstall_impl(ctx):
         output = reinstaller,
         substitutions = {
             "{chart}": pkg_info.chart.short_path,
-            "{helm}": toolchain.helm.short_path,
             "{helm_opts}": helm_opts_file.short_path,
+            "{helm}": toolchain.helm.short_path,
             "{image_pushers}": "\n".join([pusher.short_path for pusher in image_pushers]),
             "{install_name}": install_name,
             "{reinstall_opts}": opts_file.short_path,

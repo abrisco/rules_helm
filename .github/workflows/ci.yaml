@@ -204,12 +204,9 @@ jobs:
     steps:
       # Checkout the code
       - uses: actions/checkout@v2
-      - name: Download Buildifier
-        run: |
-          wget "https://github.com/bazelbuild/buildtools/releases/download/v6.3.3/buildifier-linux-amd64" -O buildifier
-          chmod +x buildifier
+
       - name: Buildifier
-        run: ./buildifier -lint=warn -mode=check -warnings=all -r ${{ github.workspace }}
+        run: bazel ${BAZEL_STARTUP_FLAGS[@]} run buildifier.check
 
   ci-gofmt:
     runs-on: ubuntu-20.04
