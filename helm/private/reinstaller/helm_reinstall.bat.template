@@ -2,5 +2,11 @@ ECHO OFF
 
 {image_pushers}
 
-{helm} uninstall {install_name}
-{helm} install {install_name} {chart} %@%
+set "helm_args="
+for /f "delims=" %%a in ({helm_opts}) do set helm_args=!helm_args! %%a
+
+set "reinstall_args="
+for /f "delims=" %%a in ({reinstall_opts}) do set reinstall_args=!reinstall_args! %%a
+
+{helm} !helm_args! uninstall !reinstall_args! {install_name}
+{helm} !helm_args! install !reinstall_args! {install_name} {chart} %@%

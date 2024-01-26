@@ -1,3 +1,9 @@
 ECHO OFF
 
-{helm} uninstall {install_name} %@%
+set "helm_args="
+for /f "delims=" %%a in ({helm_opts}) do set helm_args=!helm_args! %%a
+
+set "uninstall_args="
+for /f "delims=" %%a in ({uninstall_opts}) do set uninstall_args=!uninstall_args! %%a
+
+{helm} !helm_args! uninstall !uninstall_args! {install_name} %@%
