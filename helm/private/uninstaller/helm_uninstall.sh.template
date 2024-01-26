@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-eval exec {helm} $(cat {helm_opts}) uninstall $(cat {install_opts}) {install_name} "$@"
+eval exec {helm} $(cat {helm_opts}) uninstall $(cat {uninstall_opts}) {install_name} "$@"

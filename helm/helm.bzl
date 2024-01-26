@@ -17,7 +17,6 @@ def helm_chart(
         tags = [],
         install_name = None,
         registry_url = None,
-        namespace = None,
         helm_opts = [],
         opts = [],
         stamp = None,
@@ -47,6 +46,8 @@ def helm_chart(
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
         registry_url (str, Optional): The registry url for the helm chart. `{name}.push_registry`
             is only defined when a value is passed here.
+        helm_opts (list, optional): Additional options to pass to helm.
+        opts (list, optional): Additional options to pass to `helm install`, `helm uninstall`, and `helm reinstall`.
         stamp (int):  Whether to encode build information into the helm chart.
         **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
