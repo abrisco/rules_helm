@@ -2,30 +2,6 @@
 
 load("//helm:providers.bzl", "HelmPackageInfo")
 
-def _stamp_opts(ctx, name, opts):
-    opts_file = ctx.actions.declare_file("{}.{}.opts".format(ctx.label.name, name))
-    ctx.actions.write(
-        opts_file,
-        " ".join(opts),
-    )
-
-    opts_stamped_file = ctx.actions.declare_file("{}.{}.opts.stamped".format(ctx.label.name, name))
-
-    args = ctx.actions.args()
-    args.add("-volatile_status_file", ctx.version_file)
-    args.add("-stable_status_file", ctx.info_file)
-    args.add("-input_file", opts_file)
-    args.add("-output_file", opts_stamped_file)
-
-    ctx.actions.run(
-        executable = ctx.file._stamper,
-        inputs = [opts_file, ctx.version_file, ctx.info_file],
-        outputs = [opts_stamped_file],
-        arguments = [args],
-    )
-
-    return opts_stamped_file
-
 def _helm_install_impl(ctx):
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
 

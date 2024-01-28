@@ -21,7 +21,6 @@ def helm_chart(
         opts = [],
         install_opts = [],
         upgrade_opts = [],
-        reinstall_opts = [],
         uninstall_opts = [],
         stamp = None,
         **kwargs):
@@ -34,7 +33,7 @@ def helm_chart(
     | `{name}.push_registry` | [helm_push_registry](#helm_push_registry) |
     | `{name}.install` | [helm_install](#helm_install) |
     | `{name}.uninstall` | [helm_uninstall](#helm_uninstall) |
-    | `{name}.reinstall` | [helm_reinstall](#helm_reinstall) |
+    | `{name}.upgrade` | [helm_upgrade](#helm_upgrade) |
 
     Args:
         name (str): The name of the [helm_package](#helm_package) target.
@@ -53,9 +52,8 @@ def helm_chart(
         helm_opts (list, optional): Additional options to pass to helm.
         opts (list, optional): Additional options to pass to `helm install`, `helm uninstall`, and `helm reinstall`.
         install_opts (list, optional): Additional options to pass to `helm install`.
-        upgrade_opts (list, optional): Additional options to pass to `helm upgrade`.
-        reinstall_opts (list, optional): Additional options to pass to helm reinstall.
         uninstall_opts (list, optional): Additional options to pass to `helm uninstall`.
+        upgrade_opts (list, optional): Additional options to pass to `helm upgrade`.
         stamp (int):  Whether to encode build information into the helm chart.
         **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
