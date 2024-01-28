@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-eval exec {helm} $(cat {helm_opts}) uninstall $(cat {uninstall_opts}) {install_name} "$@"

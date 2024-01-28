@@ -6,7 +6,7 @@ def _stamp_opts(ctx, name, opts):
     opts_file = ctx.actions.declare_file("{}.{}.opts".format(ctx.label.name, name))
     ctx.actions.write(
         opts_file,
-        "\n".join(opts),
+        " ".join(opts),
     )
 
     opts_stamped_file = ctx.actions.declare_file("{}.{}.opts.stamped".format(ctx.label.name, name))
@@ -29,13 +29,10 @@ def _stamp_opts(ctx, name, opts):
 def _helm_install_impl(ctx):
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
 
-    helm_opts_file = _stamp_opts(ctx, "helm_opts", ctx.attr.helm_opts)
-    opts_file = _stamp_opts(ctx, "opts", ctx.attr.opts)
-
     if toolchain.helm.basename.endswith(".exe"):
-        installer = ctx.actions.declare_file(ctx.label.name + ".bat")
+        runner_wrapper = ctx.actions.declare_file(ctx.label.name + ".bat")
     else:
-        installer = ctx.actions.declare_file(ctx.label.name + ".sh")
+        runner_wrapper = ctx.actions.declare_file(ctx.label.name + ".sh")
 
     install_name = ctx.attr.install_name or ctx.label.name
 
@@ -47,29 +44,36 @@ def _helm_install_impl(ctx):
         image_pushers.append(image[DefaultInfo].files_to_run.executable)
         image_runfiles.append(image[DefaultInfo].default_runfiles)
 
+    args = []
+    args.extend(ctx.attr.helm_opts)
+    args.append("install")
+    args.extend(ctx.attr.opts)
+    args.append(install_name)
+    args.append(pkg_info.chart.short_path)
+
     ctx.actions.expand_template(
-        template = ctx.file._installer,
-        output = installer,
+        template = ctx.file._runner_wrapper,
+        output = runner_wrapper,
         substitutions = {
-            "{chart}": pkg_info.chart.short_path,
-            "{helm_opts}": helm_opts_file.short_path,
-            "{helm}": toolchain.helm.short_path,
-            "{image_pushers}": "\n".join([pusher.short_path for pusher in image_pushers]),
-            "{install_name}": install_name,
-            "{install_opts}": opts_file.short_path,
+            "{HELM_BIN}": toolchain.helm.short_path,
+            "{STABLE_STATUS_FILE}": ctx.info_file.short_path,
+            "{VOLATILE_STATUS_FILE}": ctx.version_file.short_path,
+            "{HELM_OPTS}": " ".join(args),
+            "{RUNNER}": ctx.executable._runner.short_path,
+            "{EXTRA_CMDS}": "\n".join([pusher.short_path for pusher in image_pushers]),
         },
         is_executable = True,
     )
 
-    runfiles = ctx.runfiles([installer, toolchain.helm, pkg_info.chart, helm_opts_file, opts_file] + image_pushers)
+    runfiles = ctx.runfiles([runner_wrapper, ctx.executable._runner, toolchain.helm, pkg_info.chart, ctx.info_file, ctx.version_file] + image_pushers)
     for ir in image_runfiles:
         runfiles = runfiles.merge(ir)
 
     return [
         DefaultInfo(
-            files = depset([installer]),
+            files = depset([runner_wrapper]),
             runfiles = runfiles,
-            executable = installer,
+            executable = runner_wrapper,
         ),
     ]
 
@@ -92,15 +96,16 @@ helm_install = rule(
             providers = [HelmPackageInfo],
             mandatory = True,
         ),
-        "_installer": attr.label(
+        "_runner_wrapper": attr.label(
             doc = "A process wrapper to use for performing `helm install`.",
             allow_single_file = True,
-            default = Label("//helm/private/installer:template"),
+            default = Label("//helm/private/runner:wrapper"),
         ),
-        "_stamper": attr.label(
-            doc = "A process wrapper to use for stamping the install.",
-            allow_single_file = True,
-            default = Label("//helm/private/stamper"),
+        "_runner": attr.label(
+            doc = "A process wrapper to use for performing `helm install`.",
+            executable = True,
+            cfg = "exec",
+            default = Label("//helm/private/runner"),
         ),
     },
     toolchains = [
@@ -111,13 +116,10 @@ helm_install = rule(
 def _helm_upgrade_impl(ctx):
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
 
-    helm_opts_file = _stamp_opts(ctx, "helm_opts", ctx.attr.helm_opts)
-    opts_file = _stamp_opts(ctx, "opts", ctx.attr.opts)
-
     if toolchain.helm.basename.endswith(".exe"):
-        upgrader = ctx.actions.declare_file(ctx.label.name + ".bat")
+        runner_wrapper = ctx.actions.declare_file(ctx.label.name + ".bat")
     else:
-        upgrader = ctx.actions.declare_file(ctx.label.name + ".sh")
+        runner_wrapper = ctx.actions.declare_file(ctx.label.name + ".sh")
 
     install_name = ctx.attr.install_name or ctx.label.name
 
@@ -129,29 +131,36 @@ def _helm_upgrade_impl(ctx):
         image_pushers.append(image[DefaultInfo].files_to_run.executable)
         image_runfiles.append(image[DefaultInfo].default_runfiles)
 
+    args = []
+    args.extend(ctx.attr.helm_opts)
+    args.append("upgrade")
+    args.extend(ctx.attr.opts)
+    args.append(install_name)
+    args.append(pkg_info.chart.short_path)
+
     ctx.actions.expand_template(
-        template = ctx.file._upgrader,
-        output = upgrader,
+        template = ctx.file._runner_wrapper,
+        output = runner_wrapper,
         substitutions = {
-            "{chart}": pkg_info.chart.short_path,
-            "{helm_opts}": helm_opts_file.short_path,
-            "{helm}": toolchain.helm.short_path,
-            "{image_pushers}": "\n".join([pusher.short_path for pusher in image_pushers]),
-            "{install_name}": install_name,
-            "{upgrade_opts}": opts_file.short_path,
+            "{HELM_BIN}": toolchain.helm.short_path,
+            "{STABLE_STATUS_FILE}": ctx.info_file.short_path,
+            "{VOLATILE_STATUS_FILE}": ctx.version_file.short_path,
+            "{HELM_OPTS}": " ".join(args),
+            "{RUNNER}": ctx.executable._runner.short_path,
+            "{EXTRA_CMDS}": "\n".join([pusher.short_path for pusher in image_pushers]),
         },
         is_executable = True,
     )
 
-    runfiles = ctx.runfiles([upgrader, toolchain.helm, pkg_info.chart, helm_opts_file, opts_file] + image_pushers)
+    runfiles = ctx.runfiles([runner_wrapper, ctx.executable._runner, toolchain.helm, pkg_info.chart, ctx.info_file, ctx.version_file] + image_pushers)
     for ir in image_runfiles:
         runfiles = runfiles.merge(ir)
 
     return [
         DefaultInfo(
-            files = depset([upgrader]),
+            files = depset([runner_wrapper]),
             runfiles = runfiles,
-            executable = upgrader,
+            executable = runner_wrapper,
         ),
     ]
 
@@ -174,15 +183,16 @@ helm_upgrade = rule(
             providers = [HelmPackageInfo],
             mandatory = True,
         ),
-        "_stamper": attr.label(
-            doc = "A process wrapper to use for stamping the upgrade.",
+        "_runner_wrapper": attr.label(
+            doc = "A process wrapper to use for performing `helm install`.",
             allow_single_file = True,
-            default = Label("//helm/private/stamper"),
+            default = Label("//helm/private/runner:wrapper"),
         ),
-        "_upgrader": attr.label(
-            doc = "A process wrapper to use for performing `helm upgrade`.",
-            allow_single_file = True,
-            default = Label("//helm/private/upgrader:template"),
+        "_runner": attr.label(
+            doc = "A process wrapper to use for performing `helm install`.",
+            executable = True,
+            cfg = "exec",
+            default = Label("//helm/private/runner"),
         ),
     },
     toolchains = [
@@ -193,33 +203,39 @@ helm_upgrade = rule(
 def _helm_uninstall_impl(ctx):
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
 
-    helm_opts_file = _stamp_opts(ctx, "helm_opts", ctx.attr.helm_opts)
-    opts_file = _stamp_opts(ctx, "opts", ctx.attr.opts)
-
     if toolchain.helm.basename.endswith(".exe"):
-        uninstaller = ctx.actions.declare_file(ctx.label.name + ".bat")
+        runner_wrapper = ctx.actions.declare_file(ctx.label.name + ".bat")
     else:
-        uninstaller = ctx.actions.declare_file(ctx.label.name + ".sh")
+        runner_wrapper = ctx.actions.declare_file(ctx.label.name + ".sh")
 
     install_name = ctx.attr.install_name or ctx.label.name
 
+
+    args = []
+    args.extend(ctx.attr.helm_opts)
+    args.append("uninstall")
+    args.extend(ctx.attr.opts)
+    args.append(install_name)
+
     ctx.actions.expand_template(
-        template = ctx.file._uninstaller,
-        output = uninstaller,
+        template = ctx.file._runner_wrapper,
+        output = runner_wrapper,
         substitutions = {
-            "{helm_opts}": helm_opts_file.short_path,
-            "{helm}": toolchain.helm.short_path,
-            "{install_name}": install_name,
-            "{uninstall_opts}": opts_file.short_path,
+            "{HELM_BIN}": toolchain.helm.short_path,
+            "{STABLE_STATUS_FILE}": ctx.info_file.short_path,
+            "{VOLATILE_STATUS_FILE}": ctx.version_file.short_path,
+            "{HELM_OPTS}": " ".join(args),
+            "{RUNNER}": ctx.executable._runner.short_path,
+            "{EXTRA_CMDS}": "",
         },
         is_executable = True,
     )
 
     return [
         DefaultInfo(
-            files = depset([uninstaller]),
-            runfiles = ctx.runfiles([uninstaller, toolchain.helm, helm_opts_file, opts_file]),
-            executable = uninstaller,
+            files = depset([runner_wrapper]),
+            runfiles = ctx.runfiles([runner_wrapper, ctx.executable._runner, toolchain.helm, ctx.info_file, ctx.version_file]),
+            executable = runner_wrapper,
         ),
     ]
 
@@ -237,97 +253,16 @@ helm_uninstall = rule(
         "opts": attr.string_list(
             doc = "Additional arguments to pass to `helm uninstall`.",
         ),
-        "_stamper": attr.label(
-            doc = "A process wrapper to use for stamping the install.",
+        "_runner_wrapper": attr.label(
+            doc = "A process wrapper to use for performing `helm install`.",
             allow_single_file = True,
-            default = Label("//helm/private/stamper"),
+            default = Label("//helm/private/runner:wrapper"),
         ),
-        "_uninstaller": attr.label(
-            doc = "A process wrapper to use for performing `helm uninstall`.",
-            allow_single_file = True,
-            default = Label("//helm/private/uninstaller:template"),
-        ),
-    },
-    toolchains = [
-        str(Label("//helm:toolchain_type")),
-    ],
-)
-
-def _helm_reinstall_impl(ctx):
-    toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
-
-    helm_opts_file = _stamp_opts(ctx, "helm_opts", ctx.attr.helm_opts)
-    opts_file = _stamp_opts(ctx, "opts", ctx.attr.opts)
-
-    if toolchain.helm.basename.endswith(".exe"):
-        reinstaller = ctx.actions.declare_file(ctx.label.name + ".bat")
-    else:
-        reinstaller = ctx.actions.declare_file(ctx.label.name + ".sh")
-
-    install_name = ctx.attr.install_name or ctx.label.name
-
-    pkg_info = ctx.attr.package[HelmPackageInfo]
-
-    image_pushers = []
-    image_runfiles = []
-    for image in pkg_info.images:
-        image_pushers.append(image[DefaultInfo].files_to_run.executable)
-        image_runfiles.append(image[DefaultInfo].default_runfiles)
-
-    ctx.actions.expand_template(
-        template = ctx.file._reinstaller,
-        output = reinstaller,
-        substitutions = {
-            "{chart}": pkg_info.chart.short_path,
-            "{helm_opts}": helm_opts_file.short_path,
-            "{helm}": toolchain.helm.short_path,
-            "{image_pushers}": "\n".join([pusher.short_path for pusher in image_pushers]),
-            "{install_name}": install_name,
-            "{reinstall_opts}": opts_file.short_path,
-        },
-        is_executable = True,
-    )
-
-    runfiles = ctx.runfiles([reinstaller, toolchain.helm, pkg_info.chart, helm_opts_file, opts_file] + image_pushers)
-    for ir in image_runfiles:
-        runfiles = runfiles.merge(ir)
-
-    return [
-        DefaultInfo(
-            files = depset([reinstaller]),
-            runfiles = runfiles,
-            executable = reinstaller,
-        ),
-    ]
-
-helm_reinstall = rule(
-    doc = "Produce a script for performing a helm uninstall and install actions",
-    implementation = _helm_reinstall_impl,
-    executable = True,
-    attrs = {
-        "helm_opts": attr.string_list(
-            doc = "Additional arguments to pass to `helm` during install.",
-        ),
-        "install_name": attr.string(
-            doc = "The name to use for the `helm install` command. The target name will be used if unset.",
-        ),
-        "opts": attr.string_list(
-            doc = "Additional arguments to pass to helm uninstall / install commands.",
-        ),
-        "package": attr.label(
-            doc = "The helm package to reinstall.",
-            providers = [HelmPackageInfo],
-            mandatory = True,
-        ),
-        "_reinstaller": attr.label(
-            doc = "A process wrapper to use for performing `helm uninstall`.",
-            allow_single_file = True,
-            default = Label("//helm/private/reinstaller:template"),
-        ),
-        "_stamper": attr.label(
-            doc = "A process wrapper to use for stamping the install.",
-            allow_single_file = True,
-            default = Label("//helm/private/stamper"),
+        "_runner": attr.label(
+            doc = "A process wrapper to use for performing `helm install`.",
+            executable = True,
+            cfg = "exec",
+            default = Label("//helm/private/runner"),
         ),
     },
     toolchains = [

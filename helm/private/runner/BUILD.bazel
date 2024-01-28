@@ -1,0 +1,40 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "runner_wrapper.bat.template",
+    "runner_wrapper.sh.template",
+])
+
+config_setting(
+    name = "windows",
+    constraint_values = ["@platforms//os:windows"],
+)
+
+alias(
+    name = "wrapper",
+    actual = select({
+        ":windows": ":runner_wrapper.bat.template",
+        "//conditions:default": ":runner_wrapper.sh.template",
+    }),
+)
+
+go_binary(
+    name = "runner",
+    srcs = ["runner.go"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@go_yaml_yaml",
+        "//helm/private/stamp",
+    ],
+)
+
+filegroup(
+    name = "bzl_srcs",
+    srcs = glob(
+        ["**/*.bzl"],
+        allow_empty = True,
+    ),
+    visibility = ["//:__subpackages__"],
+)

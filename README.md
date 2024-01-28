@@ -229,28 +229,6 @@ Produce a script for performing a helm push to a registry
 | <a id="helm_push_registry-registry_url"></a>registry_url |  The URL of the registry.   | String | required |  |
 
 
-<a id="helm_reinstall"></a>
-
-## helm_reinstall
-
-<pre>
-helm_reinstall(<a href="#helm_reinstall-name">name</a>, <a href="#helm_reinstall-helm_opts">helm_opts</a>, <a href="#helm_reinstall-install_name">install_name</a>, <a href="#helm_reinstall-opts">opts</a>, <a href="#helm_reinstall-package">package</a>)
-</pre>
-
-Produce a script for performing a helm uninstall and install actions
-
-**ATTRIBUTES**
-
-
-| Name  | Description | Type | Mandatory | Default |
-| :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_reinstall-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="helm_reinstall-helm_opts"></a>helm_opts |  Additional arguments to pass to `helm` during install.   | List of strings | optional |  `[]`  |
-| <a id="helm_reinstall-install_name"></a>install_name |  The name to use for the `helm install` command. The target name will be used if unset.   | String | optional |  `""`  |
-| <a id="helm_reinstall-opts"></a>opts |  Additional arguments to pass to helm uninstall / install commands.   | List of strings | optional |  `[]`  |
-| <a id="helm_reinstall-package"></a>package |  The helm package to reinstall.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
-
-
 <a id="helm_toolchain"></a>
 
 ## helm_toolchain

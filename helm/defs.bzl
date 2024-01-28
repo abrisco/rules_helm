@@ -67,7 +67,6 @@ load(
     "//helm/private:helm_install.bzl",
     _helm_install = "helm_install",
     _helm_push = "helm_push",
-    _helm_reinstall = "helm_reinstall",
     _helm_uninstall = "helm_uninstall",
     _helm_upgrade = "helm_upgrade",
 )
@@ -112,7 +111,6 @@ helm_package = _helm_package
 helm_push_registry = _helm_push_registry
 helm_push = _helm_push
 helm_register_toolchains = _helm_register_toolchains
-helm_reinstall = _helm_reinstall
 helm_toolchain = _helm_toolchain
 helm_uninstall = _helm_uninstall
 helm_upgrade = _helm_upgrade

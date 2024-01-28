@@ -1,6 +1,6 @@
 """Helm rules"""
 
-load("//helm/private:helm_install.bzl", "helm_install", "helm_push", "helm_reinstall", "helm_uninstall", "helm_upgrade")
+load("//helm/private:helm_install.bzl", "helm_install", "helm_push", "helm_uninstall", "helm_upgrade")
 load("//helm/private:helm_package.bzl", "helm_package")
 load("//helm/private:helm_registry.bzl", "helm_push_registry")
 
@@ -125,15 +125,5 @@ def helm_chart(
         tags = tags_with_manual,
         helm_opts = helm_opts,
         opts = opts + uninstall_opts,
-        **kwargs
-    )
-
-    helm_reinstall(
-        name = name + ".reinstall",
-        install_name = install_name,
-        package = name,
-        tags = tags_with_manual,
-        helm_opts = helm_opts,
-        opts = opts + reinstall_opts,
         **kwargs
     )

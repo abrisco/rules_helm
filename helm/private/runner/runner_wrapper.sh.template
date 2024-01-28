@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+export HELM_BIN="{HELM_BIN}"
+export STABLE_STATUS_FILE="{STABLE_STATUS_FILE}"
+export VOLATILE_STATUS_FILE="{VOLATILE_STATUS_FILE}"
+
+{EXTRA_CMDS}
+
+eval exec {RUNNER} {HELM_OPTS} "$@"
