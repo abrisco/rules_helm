@@ -18,7 +18,6 @@ def helm_chart(
         install_name = None,
         registry_url = None,
         helm_opts = [],
-        opts = [],
         install_opts = [],
         upgrade_opts = [],
         uninstall_opts = [],
@@ -50,7 +49,6 @@ def helm_chart(
         registry_url (str, Optional): The registry url for the helm chart. `{name}.push_registry`
             is only defined when a value is passed here.
         helm_opts (list, optional): Additional options to pass to helm.
-        opts (list, optional): Additional options to pass to `helm install`, `helm uninstall`, and `helm reinstall`.
         install_opts (list, optional): Additional options to pass to `helm install`.
         uninstall_opts (list, optional): Additional options to pass to `helm uninstall`.
         upgrade_opts (list, optional): Additional options to pass to `helm upgrade`.
@@ -103,7 +101,7 @@ def helm_chart(
         package = name,
         tags = tags_with_manual,
         helm_opts = helm_opts,
-        opts = opts + install_opts,
+        opts = install_opts,
         **kwargs
     )
 
@@ -113,7 +111,7 @@ def helm_chart(
         package = name,
         tags = tags_with_manual,
         helm_opts = helm_opts,
-        opts = opts + upgrade_opts,
+        opts = upgrade_opts,
         **kwargs
     )
 
@@ -122,6 +120,6 @@ def helm_chart(
         install_name = install_name,
         tags = tags_with_manual,
         helm_opts = helm_opts,
-        opts = opts + uninstall_opts,
+        opts = uninstall_opts,
         **kwargs
     )

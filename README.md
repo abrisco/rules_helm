@@ -344,8 +344,8 @@ str: A json encoded string which represents `Chart.yaml` contents.
 
 <pre>
 helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">chart</a>, <a href="#helm_chart-chart_json">chart_json</a>, <a href="#helm_chart-values">values</a>, <a href="#helm_chart-values_json">values_json</a>, <a href="#helm_chart-substitutions">substitutions</a>, <a href="#helm_chart-templates">templates</a>, <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>,
-           <a href="#helm_chart-tags">tags</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-opts">opts</a>, <a href="#helm_chart-install_opts">install_opts</a>, <a href="#helm_chart-upgrade_opts">upgrade_opts</a>,
-           <a href="#helm_chart-uninstall_opts">uninstall_opts</a>, <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">kwargs</a>)
+           <a href="#helm_chart-tags">tags</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-install_opts">install_opts</a>, <a href="#helm_chart-upgrade_opts">upgrade_opts</a>, <a href="#helm_chart-uninstall_opts">uninstall_opts</a>,
+           <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">kwargs</a>)
 </pre>
 
 Rules for producing a helm package and some convenience targets.
@@ -378,7 +378,6 @@ Rules for producing a helm package and some convenience targets.
 | <a id="helm_chart-install_name"></a>install_name |  The `helm install` name to use. `name` will be used if unset.   |  `None` |
 | <a id="helm_chart-registry_url"></a>registry_url |  The registry url for the helm chart. `{name}.push_registry` is only defined when a value is passed here.   |  `None` |
 | <a id="helm_chart-helm_opts"></a>helm_opts |  Additional options to pass to helm.   |  `[]` |
-| <a id="helm_chart-opts"></a>opts |  Additional options to pass to `helm install`, `helm uninstall`, and `helm reinstall`.   |  `[]` |
 | <a id="helm_chart-install_opts"></a>install_opts |  Additional options to pass to `helm install`.   |  `[]` |
 | <a id="helm_chart-upgrade_opts"></a>upgrade_opts |  Additional options to pass to `helm upgrade`.   |  `[]` |
 | <a id="helm_chart-uninstall_opts"></a>uninstall_opts |  Additional options to pass to `helm uninstall`.   |  `[]` |
