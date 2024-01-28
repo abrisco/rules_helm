@@ -5,15 +5,10 @@ exports_files([
     "helm_push.sh.template",
 ])
 
-config_setting(
-    name = "windows",
-    constraint_values = ["@platforms//os:windows"],
-)
-
 alias(
     name = "template",
     actual = select({
-        ":windows": ":helm_push.bat.template",
+        "@platforms//os:windows": ":helm_push.bat.template",
         "//conditions:default": ":helm_push.sh.template",
     }),
 )

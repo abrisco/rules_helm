@@ -1,6 +1,6 @@
 """Helm rules"""
 
-load("//helm/private:helm_install.bzl", "helm_install", "helm_push", "helm_reinstall", "helm_uninstall")
+load("//helm/private:helm_install.bzl", "helm_install", "helm_push", "helm_uninstall", "helm_upgrade")
 load("//helm/private:helm_package.bzl", "helm_package")
 load("//helm/private:helm_registry.bzl", "helm_push_registry")
 
@@ -17,6 +17,10 @@ def helm_chart(
         tags = [],
         install_name = None,
         registry_url = None,
+        helm_opts = [],
+        install_opts = [],
+        upgrade_opts = [],
+        uninstall_opts = [],
         stamp = None,
         **kwargs):
     """Rules for producing a helm package and some convenience targets.
@@ -28,7 +32,7 @@ def helm_chart(
     | `{name}.push_registry` | [helm_push_registry](#helm_push_registry) |
     | `{name}.install` | [helm_install](#helm_install) |
     | `{name}.uninstall` | [helm_uninstall](#helm_uninstall) |
-    | `{name}.reinstall` | [helm_reinstall](#helm_reinstall) |
+    | `{name}.upgrade` | [helm_upgrade](#helm_upgrade) |
 
     Args:
         name (str): The name of the [helm_package](#helm_package) target.
@@ -44,6 +48,10 @@ def helm_chart(
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
         registry_url (str, Optional): The registry url for the helm chart. `{name}.push_registry`
             is only defined when a value is passed here.
+        helm_opts (list, optional): Additional options to pass to helm.
+        install_opts (list, optional): Additional options to pass to `helm install`.
+        uninstall_opts (list, optional): Additional options to pass to `helm uninstall`.
+        upgrade_opts (list, optional): Additional options to pass to `helm upgrade`.
         stamp (int):  Whether to encode build information into the helm chart.
         **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
@@ -92,6 +100,18 @@ def helm_chart(
         install_name = install_name,
         package = name,
         tags = tags_with_manual,
+        helm_opts = helm_opts,
+        opts = install_opts,
+        **kwargs
+    )
+
+    helm_upgrade(
+        name = name + ".upgrade",
+        install_name = install_name,
+        package = name,
+        tags = tags_with_manual,
+        helm_opts = helm_opts,
+        opts = upgrade_opts,
         **kwargs
     )
 
@@ -99,13 +119,7 @@ def helm_chart(
         name = name + ".uninstall",
         install_name = install_name,
         tags = tags_with_manual,
-        **kwargs
-    )
-
-    helm_reinstall(
-        name = name + ".reinstall",
-        install_name = install_name,
-        package = name,
-        tags = tags_with_manual,
+        helm_opts = helm_opts,
+        opts = uninstall_opts,
         **kwargs
     )

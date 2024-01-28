@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "stamp",
+    srcs = ["stamp.go"],
+    importpath = "github.com/abrisco/rules_helm/helm/private/stamp",
+    visibility = ["//visibility:public"],
+    deps = ["@go_yaml_yaml"],
+)
+
+filegroup(
+    name = "bzl_srcs",
+    srcs = glob(
+        ["**/*.bzl"],
+        allow_empty = True,
+    ),
+    visibility = ["//:__subpackages__"],
+)

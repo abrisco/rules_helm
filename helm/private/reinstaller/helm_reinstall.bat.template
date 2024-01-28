@@ -1,6 +1,0 @@
-ECHO OFF
-
-{image_pushers}
-
-{helm} uninstall {install_name}
-{helm} install {install_name} {chart} %@%

@@ -1,5 +1,0 @@
-ECHO OFF
-
-{image_pushers}
-
-{helm} install {install_name} {chart} %@%
