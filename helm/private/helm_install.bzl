@@ -55,12 +55,12 @@ def _helm_install_impl(ctx):
         template = ctx.file._runner_wrapper,
         output = runner_wrapper,
         substitutions = {
+            "{EXTRA_CMDS}": "\n".join([pusher.short_path for pusher in image_pushers]),
             "{HELM_BIN}": toolchain.helm.short_path,
-            "{STABLE_STATUS_FILE}": ctx.info_file.short_path,
-            "{VOLATILE_STATUS_FILE}": ctx.version_file.short_path,
             "{HELM_OPTS}": " ".join(args),
             "{RUNNER}": ctx.executable._runner.short_path,
-            "{EXTRA_CMDS}": "\n".join([pusher.short_path for pusher in image_pushers]),
+            "{STABLE_STATUS_FILE}": ctx.info_file.short_path,
+            "{VOLATILE_STATUS_FILE}": ctx.version_file.short_path,
         },
         is_executable = True,
     )
@@ -96,16 +96,16 @@ helm_install = rule(
             providers = [HelmPackageInfo],
             mandatory = True,
         ),
-        "_runner_wrapper": attr.label(
-            doc = "A process wrapper to use for performing `helm install`.",
-            allow_single_file = True,
-            default = Label("//helm/private/runner:wrapper"),
-        ),
         "_runner": attr.label(
             doc = "A process wrapper to use for performing `helm install`.",
             executable = True,
             cfg = "exec",
             default = Label("//helm/private/runner"),
+        ),
+        "_runner_wrapper": attr.label(
+            doc = "A process wrapper to use for performing `helm install`.",
+            allow_single_file = True,
+            default = Label("//helm/private/runner:wrapper"),
         ),
     },
     toolchains = [
@@ -142,12 +142,12 @@ def _helm_upgrade_impl(ctx):
         template = ctx.file._runner_wrapper,
         output = runner_wrapper,
         substitutions = {
+            "{EXTRA_CMDS}": "\n".join([pusher.short_path for pusher in image_pushers]),
             "{HELM_BIN}": toolchain.helm.short_path,
-            "{STABLE_STATUS_FILE}": ctx.info_file.short_path,
-            "{VOLATILE_STATUS_FILE}": ctx.version_file.short_path,
             "{HELM_OPTS}": " ".join(args),
             "{RUNNER}": ctx.executable._runner.short_path,
-            "{EXTRA_CMDS}": "\n".join([pusher.short_path for pusher in image_pushers]),
+            "{STABLE_STATUS_FILE}": ctx.info_file.short_path,
+            "{VOLATILE_STATUS_FILE}": ctx.version_file.short_path,
         },
         is_executable = True,
     )
@@ -183,16 +183,16 @@ helm_upgrade = rule(
             providers = [HelmPackageInfo],
             mandatory = True,
         ),
-        "_runner_wrapper": attr.label(
-            doc = "A process wrapper to use for performing `helm install`.",
-            allow_single_file = True,
-            default = Label("//helm/private/runner:wrapper"),
-        ),
         "_runner": attr.label(
             doc = "A process wrapper to use for performing `helm install`.",
             executable = True,
             cfg = "exec",
             default = Label("//helm/private/runner"),
+        ),
+        "_runner_wrapper": attr.label(
+            doc = "A process wrapper to use for performing `helm install`.",
+            allow_single_file = True,
+            default = Label("//helm/private/runner:wrapper"),
         ),
     },
     toolchains = [
@@ -210,7 +210,6 @@ def _helm_uninstall_impl(ctx):
 
     install_name = ctx.attr.install_name or ctx.label.name
 
-
     args = []
     args.extend(ctx.attr.helm_opts)
     args.append("uninstall")
@@ -221,12 +220,12 @@ def _helm_uninstall_impl(ctx):
         template = ctx.file._runner_wrapper,
         output = runner_wrapper,
         substitutions = {
+            "{EXTRA_CMDS}": "",
             "{HELM_BIN}": toolchain.helm.short_path,
-            "{STABLE_STATUS_FILE}": ctx.info_file.short_path,
-            "{VOLATILE_STATUS_FILE}": ctx.version_file.short_path,
             "{HELM_OPTS}": " ".join(args),
             "{RUNNER}": ctx.executable._runner.short_path,
-            "{EXTRA_CMDS}": "",
+            "{STABLE_STATUS_FILE}": ctx.info_file.short_path,
+            "{VOLATILE_STATUS_FILE}": ctx.version_file.short_path,
         },
         is_executable = True,
     )
@@ -253,16 +252,16 @@ helm_uninstall = rule(
         "opts": attr.string_list(
             doc = "Additional arguments to pass to `helm uninstall`.",
         ),
-        "_runner_wrapper": attr.label(
-            doc = "A process wrapper to use for performing `helm install`.",
-            allow_single_file = True,
-            default = Label("//helm/private/runner:wrapper"),
-        ),
         "_runner": attr.label(
             doc = "A process wrapper to use for performing `helm install`.",
             executable = True,
             cfg = "exec",
             default = Label("//helm/private/runner"),
+        ),
+        "_runner_wrapper": attr.label(
+            doc = "A process wrapper to use for performing `helm install`.",
+            allow_single_file = True,
+            default = Label("//helm/private/runner:wrapper"),
         ),
     },
     toolchains = [

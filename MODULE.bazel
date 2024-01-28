@@ -15,12 +15,6 @@ bazel_dep(name = "rules_oci", version = "1.6.0")
 # This is unfortunately required by `rules_oci`.
 bazel_dep(name = "aspect_bazel_lib", version = "1.34.0")
 
-bazel_dep(
-    name = "buildifier_prebuilt",
-    version = "6.4.0",
-    dev_dependency = True,
-)
-
 helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
 helm.options()
 use_repo(

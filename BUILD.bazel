@@ -1,5 +1,3 @@
-load("@buildifier_prebuilt//:rules.bzl", "buildifier")
-
 exports_files(
     [
         "README.md",
@@ -17,25 +15,4 @@ filegroup(
         "//helm:bzl_srcs",
     ],
     visibility = ["//visibility:public"],
-)
-
-# Enable all buildifier lints.
-BUILDIFIER_LINTS = ["all"]
-
-buildifier(
-    name = "buildifier.check",
-    diff_command = "diff -u",
-    lint_mode = "warn",
-    lint_warnings = BUILDIFIER_LINTS,
-    mode = "diff",
-)
-
-buildifier(
-    name = "buildifier",
-    lint_mode = "fix",
-    lint_warnings = BUILDIFIER_LINTS,
-    mode = "fix",
-    target_compatible_with = [
-        "@platforms//os:linux",
-    ],
 )
