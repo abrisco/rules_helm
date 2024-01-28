@@ -47,9 +47,9 @@ bazel_dep(name = "rules_helm", version = "{version}")
 - [helm_push](#helm_push)
 - [helm_push_registry](#helm_push_registry)
 - [helm_register_toolchains](#helm_register_toolchains)
-- [helm_reinstall](#helm_reinstall)
 - [helm_toolchain](#helm_toolchain)
 - [helm_uninstall](#helm_uninstall)
+- [helm_upgrade](#helm_upgrade)
 - [rules_helm_dependencies](#rules_helm_dependencies)
 - [chart_content](#chart_content)
 
@@ -345,7 +345,7 @@ str: A json encoded string which represents `Chart.yaml` contents.
 <pre>
 helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">chart</a>, <a href="#helm_chart-chart_json">chart_json</a>, <a href="#helm_chart-values">values</a>, <a href="#helm_chart-values_json">values_json</a>, <a href="#helm_chart-substitutions">substitutions</a>, <a href="#helm_chart-templates">templates</a>, <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>,
            <a href="#helm_chart-tags">tags</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-opts">opts</a>, <a href="#helm_chart-install_opts">install_opts</a>, <a href="#helm_chart-upgrade_opts">upgrade_opts</a>,
-           <a href="#helm_chart-reinstall_opts">reinstall_opts</a>, <a href="#helm_chart-uninstall_opts">uninstall_opts</a>, <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">kwargs</a>)
+           <a href="#helm_chart-uninstall_opts">uninstall_opts</a>, <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">kwargs</a>)
 </pre>
 
 Rules for producing a helm package and some convenience targets.
@@ -357,7 +357,7 @@ Rules for producing a helm package and some convenience targets.
 | `{name}.push_registry` | [helm_push_registry](#helm_push_registry) |
 | `{name}.install` | [helm_install](#helm_install) |
 | `{name}.uninstall` | [helm_uninstall](#helm_uninstall) |
-| `{name}.reinstall` | [helm_reinstall](#helm_reinstall) |
+| `{name}.upgrade` | [helm_upgrade](#helm_upgrade) |
 
 
 **PARAMETERS**
@@ -381,7 +381,6 @@ Rules for producing a helm package and some convenience targets.
 | <a id="helm_chart-opts"></a>opts |  Additional options to pass to `helm install`, `helm uninstall`, and `helm reinstall`.   |  `[]` |
 | <a id="helm_chart-install_opts"></a>install_opts |  Additional options to pass to `helm install`.   |  `[]` |
 | <a id="helm_chart-upgrade_opts"></a>upgrade_opts |  Additional options to pass to `helm upgrade`.   |  `[]` |
-| <a id="helm_chart-reinstall_opts"></a>reinstall_opts |  Additional options to pass to helm reinstall.   |  `[]` |
 | <a id="helm_chart-uninstall_opts"></a>uninstall_opts |  Additional options to pass to `helm uninstall`.   |  `[]` |
 | <a id="helm_chart-stamp"></a>stamp |  Whether to encode build information into the helm chart.   |  `None` |
 | <a id="helm_chart-kwargs"></a>kwargs |  Additional keyword arguments for `helm_package`.   |  none |
