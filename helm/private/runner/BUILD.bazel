@@ -7,15 +7,10 @@ exports_files([
     "runner_wrapper.sh.template",
 ])
 
-config_setting(
-    name = "windows",
-    constraint_values = ["@platforms//os:windows"],
-)
-
 alias(
     name = "wrapper",
     actual = select({
-        ":windows": ":runner_wrapper.bat.template",
+        "@platforms//os:windows": ":runner_wrapper.bat.template",
         "//conditions:default": ":runner_wrapper.sh.template",
     }),
 )

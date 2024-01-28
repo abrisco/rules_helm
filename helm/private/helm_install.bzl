@@ -1,6 +1,7 @@
 """Helm rules"""
 
 load("//helm:providers.bzl", "HelmPackageInfo")
+load("//helm/private:helm_utils.bzl", _is_stamping_enabled = "is_stamping_enabled")
 
 def _helm_install_impl(ctx):
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
@@ -13,6 +14,8 @@ def _helm_install_impl(ctx):
     install_name = ctx.attr.install_name or ctx.label.name
 
     pkg_info = ctx.attr.package[HelmPackageInfo]
+
+    is_stamping_enabled = _is_stamping_enabled(ctx.attr)
 
     image_pushers = []
     image_runfiles = []
@@ -32,16 +35,24 @@ def _helm_install_impl(ctx):
         output = runner_wrapper,
         substitutions = {
             "{EXTRA_CMDS}": "\n".join([pusher.short_path for pusher in image_pushers]),
-            "{HELM_BIN}": toolchain.helm.short_path,
             "{HELM_OPTS}": " ".join(args),
             "{RUNNER}": ctx.executable._runner.short_path,
-            "{STABLE_STATUS_FILE}": ctx.info_file.short_path,
-            "{VOLATILE_STATUS_FILE}": ctx.version_file.short_path,
         },
         is_executable = True,
     )
+    is_stamping_enabled = _is_stamping_enabled(ctx.attr)
 
-    runfiles = ctx.runfiles([runner_wrapper, ctx.executable._runner, toolchain.helm, pkg_info.chart, ctx.info_file, ctx.version_file] + image_pushers)
+    environment = {
+        "HELM_BIN": toolchain.helm.short_path,
+    }
+
+    runfiles = [runner_wrapper, ctx.executable._runner, toolchain.helm, pkg_info.chart] + image_pushers
+    if is_stamping_enabled:
+        runfiles.extend([ctx.info_file, ctx.version_file])
+        environment["STABLE_STATUS_FILE"] = ctx.info_file.short_path
+        environment["VOLATILE_STATUS_FILE"] = ctx.version_file.short_path
+
+    runfiles = ctx.runfiles(runfiles)
     for ir in image_runfiles:
         runfiles = runfiles.merge(ir)
 
@@ -50,6 +61,9 @@ def _helm_install_impl(ctx):
             files = depset([runner_wrapper]),
             runfiles = runfiles,
             executable = runner_wrapper,
+        ),
+        RunEnvironmentInfo(
+            environment = environment,
         ),
     ]
 
@@ -83,6 +97,10 @@ helm_install = rule(
             allow_single_file = True,
             default = Label("//helm/private/runner:wrapper"),
         ),
+        "_stamp_flag": attr.label(
+            doc = "A setting used to determine whether or not the `--stamp` flag is enabled",
+            default = Label("//helm/private:stamp"),
+        ),
     },
     toolchains = [
         str(Label("//helm:toolchain_type")),
@@ -98,6 +116,8 @@ def _helm_upgrade_impl(ctx):
         runner_wrapper = ctx.actions.declare_file(ctx.label.name + ".sh")
 
     install_name = ctx.attr.install_name or ctx.label.name
+
+    is_stamping_enabled = _is_stamping_enabled(ctx.attr)
 
     pkg_info = ctx.attr.package[HelmPackageInfo]
 
@@ -119,16 +139,23 @@ def _helm_upgrade_impl(ctx):
         output = runner_wrapper,
         substitutions = {
             "{EXTRA_CMDS}": "\n".join([pusher.short_path for pusher in image_pushers]),
-            "{HELM_BIN}": toolchain.helm.short_path,
             "{HELM_OPTS}": " ".join(args),
             "{RUNNER}": ctx.executable._runner.short_path,
-            "{STABLE_STATUS_FILE}": ctx.info_file.short_path,
-            "{VOLATILE_STATUS_FILE}": ctx.version_file.short_path,
         },
         is_executable = True,
     )
 
-    runfiles = ctx.runfiles([runner_wrapper, ctx.executable._runner, toolchain.helm, pkg_info.chart, ctx.info_file, ctx.version_file] + image_pushers)
+    environment = {
+        "HELM_BIN": toolchain.helm.short_path,
+    }
+
+    runfiles = [runner_wrapper, ctx.executable._runner, toolchain.helm, pkg_info.chart] + image_pushers
+    if is_stamping_enabled:
+        runfiles.extend([ctx.info_file, ctx.version_file])
+        environment["STABLE_STATUS_FILE"] = ctx.info_file.short_path
+        environment["VOLATILE_STATUS_FILE"] = ctx.version_file.short_path
+
+    runfiles = ctx.runfiles(runfiles)
     for ir in image_runfiles:
         runfiles = runfiles.merge(ir)
 
@@ -137,6 +164,9 @@ def _helm_upgrade_impl(ctx):
             files = depset([runner_wrapper]),
             runfiles = runfiles,
             executable = runner_wrapper,
+        ),
+        RunEnvironmentInfo(
+            environment = environment,
         ),
     ]
 
@@ -170,6 +200,10 @@ helm_upgrade = rule(
             allow_single_file = True,
             default = Label("//helm/private/runner:wrapper"),
         ),
+        "_stamp_flag": attr.label(
+            doc = "A setting used to determine whether or not the `--stamp` flag is enabled",
+            default = Label("//helm/private:stamp"),
+        ),
     },
     toolchains = [
         str(Label("//helm:toolchain_type")),
@@ -197,20 +231,32 @@ def _helm_uninstall_impl(ctx):
         output = runner_wrapper,
         substitutions = {
             "{EXTRA_CMDS}": "",
-            "{HELM_BIN}": toolchain.helm.short_path,
             "{HELM_OPTS}": " ".join(args),
             "{RUNNER}": ctx.executable._runner.short_path,
-            "{STABLE_STATUS_FILE}": ctx.info_file.short_path,
-            "{VOLATILE_STATUS_FILE}": ctx.version_file.short_path,
         },
         is_executable = True,
     )
 
+    is_stamping_enabled = _is_stamping_enabled(ctx.attr)
+
+    environment = {
+        "HELM_BIN": toolchain.helm.short_path,
+    }
+
+    runfiles = [runner_wrapper, ctx.executable._runner, toolchain.helm]
+    if is_stamping_enabled:
+        runfiles.extend([ctx.info_file, ctx.version_file])
+        environment["STABLE_STATUS_FILE"] = ctx.info_file.short_path
+        environment["VOLATILE_STATUS_FILE"] = ctx.version_file.short_path
+
     return [
         DefaultInfo(
             files = depset([runner_wrapper]),
-            runfiles = ctx.runfiles([runner_wrapper, ctx.executable._runner, toolchain.helm, ctx.info_file, ctx.version_file]),
+            runfiles = ctx.runfiles(runfiles),
             executable = runner_wrapper,
+        ),
+        RunEnvironmentInfo(
+            environment = environment,
         ),
     ]
 
@@ -238,6 +284,10 @@ helm_uninstall = rule(
             doc = "A process wrapper to use for performing `helm install`.",
             allow_single_file = True,
             default = Label("//helm/private/runner:wrapper"),
+        ),
+        "_stamp_flag": attr.label(
+            doc = "A setting used to determine whether or not the `--stamp` flag is enabled",
+            default = Label("//helm/private:stamp"),
         ),
     },
     toolchains = [

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -11,29 +10,32 @@ import (
 
 func main() {
 	helm_bin := os.Getenv("HELM_BIN")
-	stable_status_file := os.Getenv("STABLE_STATUS_FILE")
-	volatile_status_file := os.Getenv("VOLATILE_STATUS_FILE")
+	stable_status_file, ok := os.LookupEnv("STABLE_STATUS_FILE")
+	volatile_status_file, ok := os.LookupEnv("VOLATILE_STATUS_FILE")
 
-	stamps, err := stamp.LoadStamps(volatile_status_file, stable_status_file)
-	if err != nil {
-		log.Fatalf("Error loading stamps: %v", err)
-	}
-
-	var stampedArgs = []string{}
-	for _, arg := range os.Args[1:] {
-		stampedArg, err := stamp.ReplaceKeyValues(arg, stamps)
+	var args = []string{}
+	if ok {
+		stamps, err := stamp.LoadStamps(volatile_status_file, stable_status_file)
 		if err != nil {
-			log.Fatalf("Error replacing key values for %s: %v", arg, err)
+			log.Fatalf("Error loading stamps: %v", err)
 		}
 
-		stampedArgs = append(stampedArgs, stampedArg)
+		for _, arg := range os.Args[1:] {
+			stampedArg, err := stamp.ReplaceKeyValues(arg, stamps)
+			if err != nil {
+				log.Fatalf("Error replacing key values for %s: %v", arg, err)
+			}
+
+			args = append(args, stampedArg)
+		}
+	} else {
+		args = os.Args[1:]
 	}
 
-	cmd := exec.Command(helm_bin, stampedArgs...)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Fatalf("Error running helm: %v\n\n%s", err, output)
+	cmd := exec.Command(helm_bin, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("Error running helm: %v", err)
 	}
-
-	fmt.Print(string(output))
 }
