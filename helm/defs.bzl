@@ -59,6 +59,10 @@ load(
     _chart_file = "chart_file",
 )
 load(
+    "//helm/private:helm.bzl",
+    _helm_chart = "helm_chart",
+)
+load(
     "//helm/private:helm_import.bzl",
     _helm_import = "helm_import",
     _helm_import_repository = "helm_import_repository",
@@ -82,10 +86,6 @@ load(
 load(
     "//helm/private:helm_registry.bzl",
     _helm_push_registry = "helm_push_registry",
-)
-load(
-    ":helm.bzl",
-    _helm_chart = "helm_chart",
 )
 load(
     ":providers.bzl",
