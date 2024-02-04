@@ -1,0 +1,4 @@
+ECHO OFF
+
+echo STABLE_STAMP_VALUE stable
+echo VOLATILE_STAMP_VALUE volatile

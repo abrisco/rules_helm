@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -82,10 +81,6 @@ func extract_package(source string, target string) {
 		// the target location where the dir/file should be created
 		target := filepath.Join(target, header.Name)
 
-		// the following switch could also be done using fi.Mode(), not sure if there
-		// a benefit of using one vs. the other.
-		// fi := header.FileInfo()
-
 		// check the file type
 		switch header.Typeflag {
 
@@ -99,7 +94,7 @@ func extract_package(source string, target string) {
 
 		// if it's a file create it
 		case tar.TypeReg:
-			parent := path.Dir(target)
+			parent := filepath.Dir(target)
 			if err := os.MkdirAll(parent, 0755); err != nil {
 				log.Fatal(err)
 			}
@@ -113,7 +108,7 @@ func extract_package(source string, target string) {
 				log.Fatal(err)
 			}
 
-			// manually close here after each file operation; defering would cause each file close
+			// manually close here after each file operation; deferring would cause each file close
 			// to wait until all operations have completed.
 			f.Close()
 		}
@@ -150,7 +145,7 @@ func lint(directory string, package_name string, helm string, output string) {
 	}
 
 	if len(output) > 0 {
-		parent := path.Dir(output)
+		parent := filepath.Dir(output)
 		dir_err := os.MkdirAll(parent, 0755)
 		if dir_err != nil {
 			log.Fatal(dir_err)
@@ -202,7 +197,7 @@ func main() {
 		prefix = cwd
 	}
 
-	dir := path.Join(prefix, "rules_helm_lint_dir")
+	dir := filepath.Join(prefix, "rules_helm_lint_dir")
 
 	extract_package(get_runfile(args.pkg), dir)
 	lint_dir := find_package_root(dir)

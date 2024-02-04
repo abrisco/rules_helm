@@ -6,7 +6,10 @@ build:strict --aspects=//helm:defs.bzl%helm_lint_aspect
 build:strict --output_groups=+helm_lint_checks
 
 # Used for populating stamp data
-build --workspace_status_command=tools/workspace_status.sh
+build --enable_platform_specific_config
+build:linux --workspace_status_command=tools/workspace_status.sh
+build:macos --workspace_status_command=tools/workspace_status.sh
+build:windows --workspace_status_command=tools/workspace_status.bat
 
 # These settings make the windows workers behave similarly to unix workers
 startup --windows_enable_symlinks
