@@ -57,10 +57,14 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}
         if: startswith(runner.os, 'Windows')
 
-      - name: Setup Bazelrc
+      - name: Setup Bazelrc (Windows)
         run: |
           echo "startup --output_user_root=C:/bzl" > ./user.bazelrc
         if: startswith(runner.os, 'Windows')
+      - name: Setup Bazelrc
+        run: |
+          echo "common --noenable_bzlmod" >> ./user.bazelrc
+          echo "common --keep_going" >> ./user.bazelrc
 
       # Build and Test the code
       - name: Test (Unix)
@@ -114,13 +118,14 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}
         if: startswith(runner.os, 'Windows')
 
-      - name: Setup Bazelrc (Unix)
+      - name: Setup Bazelrc (Windows)
         run: |
           echo "startup --output_user_root=C:/bzl" > ./user.bazelrc
         if: startswith(runner.os, 'Windows')
       - name: Setup Bazelrc
         run: |
           echo "common --config=strict" >> ./user.bazelrc
+          echo "common --noenable_bzlmod" >> ./user.bazelrc
           echo "common --keep_going" >> ./user.bazelrc
 
       # Build and Test the code
