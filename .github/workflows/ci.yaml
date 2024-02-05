@@ -9,10 +9,6 @@ on:
       - opened
       - synchronize
 
-defaults:
-  run:
-    shell: bash
-
 env:
   BAZEL_STARTUP_FLAGS: --bazelrc=${{ github.workspace }}/.github/github.bazelrc
 
@@ -24,8 +20,7 @@ jobs:
         include:
           - os: macos-11
           - os: ubuntu-20.04
-          # TODO: https://github.com/abrisco/rules_helm/issues/1
-          # - os: windows-2019
+          - os: windows-2019
     steps:
       # Checkout the code
       - uses: actions/checkout@v2
@@ -68,13 +63,12 @@ jobs:
         if: startswith(runner.os, 'Windows')
 
       # Build and Test the code
-      - name: Test
-        run: |
-          if [[ "${RUNNER_OS}" == "Windows" ]]; then
-            bazel ${BAZEL_STARTUP_FLAGS[@]} test ///...
-          else
-            bazel ${BAZEL_STARTUP_FLAGS[@]} test //...
-          fi
+      - name: Test (Unix)
+        run: bazel ${BAZEL_STARTUP_FLAGS[@]} test //...
+        if: startswith(runner.os, 'Windows') != true
+      - name: Test (Windows)
+        run: bazel $env:BAZEL_STARTUP_FLAGS test //...
+        if: startswith(runner.os, 'Windows')
 
   ci-aspects:
     runs-on: ${{ matrix.os }}
@@ -83,8 +77,7 @@ jobs:
         include:
           - os: macos-11
           - os: ubuntu-20.04
-          # TODO: https://github.com/abrisco/rules_helm/issues/1
-          # - os: windows-2019
+          - os: windows-2019
     steps:
       # Checkout the code
       - uses: actions/checkout@v2
@@ -121,21 +114,22 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}
         if: startswith(runner.os, 'Windows')
 
+      - name: Setup Bazelrc (Unix)
+        run: |
+          echo "startup --output_user_root=C:/bzl" > ./user.bazelrc
+        if: startswith(runner.os, 'Windows')
       - name: Setup Bazelrc
         run: |
-          if [[ "${RUNNER_OS}" == "Windows" ]]; then
-            echo "startup --output_user_root=C:/bzl" > ./user.bazelrc
-          fi
           echo "common --config=strict" >> ./user.bazelrc
+          echo "common --keep_going" >> ./user.bazelrc
 
       # Build and Test the code
-      - name: Test
-        run: |
-          if [[ "${RUNNER_OS}" == "Windows" ]]; then
-            bazel ${BAZEL_STARTUP_FLAGS[@]} test ///...
-          else
-            bazel ${BAZEL_STARTUP_FLAGS[@]} test //...
-          fi
+      - name: Test (Unix)
+        run: bazel ${BAZEL_STARTUP_FLAGS[@]} test //...
+        if: startswith(runner.os, 'Windows') != true
+      - name: Test (Windows)
+        run: bazel $env:BAZEL_STARTUP_FLAGS test //...
+        if: startswith(runner.os, 'Windows')
 
   ci-bzlmod:
     runs-on: ${{ matrix.os }}
@@ -144,8 +138,7 @@ jobs:
         include:
           - os: macos-11
           - os: ubuntu-20.04
-          # TODO: https://github.com/abrisco/rules_helm/issues/1
-          # - os: windows-2019
+          - os: windows-2019
     steps:
       # Checkout the code
       - uses: actions/checkout@v2
@@ -182,22 +175,22 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}
         if: startswith(runner.os, 'Windows')
 
+      - name: Setup Bazelrc (Windows)
+        run: echo "startup --output_user_root=C:/bzl" > ./user.bazelrc
+        if: startswith(runner.os, 'Windows')
       - name: Setup Bazelrc
         run: |
-          if [[ "${RUNNER_OS}" == "Windows" ]]; then
-            echo "startup --output_user_root=C:/bzl" > ./user.bazelrc
-          fi
           echo "common --config=strict" >> ./user.bazelrc
           echo "common --enable_bzlmod" >> ./user.bazelrc
+          echo "common --keep_going" >> ./user.bazelrc
 
       # Build and Test the code
-      - name: Test
-        run: |
-          if [[ "${RUNNER_OS}" == "Windows" ]]; then
-            bazel ${BAZEL_STARTUP_FLAGS[@]} test ///...
-          else
-            bazel ${BAZEL_STARTUP_FLAGS[@]} test //...
-          fi
+      - name: Test (Unix)
+        run: bazel ${BAZEL_STARTUP_FLAGS[@]} test //...
+        if: startswith(runner.os, 'Windows') != true
+      - name: Test (Windows)
+        run: bazel $env:BAZEL_STARTUP_FLAGS test //...
+        if: startswith(runner.os, 'Windows')
 
   ci-buildifier:
     runs-on: ubuntu-20.04

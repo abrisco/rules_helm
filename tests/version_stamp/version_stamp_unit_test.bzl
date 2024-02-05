@@ -62,6 +62,7 @@ def version_stamp_test_suite(name):
     "version": "0.1.0-STABLE-STAMP-VALUE-VOLATILE-STAMP-VALUE"
 }
 """.splitlines(),
+        newline = "unix",
     )
 
     diff_test(
@@ -79,6 +80,7 @@ def version_stamp_test_suite(name):
     "version": "0.1.0-stable-volatile"
 }
 """.splitlines(),
+        newline = "unix",
     )
 
     diff_test(

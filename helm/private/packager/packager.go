@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -9,7 +11,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -134,7 +135,7 @@ func loadStamps(volatileStatusFile string, stableStatusFile string) ([]Replaceme
 		}
 
 		for _, line := range strings.Split(string(content), "\n") {
-			split := strings.SplitN(line, " ", 2)
+			split := strings.SplitN(strings.TrimRight(line, "\r"), " ", 2)
 			if len(split) < 2 {
 				continue
 			}
@@ -210,7 +211,7 @@ func imageManifestToImageInfo(imageManifest ImageManifest) (ImageInfo, error) {
 	}
 	imageInfo.Repository = string(repository)
 
-	imageIndexPath := path.Join(imageManifest.ImageRootPath, "index.json")
+	imageIndexPath := filepath.Join(imageManifest.ImageRootPath, "index.json")
 	imageIndexContent, err := os.ReadFile(imageIndexPath)
 	if err != nil {
 		return imageInfo, fmt.Errorf("Error reading file %s: %w", imageIndexPath, err)
@@ -354,7 +355,7 @@ func copyFile(source string, dest string) error {
 	}
 	defer srcFile.Close()
 
-	parent := path.Dir(dest)
+	parent := filepath.Dir(dest)
 	err = os.MkdirAll(parent, 0755)
 	if err != nil {
 		return fmt.Errorf("Error creating parent directory %s: %w", parent, err)
@@ -386,13 +387,13 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 		return fmt.Errorf("Error creating working directory %s: %w", workingDir, err)
 	}
 
-	chartYaml := path.Join(workingDir, "Chart.yaml")
+	chartYaml := filepath.Join(workingDir, "Chart.yaml")
 	err = os.WriteFile(chartYaml, []byte(stampedChartContent), 0644)
 	if err != nil {
 		return fmt.Errorf("Error writing chart file %s: %w", chartYaml, err)
 	}
 
-	valuesYaml := path.Join(workingDir, "values.yaml")
+	valuesYaml := filepath.Join(workingDir, "values.yaml")
 	err = os.WriteFile(valuesYaml, []byte(stampedValuesContent), 0644)
 	if err != nil {
 		return fmt.Errorf("Error writing values file %s: %w", valuesYaml, err)
@@ -409,7 +410,7 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 		return fmt.Errorf("Error unmarshalling templates manifest %s: %w", templatesManifest, err)
 	}
 
-	templatesDir := path.Join(workingDir, "templates")
+	templatesDir := filepath.Join(workingDir, "templates")
 	templatesRoot := ""
 
 	// Copy all templates
@@ -418,22 +419,24 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 		// Locate the templates directory so we can start copying files
 		// into the new templates directory at the right location
 		if len(templatesRoot) == 0 {
-			var current = templateShortpath
+			var current = filepath.Clean(templateShortpath)
 			for {
 				if len(current) == 0 {
 					return errors.New("Failed to find templates directory")
 				}
-				parent := path.Dir(current)
-				if path.Base(parent) == "templates" {
-					templatesRoot = parent
+				parent := filepath.Dir(current)
+				if filepath.Base(parent) == "templates" {
+					templatesRoot = filepath.Clean(parent)
 					break
 				}
 				current = parent
 			}
 		}
 
-		if !strings.HasPrefix(templateShortpath, templatesRoot) {
-			return errors.New("Template path does not start with templates root")
+		if !strings.HasPrefix(filepath.Clean(templateShortpath), templatesRoot) {
+			return fmt.Errorf(
+				"Template path (%s) does not start with templates root (%s)",
+				filepath.Clean(templateShortpath), templatesRoot)
 		}
 
 		targetFile, err := filepath.Rel(templatesRoot, templateShortpath)
@@ -441,7 +444,14 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 			return err
 		}
 
-		err = copyFile(templatePath, path.Join(templatesDir, targetFile))
+		templateDest := filepath.Join(templatesDir, targetFile)
+		templateDestDir := filepath.Dir(templateDest)
+		err = os.MkdirAll(templateDestDir, 0755)
+		if err != nil {
+			return fmt.Errorf("Error creating template parent directory %s: %w", templateDestDir, err)
+		}
+
+		err = copyFile(templatePath, templateDest)
 		if err != nil {
 			return fmt.Errorf("Error copying template %s: %w", templatePath, err)
 		}
@@ -461,7 +471,7 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 		}
 
 		for _, dep := range deps {
-			err = copyFile(dep, path.Join(workingDir, "charts", path.Base(dep)))
+			err = copyFile(dep, filepath.Join(workingDir, "charts", filepath.Base(dep)))
 			if err != nil {
 				return fmt.Errorf("Error copying dep %s: %w", dep, err)
 			}
@@ -516,6 +526,20 @@ func writeResultsMetadata(packageBase string, metadataOutput string) error {
 	return nil
 }
 
+func hashString(text string) string {
+	// Create a new SHA-256 hash
+	hasher := sha256.New()
+
+	// Write the string to the hash
+	hasher.Write([]byte(text))
+
+	// Get the final hash sum as a byte slice
+	hashSum := hasher.Sum(nil)
+
+	// Convert the byte slice to a hexadecimal string
+	return hex.EncodeToString(hashSum)
+}
+
 func main() {
 	var args = parseArgs()
 
@@ -526,7 +550,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	dir := path.Join(cwd, ".rules_helm_pkg_dir")
+	// Generate a directory name but keep it short for windows
+	dir_name := fmt.Sprintf(".rules_helm_pkg_%s", hashString(args.Output)[:12])
+	dir := filepath.Join(cwd, dir_name)
 
 	chartContent, err := os.ReadFile(args.Chart)
 	if err != nil {
@@ -576,14 +602,14 @@ func main() {
 	}
 
 	// Create a directory in which to run helm package
-	tmpPath := path.Join(dir, chart.Name)
+	tmpPath := filepath.Join(dir, chart.Name)
 	err = installHelmContent(tmpPath, stampedChartContent, stampedValuesContent, args.TemplatesManifest, args.DepsManifest)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Build the helm package
-	command := exec.Command(path.Join(cwd, args.Helm), "package", ".")
+	command := exec.Command(filepath.Join(cwd, args.Helm), "package", ".")
 	command.Dir = tmpPath
 	out, err := command.CombinedOutput()
 	if err != nil {
@@ -605,7 +631,7 @@ func main() {
 	}
 
 	// Write output metadata to retain information about the helm package
-	err = writeResultsMetadata(path.Base(pkg), args.MetadataOutput)
+	err = writeResultsMetadata(filepath.Base(pkg), args.MetadataOutput)
 	if err != nil {
 		log.Fatal(err)
 	}

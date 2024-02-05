@@ -23,11 +23,12 @@ func parseModuleBazel() (string, error) {
 
 	var moduleFound bool = false
 	for _, line := range strings.Split(string(content), "\n") {
+		text := strings.TrimRight(line, "\r")
 		if moduleFound {
-			if strings.HasSuffix(line, ")") {
+			if strings.HasSuffix(text, ")") {
 				return "", errors.New("Failed to parse version from module section")
 			}
-			split := strings.SplitN(line, " = ", 2)
+			split := strings.SplitN(text, " = ", 2)
 			if len(split) < 2 {
 				continue
 			}
@@ -36,7 +37,7 @@ func parseModuleBazel() (string, error) {
 				return strings.Trim(val, "\" ,"), nil
 			}
 
-		} else if strings.HasPrefix(line, "module(") {
+		} else if strings.HasPrefix(text, "module(") {
 			moduleFound = true
 			continue
 		}

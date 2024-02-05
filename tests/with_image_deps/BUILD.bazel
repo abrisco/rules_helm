@@ -5,6 +5,13 @@ load("//tests:test_defs.bzl", "helm_package_regex_test")
 
 exports_files(["Chart.lock"])
 
+EXCLUDE_WINDOWS = select({
+    # TODO: rules_oci is broken on simple windows systems such as the windows github runners
+    # https://github.com/abrisco/rules_helm/issues/53
+    "@platforms//os:windows": ["@platforms//:incompatible"],
+    "//conditions:default": [],
+})
+
 helm_chart(
     name = "with_image_deps",
     chart = "Chart.yaml",
@@ -12,17 +19,20 @@ helm_chart(
         ":image_a.push",
         "//tests/with_image_deps:image_b.push",
     ],
+    target_compatible_with = EXCLUDE_WINDOWS,
     values = "values.yaml",
 )
 
 helm_lint_test(
     name = "with_image_deps_test",
     chart = ":with_image_deps",
+    target_compatible_with = EXCLUDE_WINDOWS,
 )
 
 helm_package_regex_test(
     name = "with_image_deps_regex_test",
     package = ":with_image_deps",
+    target_compatible_with = EXCLUDE_WINDOWS,
     values_patterns = [
         r"image_a:\s+url:\s+\"docker.io/rules_helm/test/image_a@sha256:[a-z0-9]{64}\"",
         r"image_b:\s+url:\s+\"docker.io/rules_helm/test/image_b@sha256:[a-z0-9]{64}\"",
@@ -38,6 +48,7 @@ _IMAGES = [
     oci_image(
         name = name,
         base = "@rules_helm_test_container_base",
+        target_compatible_with = EXCLUDE_WINDOWS,
     )
     for name in _IMAGES
 ]
@@ -47,12 +58,14 @@ oci_push(
     image = ":image_a",
     remote_tags = ["latest"],
     repository = "docker.io/rules_helm/test/image_a",
+    target_compatible_with = EXCLUDE_WINDOWS,
 )
 
 write_file(
     name = "image_b.repository",
     out = "image_b.repository.txt",
     content = ["docker.io/rules_helm/test/image_b"],
+    tags = ["manual"],
 )
 
 oci_push(
@@ -60,4 +73,5 @@ oci_push(
     image = ":image_b",
     remote_tags = ["latest"],
     repository_file = ":image_b.repository.txt",
+    target_compatible_with = EXCLUDE_WINDOWS,
 )
