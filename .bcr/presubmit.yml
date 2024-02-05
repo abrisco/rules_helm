@@ -5,7 +5,6 @@ bcr_test_module:
   # within the same repository.
   module_path: "."
   matrix:
-    # TODO(abrisco/rules_helm#1): Add windows support
     platform: ["macos", "ubuntu2004", "windows"]
   tasks:
     run_tests:
