@@ -3,7 +3,10 @@ package main
 import (
 	"archive/tar"
 	"compress/gzip"
+	"crypto/sha256"
+	"encoding/hex"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -179,6 +182,20 @@ func get_runfile(runfile_path string) string {
 	return runfile
 }
 
+func hashString(text string) string {
+	// Create a new SHA-256 hash
+	hasher := sha256.New()
+
+	// Write the string to the hash
+	hasher.Write([]byte(text))
+
+	// Get the final hash sum as a byte slice
+	hashSum := hasher.Sum(nil)
+
+	// Convert the byte slice to a hexadecimal string
+	return hex.EncodeToString(hashSum)
+}
+
 func main() {
 	args := parse_args()
 
@@ -197,7 +214,17 @@ func main() {
 		prefix = cwd
 	}
 
-	dir := filepath.Join(prefix, "rules_helm_lint_dir")
+	// Generate a directory name but keep it short for windows
+	dir_name := fmt.Sprintf("rules_helm_lint_%s", hashString(args.output)[:12])
+	dir := filepath.Join(prefix, dir_name)
+
+	// Ensure the directory is clean
+	if err := os.RemoveAll(dir); err != nil {
+		log.Fatal(err)
+	}
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		log.Fatal(err)
+	}
 
 	extract_package(get_runfile(args.pkg), dir)
 	lint_dir := find_package_root(dir)
