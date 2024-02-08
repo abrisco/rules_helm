@@ -46,76 +46,71 @@ func parse_args() Arguments {
 	return args
 }
 
-func extract_package(source string, target string) {
-
-	reader, err := os.Open(source)
+func extractPackage(sourcePath string, targetDir string) error {
+	// Open the tar.gz file for reading
+	file, err := os.Open(sourcePath)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	defer reader.Close()
+	defer file.Close()
 
-	gzr, err := gzip.NewReader(reader)
+	// Create a gzip reader
+	gzipReader, err := gzip.NewReader(file)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	defer gzr.Close()
+	defer gzipReader.Close()
 
-	tr := tar.NewReader(gzr)
+	// Create a tar reader
+	tarReader := tar.NewReader(gzipReader)
 
+	// Iterate through the tar entries and extract them
 	for {
-		header, err := tr.Next()
+		header, err := tarReader.Next()
 
-		switch {
-
-		// if no more files are found return
-		case err == io.EOF:
-			return
-
-		// return any other error
-		case err != nil:
-			log.Fatal(err)
-
-		// if the header is nil, just skip it (not sure how this happens)
-		case header == nil:
-			log.Fatal("NULL")
-			continue
+		if err == io.EOF {
+			break
 		}
 
-		// the target location where the dir/file should be created
-		target := filepath.Join(target, header.Name)
+		if err != nil {
+			return err
+		}
 
-		// check the file type
+		// Construct the target file path
+		targetFilePath := filepath.Join(targetDir, header.Name)
+
 		switch header.Typeflag {
-
-		// if its a dir and it doesn't exist create it
 		case tar.TypeDir:
-			if _, err := os.Stat(target); err != nil {
-				if err := os.MkdirAll(target, 0755); err != nil {
-					log.Fatal(err)
-				}
-			}
-
-		// if it's a file create it
-		case tar.TypeReg:
-			parent := filepath.Dir(target)
-			if err := os.MkdirAll(parent, 0755); err != nil {
-				log.Fatal(err)
-			}
-			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+			// Create directories if they don't exist
+			err = os.MkdirAll(targetFilePath, 0755)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
-			// copy over contents
-			if _, err := io.Copy(f, tr); err != nil {
-				log.Fatal(err)
+		case tar.TypeReg:
+			// Ensure the file's parents exist
+			if err := os.MkdirAll(filepath.Dir(targetFilePath), 0755); err != nil {
+				return err
+			}
+			// Create the file
+			file, err := os.Create(targetFilePath)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			// Copy the file contents
+			_, err = io.Copy(file, tarReader)
+			if err != nil {
+				return err
 			}
 
-			// manually close here after each file operation; deferring would cause each file close
-			// to wait until all operations have completed.
-			f.Close()
+		default:
+			return fmt.Errorf("Unsupported tar entry type: %c", header.Typeflag)
 		}
 	}
+
+	return nil
 }
 
 func find_package_root(extract_dir string) string {
@@ -226,7 +221,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	extract_package(get_runfile(args.pkg), dir)
+	if err := extractPackage(get_runfile(args.pkg), dir); err != nil {
+		log.Fatal(err)
+	}
+
 	lint_dir := find_package_root(dir)
 
 	lint(dir, lint_dir, get_runfile(args.helm), args.output)
