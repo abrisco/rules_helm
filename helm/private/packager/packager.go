@@ -487,9 +487,10 @@ func findGeneratedPackage(logging string) (string, error) {
 		// text which starts with `Successfully packaged chart and saved it to:`
 		split := strings.SplitN(logging, ":", 2)
 		var pkg = strings.TrimSpace(split[1])
-		if _, err := os.Stat(pkg); err == nil {
-			return pkg, nil
+		if _, err := os.Stat(pkg); err != nil {
+			return "", fmt.Errorf("Failed to parse package installed at '%s' with %w", pkg, err)
 		}
+		return pkg, nil
 	}
 
 	return "", errors.New("failed to find package")
