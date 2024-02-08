@@ -356,7 +356,7 @@ func copyFile(source string, dest string) error {
 	defer srcFile.Close()
 
 	parent := filepath.Dir(dest)
-	err = os.MkdirAll(parent, 0755)
+	err = os.MkdirAll(parent, 0700)
 	if err != nil {
 		return fmt.Errorf("Error creating parent directory %s: %w", parent, err)
 	}
@@ -382,7 +382,7 @@ func copyFile(source string, dest string) error {
 }
 
 func installHelmContent(workingDir string, stampedChartContent string, stampedValuesContent string, templatesManifest string, depsManifest string) error {
-	err := os.MkdirAll(workingDir, 0755)
+	err := os.MkdirAll(workingDir, 0700)
 	if err != nil {
 		return fmt.Errorf("Error creating working directory %s: %w", workingDir, err)
 	}
@@ -446,7 +446,7 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 
 		templateDest := filepath.Join(templatesDir, targetFile)
 		templateDestDir := filepath.Dir(templateDest)
-		err = os.MkdirAll(templateDestDir, 0755)
+		err = os.MkdirAll(templateDestDir, 0700)
 		if err != nil {
 			return fmt.Errorf("Error creating template parent directory %s: %w", templateDestDir, err)
 		}
@@ -555,6 +555,25 @@ func main() {
 	dir_name := fmt.Sprintf(".rules_helm_pkg_%s", hashString(args.Output)[:12])
 	dir := filepath.Join(cwd, dir_name)
 
+	// Ensure the directory is clean
+	if err := os.RemoveAll(dir); err != nil {
+		log.Fatal(err)
+	}
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		log.Fatal(err)
+	}
+
+	// Generate a fake kubeconfig for more consistent results when building packages
+	kubeconfig := filepath.Join(dir, ".kubeconfig")
+	file, err := os.Create(kubeconfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := file.Chmod(0700); err != nil {
+		log.Fatal(err)
+	}
+	file.Close()
+
 	chartContent, err := os.ReadFile(args.Chart)
 	if err != nil {
 		log.Fatal(err)
@@ -612,6 +631,7 @@ func main() {
 	// Build the helm package
 	command := exec.Command(filepath.Join(cwd, args.Helm), "package", ".")
 	command.Dir = tmpPath
+	command.Env = append(command.Environ(), fmt.Sprintf("KUBECONFIG=%s", kubeconfig))
 	out, err := command.CombinedOutput()
 	if err != nil {
 		os.Stderr.WriteString(string(out))
