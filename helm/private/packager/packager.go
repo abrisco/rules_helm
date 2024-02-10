@@ -631,7 +631,7 @@ func main() {
 	// Build the helm package
 	command := exec.Command(filepath.Join(cwd, args.Helm), "package", ".")
 	command.Dir = tmpPath
-	command.Env = append(command.Environ(), fmt.Sprintf("KUBECONFIG=%s", kubeconfig))
+	command.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", kubeconfig))
 	out, err := command.CombinedOutput()
 	if err != nil {
 		os.Stderr.WriteString(string(out))

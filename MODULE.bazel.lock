@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "0e8346a7326770eb4151420c5a854a7f4e38e0933fb788e4a233f15f8387a10b",
+  "moduleFileHash": "669b417c36989acbad382c4f18a9094329f6a1a7948fe194b446edf1d98fb7db",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -18,7 +18,7 @@
   "moduleDepGraph": {
     "<root>": {
       "name": "rules_helm",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "key": "<root>",
       "repoName": "rules_helm",
       "executionPlatformsToRegister": [],
@@ -45,7 +45,7 @@
             {
               "tagName": "download",
               "attributeValues": {
-                "version": "1.22.0"
+                "version": "1.18.10"
               },
               "devDependency": false,
               "location": {
@@ -2251,7 +2251,7 @@
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.22.0"
+              "version": "1.18.10"
             }
           },
           "rules_helm__download_0_windows_arm64": {
@@ -2265,7 +2265,7 @@
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.22.0"
+              "version": "1.18.10"
             }
           },
           "go_host_compatible_sdk_label": {
@@ -2301,7 +2301,7 @@
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.22.0"
+              "version": "1.18.10"
             }
           },
           "go_toolchains": {
@@ -2380,12 +2380,12 @@
                 "remote"
               ],
               "sdk_versions": [
-                "1.22.0",
-                "1.22.0",
-                "1.22.0",
-                "1.22.0",
-                "1.22.0",
-                "1.22.0",
+                "1.18.10",
+                "1.18.10",
+                "1.18.10",
+                "1.18.10",
+                "1.18.10",
+                "1.18.10",
                 "1.21.1",
                 "1.21.1",
                 "1.21.1",
@@ -2406,7 +2406,7 @@
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.22.0"
+              "version": "1.18.10"
             }
           },
           "io_bazel_rules_nogo": {
@@ -2449,7 +2449,7 @@
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.22.0",
+              "version": "1.18.10",
               "strip_prefix": "go"
             }
           },
@@ -2510,7 +2510,7 @@
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.22.0"
+              "version": "1.18.10"
             }
           },
           "rules_go__download_0_windows_amd64": {

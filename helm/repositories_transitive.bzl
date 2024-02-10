@@ -8,4 +8,4 @@ def rules_helm_transitive_dependencies():
     go_rules_dependencies()
 
     if "go_sdk" not in native.existing_rules():
-        go_register_toolchains(go_version = "1.22.0")
+        go_register_toolchains(go_version = "1.18.10")
