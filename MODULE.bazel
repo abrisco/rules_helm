@@ -16,7 +16,7 @@ bazel_dep(name = "rules_oci", version = "1.7.2")
 bazel_dep(name = "aspect_bazel_lib", version = "1.36.0")
 
 go_sdk = use_extension("@io_bazel_rules_go//go:extensions.bzl", "go_sdk")
-go_sdk.download(version = "1.22.0")
+go_sdk.download(version = "1.18.10")
 
 helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
 helm.options()
