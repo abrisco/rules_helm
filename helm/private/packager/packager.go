@@ -498,7 +498,7 @@ func findGeneratedPackage(logging string) (string, error) {
 
 func writeResultsMetadata(packageBase string, metadataOutput string) error {
 	// Official recommended regex from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
-	re := regexp.MustCompile(`^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$\.tgz`)
+	re := regexp.MustCompile(`(.*)-^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$\.tgz`)
 	match := re.FindAllStringSubmatch(packageBase, 2)
 
 	if len(match) == 0 {
