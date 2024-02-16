@@ -14,7 +14,6 @@ def helm_chart(
         templates = None,
         images = [],
         deps = None,
-        tags = [],
         install_name = None,
         registry_url = None,
         helm_opts = [],
@@ -44,7 +43,6 @@ def helm_chart(
         templates (list, optional): A list of template files to include in the package.
         images (list, optional): A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets
         deps (list, optional): A list of helm package dependencies.
-        tags (list, optional): Tags to apply to all targets.
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
         registry_url (str, Optional): The registry url for the helm chart. `{name}.push_registry`
             is only defined when a value is passed here.
@@ -58,9 +56,6 @@ def helm_chart(
     if templates == None:
         templates = native.glob(["templates/**"])
 
-    tags = kwargs.pop("tags", [])
-    tags_with_manual = depset(tags + ["manual"]).to_list()
-
     helm_package(
         name = name,
         chart = chart,
@@ -72,14 +67,12 @@ def helm_chart(
         values_json = values_json,
         substitutions = substitutions,
         stamp = stamp,
-        tags = tags,
         **kwargs
     )
 
     helm_push(
         name = name + ".push",
         package = name,
-        tags = tags_with_manual,
         **kwargs
     )
 
@@ -88,7 +81,6 @@ def helm_chart(
             name = name + ".push_registry",
             package = name,
             registry_url = registry_url,
-            tags = tags_with_manual,
             **kwargs
         )
 
@@ -99,7 +91,6 @@ def helm_chart(
         name = name + ".install",
         install_name = install_name,
         package = name,
-        tags = tags_with_manual,
         helm_opts = helm_opts,
         opts = install_opts,
         **kwargs
@@ -109,7 +100,6 @@ def helm_chart(
         name = name + ".upgrade",
         install_name = install_name,
         package = name,
-        tags = tags_with_manual,
         helm_opts = helm_opts,
         opts = upgrade_opts,
         **kwargs
@@ -118,7 +108,6 @@ def helm_chart(
     helm_uninstall(
         name = name + ".uninstall",
         install_name = install_name,
-        tags = tags_with_manual,
         helm_opts = helm_opts,
         opts = uninstall_opts,
         **kwargs
