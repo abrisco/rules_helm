@@ -1,5 +1,5 @@
-load("//helm:defs.bzl", "helm_chart", "helm_lint_test")
 load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test")
 
 copy_to_directory(
     name = "templates",
