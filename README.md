@@ -97,30 +97,6 @@ A rule that allows pre-packaged Helm charts to be used within Bazel.
 | <a id="helm_import-version"></a>version |  The version fo the helm chart   | String | optional |  `""`  |
 
 
-<a id="helm_import_repository"></a>
-
-## helm_import_repository
-
-<pre>
-helm_import_repository(<a href="#helm_import_repository-name">name</a>, <a href="#helm_import_repository-chart_name">chart_name</a>, <a href="#helm_import_repository-repo_mapping">repo_mapping</a>, <a href="#helm_import_repository-repository">repository</a>, <a href="#helm_import_repository-sha256">sha256</a>, <a href="#helm_import_repository-url">url</a>, <a href="#helm_import_repository-version">version</a>)
-</pre>
-
-A rule for fetching external Helm charts from an arbitrary repository.
-
-**ATTRIBUTES**
-
-
-| Name  | Description | Type | Mandatory | Default |
-| :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="helm_import_repository-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="helm_import_repository-chart_name"></a>chart_name |  Chart name to import.   | String | optional |  `""`  |
-| <a id="helm_import_repository-repo_mapping"></a>repo_mapping |  A dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.<p>For example, an entry `"@foo": "@bar"` declares that, for any time this repository depends on `@foo` (such as a dependency on `@foo//some:target`, it should actually resolve that dependency within globally-declared `@bar` (`@bar//some:target`).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | required |  |
-| <a id="helm_import_repository-repository"></a>repository |  Chart repository url where to locate the requested chart.   | String | required |  |
-| <a id="helm_import_repository-sha256"></a>sha256 |  The expected SHA-256 hash of the chart imported.   | String | optional |  `""`  |
-| <a id="helm_import_repository-url"></a>url |  The url where the chart can be directly downloaded.   | String | optional |  `""`  |
-| <a id="helm_import_repository-version"></a>version |  Specify a version constraint for the chart version to use.   | String | optional |  `""`  |
-
-
 <a id="helm_install"></a>
 
 ## helm_install
@@ -435,5 +411,29 @@ An aspect for running `helm lint` on helm package targets
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_lint_aspect-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+
+
+<a id="helm_import_repository"></a>
+
+## helm_import_repository
+
+<pre>
+helm_import_repository(<a href="#helm_import_repository-name">name</a>, <a href="#helm_import_repository-chart_name">chart_name</a>, <a href="#helm_import_repository-repo_mapping">repo_mapping</a>, <a href="#helm_import_repository-repository">repository</a>, <a href="#helm_import_repository-sha256">sha256</a>, <a href="#helm_import_repository-url">url</a>, <a href="#helm_import_repository-version">version</a>)
+</pre>
+
+A rule for fetching external Helm charts from an arbitrary repository.
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="helm_import_repository-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_import_repository-chart_name"></a>chart_name |  Chart name to import.   | String | optional |  `""`  |
+| <a id="helm_import_repository-repo_mapping"></a>repo_mapping |  In `WORKSPACE` context only: a dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.<br><br>For example, an entry `"@foo": "@bar"` declares that, for any time this repository depends on `@foo` (such as a dependency on `@foo//some:target`, it should actually resolve that dependency within globally-declared `@bar` (`@bar//some:target`).<br><br>This attribute is _not_ supported in `MODULE.bazel` context (when invoking a repository rule inside a module extension's implementation function).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  |
+| <a id="helm_import_repository-repository"></a>repository |  Chart repository url where to locate the requested chart.   | String | required |  |
+| <a id="helm_import_repository-sha256"></a>sha256 |  The expected SHA-256 hash of the chart imported.   | String | optional |  `""`  |
+| <a id="helm_import_repository-url"></a>url |  The url where the chart can be directly downloaded.   | String | optional |  `""`  |
+| <a id="helm_import_repository-version"></a>version |  Specify a version constraint for the chart version to use.   | String | optional |  `""`  |
 
 
