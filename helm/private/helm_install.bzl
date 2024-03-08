@@ -94,11 +94,6 @@ helm_install = rule(
             providers = [HelmPackageInfo],
             mandatory = True,
         ),
-        "data": attr.label_list(
-            doc = "Additional data to pass to `helm install`.",
-            allow_files = True,
-            mandatory = False,
-        ),
         "_runner": attr.label(
             doc = "A process wrapper to use for performing `helm install`.",
             executable = True,
@@ -207,11 +202,6 @@ helm_upgrade = rule(
             providers = [HelmPackageInfo],
             mandatory = True,
         ),
-        "data": attr.label_list(
-            doc = "Additional data to pass to `helm upgrade`.",
-            allow_files = True,
-            mandatory = False,
-        ),
         "_runner": attr.label(
             doc = "A process wrapper to use for performing `helm install`.",
             executable = True,
@@ -301,11 +291,6 @@ helm_uninstall = rule(
         ),
         "opts": attr.string_list(
             doc = "Additional arguments to pass to `helm uninstall`.",
-        ),
-        "data": attr.label_list(
-            doc = "Additional data to pass to `helm uninstall`.",
-            allow_files = True,
-            mandatory = False,
         ),
         "_runner": attr.label(
             doc = "A process wrapper to use for performing `helm install`.",
