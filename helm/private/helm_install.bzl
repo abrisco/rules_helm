@@ -3,6 +3,9 @@
 load("//helm:providers.bzl", "HelmPackageInfo")
 load("//helm/private:helm_utils.bzl", _is_stamping_enabled = "is_stamping_enabled")
 
+def _expand_opts(ctx, opts, targets):
+    return [ctx.expand_location(x, targets = targets) for x in opts]
+
 def _helm_install_impl(ctx):
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
 
@@ -24,9 +27,9 @@ def _helm_install_impl(ctx):
         image_runfiles.append(image[DefaultInfo].default_runfiles)
 
     args = []
-    args.extend(ctx.attr.helm_opts)
+    args.extend(_expand_opts(ctx, ctx.attr.helm_opts, ctx.attr.data))
     args.append("install")
-    args.extend(ctx.attr.opts)
+    args.extend(_expand_opts(ctx, ctx.attr.opts, ctx.attr.data))
     args.append(install_name)
     args.append(pkg_info.chart.short_path)
 
@@ -46,7 +49,7 @@ def _helm_install_impl(ctx):
         "HELM_BIN": toolchain.helm.short_path,
     }
 
-    runfiles = [runner_wrapper, ctx.executable._runner, toolchain.helm, pkg_info.chart] + image_pushers
+    runfiles = [runner_wrapper, ctx.executable._runner, toolchain.helm, pkg_info.chart] + image_pushers + ctx.files.data
     if is_stamping_enabled:
         runfiles.extend([ctx.info_file, ctx.version_file])
         environment["STABLE_STATUS_FILE"] = ctx.info_file.short_path
@@ -85,6 +88,11 @@ helm_install = rule(
             doc = "The helm package to install.",
             providers = [HelmPackageInfo],
             mandatory = True,
+        ),
+        "data": attr.label_list(
+            doc = "Additional data to pass to `helm install`.",
+            allow_files = True,
+            mandatory = False,
         ),
         "_runner": attr.label(
             doc = "A process wrapper to use for performing `helm install`.",
@@ -128,9 +136,9 @@ def _helm_upgrade_impl(ctx):
         image_runfiles.append(image[DefaultInfo].default_runfiles)
 
     args = []
-    args.extend(ctx.attr.helm_opts)
+    args.extend(_expand_opts(ctx, ctx.attr.helm_opts, ctx.attr.data))
     args.append("upgrade")
-    args.extend(ctx.attr.opts)
+    args.extend(_expand_opts(ctx, ctx.attr.opts, ctx.attr.data))
     args.append(install_name)
     args.append(pkg_info.chart.short_path)
 
@@ -149,7 +157,7 @@ def _helm_upgrade_impl(ctx):
         "HELM_BIN": toolchain.helm.short_path,
     }
 
-    runfiles = [runner_wrapper, ctx.executable._runner, toolchain.helm, pkg_info.chart] + image_pushers
+    runfiles = [runner_wrapper, ctx.executable._runner, toolchain.helm, pkg_info.chart] + image_pushers + ctx.files.data
     if is_stamping_enabled:
         runfiles.extend([ctx.info_file, ctx.version_file])
         environment["STABLE_STATUS_FILE"] = ctx.info_file.short_path
@@ -189,6 +197,11 @@ helm_upgrade = rule(
             providers = [HelmPackageInfo],
             mandatory = True,
         ),
+        "data": attr.label_list(
+            doc = "Additional data to pass to `helm upgrade`.",
+            allow_files = True,
+            mandatory = False,
+        ),
         "_runner": attr.label(
             doc = "A process wrapper to use for performing `helm install`.",
             executable = True,
@@ -221,9 +234,9 @@ def _helm_uninstall_impl(ctx):
     install_name = ctx.attr.install_name or ctx.label.name
 
     args = []
-    args.extend(ctx.attr.helm_opts)
+    args.extend(_expand_opts(ctx, ctx.attr.helm_opts, ctx.attr.data))
     args.append("uninstall")
-    args.extend(ctx.attr.opts)
+    args.extend(_expand_opts(ctx, ctx.attr.opts, ctx.attr.data))
     args.append(install_name)
 
     ctx.actions.expand_template(
@@ -243,7 +256,7 @@ def _helm_uninstall_impl(ctx):
         "HELM_BIN": toolchain.helm.short_path,
     }
 
-    runfiles = [runner_wrapper, ctx.executable._runner, toolchain.helm]
+    runfiles = [runner_wrapper, ctx.executable._runner, toolchain.helm] + ctx.files.data
     if is_stamping_enabled:
         runfiles.extend([ctx.info_file, ctx.version_file])
         environment["STABLE_STATUS_FILE"] = ctx.info_file.short_path
@@ -273,6 +286,11 @@ helm_uninstall = rule(
         ),
         "opts": attr.string_list(
             doc = "Additional arguments to pass to `helm uninstall`.",
+        ),
+        "data": attr.label_list(
+            doc = "Additional data to pass to `helm uninstall`.",
+            allow_files = True,
+            mandatory = False,
         ),
         "_runner": attr.label(
             doc = "A process wrapper to use for performing `helm install`.",
