@@ -102,7 +102,7 @@ A rule that allows pre-packaged Helm charts to be used within Bazel.
 ## helm_install
 
 <pre>
-helm_install(<a href="#helm_install-name">name</a>, <a href="#helm_install-helm_opts">helm_opts</a>, <a href="#helm_install-install_name">install_name</a>, <a href="#helm_install-opts">opts</a>, <a href="#helm_install-package">package</a>)
+helm_install(<a href="#helm_install-name">name</a>, <a href="#helm_install-data">data</a>, <a href="#helm_install-helm_opts">helm_opts</a>, <a href="#helm_install-install_name">install_name</a>, <a href="#helm_install-opts">opts</a>, <a href="#helm_install-package">package</a>)
 </pre>
 
 Produce a script for performing a helm install action
@@ -113,6 +113,7 @@ Produce a script for performing a helm install action
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_install-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_install-data"></a>data |  Additional data to pass to `helm install`.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_install-helm_opts"></a>helm_opts |  Additional arguments to pass to `helm` during install.   | List of strings | optional |  `[]`  |
 | <a id="helm_install-install_name"></a>install_name |  The name to use for the `helm install` command. The target name will be used if unset.   | String | optional |  `""`  |
 | <a id="helm_install-opts"></a>opts |  Additional arguments to pass to `helm install`.   | List of strings | optional |  `[]`  |
@@ -229,7 +230,7 @@ A helm toolchain
 ## helm_uninstall
 
 <pre>
-helm_uninstall(<a href="#helm_uninstall-name">name</a>, <a href="#helm_uninstall-helm_opts">helm_opts</a>, <a href="#helm_uninstall-install_name">install_name</a>, <a href="#helm_uninstall-opts">opts</a>)
+helm_uninstall(<a href="#helm_uninstall-name">name</a>, <a href="#helm_uninstall-data">data</a>, <a href="#helm_uninstall-helm_opts">helm_opts</a>, <a href="#helm_uninstall-install_name">install_name</a>, <a href="#helm_uninstall-opts">opts</a>)
 </pre>
 
 Produce a script for performing a helm uninstall action
@@ -240,6 +241,7 @@ Produce a script for performing a helm uninstall action
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_uninstall-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_uninstall-data"></a>data |  Additional data to pass to `helm uninstall`.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_uninstall-helm_opts"></a>helm_opts |  Additional arguments to pass to `helm` during install.   | List of strings | optional |  `[]`  |
 | <a id="helm_uninstall-install_name"></a>install_name |  The name to use for the `helm install` command. The target name will be used if unset.   | String | optional |  `""`  |
 | <a id="helm_uninstall-opts"></a>opts |  Additional arguments to pass to `helm uninstall`.   | List of strings | optional |  `[]`  |
@@ -250,7 +252,7 @@ Produce a script for performing a helm uninstall action
 ## helm_upgrade
 
 <pre>
-helm_upgrade(<a href="#helm_upgrade-name">name</a>, <a href="#helm_upgrade-helm_opts">helm_opts</a>, <a href="#helm_upgrade-install_name">install_name</a>, <a href="#helm_upgrade-opts">opts</a>, <a href="#helm_upgrade-package">package</a>)
+helm_upgrade(<a href="#helm_upgrade-name">name</a>, <a href="#helm_upgrade-data">data</a>, <a href="#helm_upgrade-helm_opts">helm_opts</a>, <a href="#helm_upgrade-install_name">install_name</a>, <a href="#helm_upgrade-opts">opts</a>, <a href="#helm_upgrade-package">package</a>)
 </pre>
 
 Produce a script for performing a helm upgrade action
@@ -261,6 +263,7 @@ Produce a script for performing a helm upgrade action
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_upgrade-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_upgrade-data"></a>data |  Additional data to pass to `helm upgrade`.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_upgrade-helm_opts"></a>helm_opts |  Additional arguments to pass to `helm` during upgrade.   | List of strings | optional |  `[]`  |
 | <a id="helm_upgrade-install_name"></a>install_name |  The name to use for the `helm upgrade` command. The target name will be used if unset.   | String | optional |  `""`  |
 | <a id="helm_upgrade-opts"></a>opts |  Additional arguments to pass to `helm upgrade`.   | List of strings | optional |  `[]`  |
@@ -320,8 +323,8 @@ str: A json encoded string which represents `Chart.yaml` contents.
 
 <pre>
 helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">chart</a>, <a href="#helm_chart-chart_json">chart_json</a>, <a href="#helm_chart-values">values</a>, <a href="#helm_chart-values_json">values_json</a>, <a href="#helm_chart-substitutions">substitutions</a>, <a href="#helm_chart-templates">templates</a>, <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>,
-           <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-install_opts">install_opts</a>, <a href="#helm_chart-upgrade_opts">upgrade_opts</a>, <a href="#helm_chart-uninstall_opts">uninstall_opts</a>, <a href="#helm_chart-stamp">stamp</a>,
-           <a href="#helm_chart-kwargs">kwargs</a>)
+           <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-install_opts">install_opts</a>, <a href="#helm_chart-upgrade_opts">upgrade_opts</a>, <a href="#helm_chart-uninstall_opts">uninstall_opts</a>, <a href="#helm_chart-data">data</a>,
+           <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">kwargs</a>)
 </pre>
 
 Rules for producing a helm package and some convenience targets.
@@ -356,6 +359,7 @@ Rules for producing a helm package and some convenience targets.
 | <a id="helm_chart-install_opts"></a>install_opts |  Additional options to pass to `helm install`.   |  `[]` |
 | <a id="helm_chart-upgrade_opts"></a>upgrade_opts |  Additional options to pass to `helm upgrade`.   |  `[]` |
 | <a id="helm_chart-uninstall_opts"></a>uninstall_opts |  Additional options to pass to `helm uninstall`.   |  `[]` |
+| <a id="helm_chart-data"></a>data |  Additional runtime data to pass to the helm templates.   |  `[]` |
 | <a id="helm_chart-stamp"></a>stamp |  Whether to encode build information into the helm chart.   |  `None` |
 | <a id="helm_chart-kwargs"></a>kwargs |  Additional keyword arguments for `helm_package`.   |  none |
 

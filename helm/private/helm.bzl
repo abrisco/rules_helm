@@ -20,6 +20,7 @@ def helm_chart(
         install_opts = [],
         upgrade_opts = [],
         uninstall_opts = [],
+        data = [],
         stamp = None,
         **kwargs):
     """Rules for producing a helm package and some convenience targets.
@@ -50,6 +51,7 @@ def helm_chart(
         install_opts (list, optional): Additional options to pass to `helm install`.
         uninstall_opts (list, optional): Additional options to pass to `helm uninstall`.
         upgrade_opts (list, optional): Additional options to pass to `helm upgrade`.
+        data (list, optional): Additional runtime data to pass to the helm templates.
         stamp (int):  Whether to encode build information into the helm chart.
         **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
@@ -93,6 +95,7 @@ def helm_chart(
         package = name,
         helm_opts = helm_opts,
         opts = install_opts,
+        data = data,
         **kwargs
     )
 
@@ -102,6 +105,7 @@ def helm_chart(
         package = name,
         helm_opts = helm_opts,
         opts = upgrade_opts,
+        data = data,
         **kwargs
     )
 
@@ -110,5 +114,6 @@ def helm_chart(
         install_name = install_name,
         helm_opts = helm_opts,
         opts = uninstall_opts,
+        data = data,
         **kwargs
     )
