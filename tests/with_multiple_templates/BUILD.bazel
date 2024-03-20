@@ -1,0 +1,26 @@
+load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test")
+
+copy_to_directory(
+    name = "templates",
+    srcs = [
+        "//tests/with_multiple_templates/extended:templates",
+        "//tests/with_multiple_templates/original:templates",
+    ],
+    root_paths = [
+        "tests/with_multiple_templates/extended/templates",
+        "tests/with_multiple_templates/original/templates",
+    ],
+)
+
+helm_chart(
+    name = "multiple",
+    chart = "Chart.yaml",
+    templates = [":templates"],
+    values = "values.yaml",
+)
+
+helm_lint_test(
+    name = "multiple_test",
+    chart = ":multiple",
+)

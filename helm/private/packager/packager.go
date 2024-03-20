@@ -415,46 +415,83 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 
 	// Copy all templates
 	for templatePath, templateShortpath := range templates {
+		fileInfo, err := os.Stat(templatePath)
+		if err != nil {
+			return fmt.Errorf("Error getting info for %s: %w", templatePath, err)
+		}
 
-		// Locate the templates directory so we can start copying files
-		// into the new templates directory at the right location
-		if len(templatesRoot) == 0 {
-			var current = filepath.Clean(templateShortpath)
-			for {
-				if len(current) == 0 {
-					return errors.New("Failed to find templates directory")
+		if fileInfo.IsDir() {
+			destDirBasePath := filepath.Join(templatesDir) // Destination is the base templates directory
+
+			// Walk the source directory and copy each item to the destination
+			err := filepath.Walk(templatePath, func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					return fmt.Errorf("Error during walking the directory %s: %w", path, err)
 				}
-				parent := filepath.Dir(current)
-				if filepath.Base(parent) == "templates" {
-					templatesRoot = filepath.Clean(parent)
-					break
+
+				relPath, err := filepath.Rel(templatePath, path)
+				if err != nil {
+					return fmt.Errorf("Error calculating relative path from %s to %s: %w", templatePath, path, err)
 				}
-				current = parent
+
+				targetPath := filepath.Join(destDirBasePath, relPath)
+
+				if info.IsDir() {
+					return os.MkdirAll(targetPath, 0750)
+				} else {
+					if err := os.MkdirAll(filepath.Dir(targetPath), 0750); err != nil {
+						return fmt.Errorf("Error creating directory %s: %w", targetPath, err)
+					}
+					// Copy the file to the target path
+					return copyFile(path, targetPath)
+				}
+			})
+
+			if err != nil {
+				return fmt.Errorf("Error copying directory contents from %s to %s: %w", templatePath, destDirBasePath, err)
+			}
+		} else {
+			// Locate the templates directory so we can start copying files
+			// into the new templates directory at the right location
+			if len(templatesRoot) == 0 {
+				var current = filepath.Clean(templateShortpath)
+				for {
+					if len(current) == 0 {
+						return errors.New("Failed to find templates directory")
+					}
+					parent := filepath.Dir(current)
+					if filepath.Base(parent) == "templates" {
+						templatesRoot = filepath.Clean(parent)
+						break
+					}
+					current = parent
+				}
+			}
+
+			if !strings.HasPrefix(filepath.Clean(templateShortpath), templatesRoot) {
+				return fmt.Errorf(
+					"Template path (%s) does not start with templates root (%s)",
+					filepath.Clean(templateShortpath), templatesRoot)
+			}
+
+			targetFile, err := filepath.Rel(templatesRoot, templateShortpath)
+			if err != nil {
+				return err
+			}
+
+			templateDest := filepath.Join(templatesDir, targetFile)
+			templateDestDir := filepath.Dir(templateDest)
+			err = os.MkdirAll(templateDestDir, 0700)
+			if err != nil {
+				return fmt.Errorf("Error creating template parent directory %s: %w", templateDestDir, err)
+			}
+
+			err = copyFile(templatePath, templateDest)
+			if err != nil {
+				return fmt.Errorf("Error copying template %s: %w", templatePath, err)
 			}
 		}
 
-		if !strings.HasPrefix(filepath.Clean(templateShortpath), templatesRoot) {
-			return fmt.Errorf(
-				"Template path (%s) does not start with templates root (%s)",
-				filepath.Clean(templateShortpath), templatesRoot)
-		}
-
-		targetFile, err := filepath.Rel(templatesRoot, templateShortpath)
-		if err != nil {
-			return err
-		}
-
-		templateDest := filepath.Join(templatesDir, targetFile)
-		templateDestDir := filepath.Dir(templateDest)
-		err = os.MkdirAll(templateDestDir, 0700)
-		if err != nil {
-			return fmt.Errorf("Error creating template parent directory %s: %w", templateDestDir, err)
-		}
-
-		err = copyFile(templatePath, templateDest)
-		if err != nil {
-			return fmt.Errorf("Error copying template %s: %w", templatePath, err)
-		}
 	}
 
 	// Copy over any dependency chart files
