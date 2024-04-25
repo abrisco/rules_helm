@@ -2,7 +2,7 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//helm:repositories.bzl", "helm_toolchain_repository")
+load("//helm:repositories.bzl", "helm_host_alias_repository", "helm_toolchain_repository")
 load("//helm/private:versions.bzl", "DEFAULT_HELM_URL_TEMPLATES", "DEFAULT_HELM_VERSION", "HELM_VERSIONS")
 load("//tests:test_deps.bzl", "helm_test_deps")
 
@@ -55,6 +55,11 @@ def _register_toolchains(version, helm_url_templates):
             platform = platform,
             exec_compatible_with = helm_version_info[platform].constraints,
         )
+
+    maybe(
+        helm_host_alias_repository,
+        name = "helm",
+    )
 
 def _register_go_yaml():
     maybe(
