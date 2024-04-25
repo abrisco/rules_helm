@@ -22,6 +22,7 @@ helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
 helm.options()
 use_repo(
     helm,
+    "helm",
     "helm_darwin_amd64_toolchain",
     "helm_darwin_arm64_toolchain",
     "helm_linux_amd64_toolchain",

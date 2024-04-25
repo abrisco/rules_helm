@@ -51,6 +51,12 @@ bazel_dep(name = "rules_helm", version = "{version}")
 - [rules_helm_dependencies](#rules_helm_dependencies)
 - [chart_content](#chart_content)
 
+## Run as a tool
+
+```bash
+bazel run @helm//:helm -- ...
+```
+
 """
 
 load(
