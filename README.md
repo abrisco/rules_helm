@@ -59,6 +59,18 @@ bazel_dep(name = "rules_helm", version = "{version}")
 bazel run @helm//:helm -- ...
 ```
 
+## Use in a genrule
+
+```starlark
+genrule(
+    name = "genrule",
+    srcs = [":chart"],
+    outs = ["template.yaml"],
+    cmd = "$(HELM_BIN) template my-chart $(execpath :chart) > $@",
+    toolchains = ["@rules_helm//helm:current_toolchain"],
+)
+```
+
 <a id="chart_file"></a>
 
 ## chart_file
