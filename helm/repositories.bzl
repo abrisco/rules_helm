@@ -2,6 +2,7 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
+load("//3rdparty/bazel-lib:repo_utils.bzl", "repo_utils")
 load("//helm/private:versions.bzl", "DEFAULT_HELM_URL_TEMPLATES", "DEFAULT_HELM_VERSION", "HELM_VERSIONS")
 
 _HELM_TAR_BUILD_CONTENT = """\
@@ -124,12 +125,9 @@ exports_files(["helm{ext}"])
         ext = ext,
     ))
 
-    platform = "{}_{}".format(repository_ctx.os.name, repository_ctx.os.arch)
-    platform_repo_name = _helm_bin_repo_name(platform)
-
-    repository_ctx.symlink("../{platform_repo_name}/helm{ext}".format(
+    repository_ctx.symlink("../{name}_{platform}/helm{ext}".format(
         name = repository_ctx.attr.name,
-        platform_repo_name = platform_repo_name,
+        platform = repo_utils.platform(repository_ctx),
         ext = ext,
     ), "helm{ext}".format(ext = ext))
 
