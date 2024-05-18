@@ -1,12 +1,12 @@
 """Constants for accessing helm binaries"""
 
-DEFAULT_HELM_VERSION = "3.13.3"
+DEFAULT_HELM_VERSION = "3.15.0"
 
 DEFAULT_HELM_URL_TEMPLATES = [
     "https://get.helm.sh/helm-v{version}-{platform}.{compression}",
 ]
 
-_CONSTRAINTS = {
+CONSTRAINTS = {
     "darwin-amd64": ["@platforms//os:macos", "@platforms//cpu:x86_64"],
     "darwin-arm64": ["@platforms//os:macos", "@platforms//cpu:aarch64"],
     "linux-amd64": ["@platforms//os:linux", "@platforms//cpu:x86_64"],
@@ -17,795 +17,303 @@ _CONSTRAINTS = {
     "windows-amd64": ["@platforms//os:windows"],
 }
 
-def _artifact(platform, sha256):
-    return struct(
-        sha256 = sha256,
-        constraints = _CONSTRAINTS[platform],
-    )
-
 HELM_VERSIONS = {
     "2.17.0": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "104dcda352985306d04d5d23aaf5252d00a85c083f3667fd013991d82f57ae83",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "f3bec3c7c55f6a9eb9e6586b8c503f370af92fe987fcbf741f37707606d70296",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "c3ebe8fa04b4e235eb7a9ab030a98d3002f93ecb842f0a8741f98383a9493d7f",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "048147ef523f88753ba34170f2f6acd01ac6ec688c6f5973b0e5ffb0b113a232",
-        ),
+        "darwin-amd64": "sha256-EE3No1KYUwbQTV0jqvUlLQCoXAg/Nmf9ATmR2C9XroM=",
+        "linux-amd64": "sha256-877Dx8Vfap655lhrjFA/Nwr5L+mH/L90HzdwdgbXApY=",
+        "linux-arm64": "sha256-w+vo+gS04jXrepqwMKmNMAL5PsuELwqHQfmDg6lJPX8=",
+        "windows-amd64": "sha256-BIFH71I/iHU7o0Fw8vas0BrG7GiMb1lzsOX/sLETojI=",
     },
     "3.10.0": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "1e7fd528482ac2ef2d79fe300724b3e07ff6f846a2a9b0b0fe6f5fa05691786b",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "f7f6558ebc8211824032a7fdcf0d55ad064cb33ec1eeec3d18057b9fe2e04dbe",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "bf56beb418bb529b5e0d6d43d56654c5a03f89c98400b409d1013a33d9586474",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "3b72f5f8a60772fb156d0a4ab93272e8da7ef4d18e6421a7020d7c019f521fc1",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "9d841d55eb7cd6e07be0364bbfa85bceca7e184d50b43b13d20f044403937309",
-        ),
+        "darwin-amd64": "sha256-Hn/VKEgqwu8tef4wBySz4H/2+EaiqbCw/m9foFaReGs=",
+        "darwin-arm64": "sha256-9/ZVjryCEYJAMqf9zw1VrQZMsz7B7uw9GAV7n+LgTb4=",
+        "linux-amd64": "sha256-v1a+tBi7UpteDW1D1WZUxaA/icmEALQJ0QE6M9lYZHQ=",
+        "linux-arm64": "sha256-O3L1+KYHcvsVbQpKuTJy6Np+9NGOZCGnAg18AZ9SH8E=",
+        "windows-amd64": "sha256-nYQdVet81uB74DZLv6hbzsp+GE1QtDsT0g8ERAOTcwk=",
     },
     "3.10.1": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "e7f2db0df45a5011c1df8c82efde1e306a93a31eba4696d27cd751917e549ac6",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "28a079a61c393d125c5d5e1a8e20a04b72c709ccfa8e7822f3f17bb1ad2bbc22",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "c12d2cd638f2d066fec123d0bd7f010f32c643afdf288d39a4610b1f9cb32af3",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "309f56a35185023262b4f20f7315d4e60854b517243444b34f5a458c81b33009",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "d04b38d439ab8655abb4cb9ccc1efa8a3fe95f3f68af46d9137c6b7985491833",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "fb75a02d8a6e9ba6dd458f47dc0771a0f15c1842b6f6e2928c9136e676657993",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "855ab37613b393c68d50b4355273df2322f27db08b1deca8807bac80343a8a64",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "4c6f89f005a86665e3e90c28d36446434945594aac960a8d5a2d1c4fb1e53522",
-        ),
+        "darwin-amd64": "sha256-5/LbDfRaUBHB34yC794eMGqTox66RpbSfNdRkX5UmsY=",
+        "darwin-arm64": "sha256-KKB5phw5PRJcXV4ajiCgS3LHCcz6jngi8/F7sa0rvCI=",
+        "linux-amd64": "sha256-wS0s1jjy0Gb+wSPQvX8BDzLGQ6/fKI05pGELH5yzKvM=",
+        "linux-arm": "sha256-MJ9Wo1GFAjJitPIPcxXU5ghUtRckNESzT1pFjIGzMAk=",
+        "linux-arm64": "sha256-0Es41DmrhlWrtMuczB76ij/pXz9or0bZE3xreYVJGDM=",
+        "linux-i386": "sha256-+3WgLYpum6bdRY9H3AdxoPFcGEK29uKSjJE25nZleZM=",
+        "linux-ppc64le": "sha256-hVqzdhOzk8aNULQ1UnPfIyLyfbCLHeyogHusgDQ6imQ=",
+        "windows-amd64": "sha256-TG+J8AWoZmXj6Qwo02RGQ0lFWUqslgqNWi0cT7HlNSI=",
     },
     "3.10.2": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "e889960e4c1d7e2dfdb91b102becfaf22700cb86dc3e3553d9bebd7bab5a3803",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "460441eea1764ca438e29fa0e38aa0d2607402f753cb656a4ab0da9223eda494",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "2315941a13291c277dac9f65e75ead56386440d3907e0540bf157ae70f188347",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "25af344f46348958baa1c758cdf3b204ede3ddc483be1171ed3738d47efd0aae",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "57fa17b6bb040a3788116557a72579f2180ea9620b4ee8a9b7244e5901df02e4",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "ac9cbef2ec1237e2723ee8d3a92d1c4525a2da7cecc11336ba67de9bb6b473f0",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "53a578b84155d31c3e62dd93a88586b75e876dae82c7912c895ee5a574fa6209",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "f1a3190adecc26270bbef4f3ab2d1a56509f9d8df95413cdd6e3151f6f367862",
-        ),
+        "darwin-amd64": "sha256-6ImWDkwdfi39uRsQK+z68icAy4bcPjVT2b69e6taOAM=",
+        "darwin-arm64": "sha256-RgRB7qF2TKQ44p+g44qg0mB0AvdTy2VqSrDakiPtpJQ=",
+        "linux-amd64": "sha256-IxWUGhMpHCd9rJ9l516tVjhkQNOQfgVAvxV65w8Yg0c=",
+        "linux-arm": "sha256-Ja80T0Y0iVi6ocdYzfOyBO3j3cSDvhFx7Tc41H79Cq4=",
+        "linux-arm64": "sha256-V/oXtrsECjeIEWVXpyV58hgOqWILTuiptyROWQHfAuQ=",
+        "linux-i386": "sha256-rJy+8uwSN+JyPujTqS0cRSWi2nzswRM2umfem7a0c/A=",
+        "linux-ppc64le": "sha256-U6V4uEFV0xw+Yt2TqIWGt16Hba6Cx5EsiV7lpXT6Ygk=",
+        "windows-amd64": "sha256-8aMZCt7MJicLvvTzqy0aVlCfnY35VBPN1uMVH282eGI=",
     },
     "3.10.3": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "77a94ebd37eab4d14aceaf30a372348917830358430fcd7e09761eed69f08be5",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "4f3490654349d6fee8d4055862efdaaf9422eca1ffd2a15393394fd948ae3377",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "950439759ece902157cf915b209b8d694e6f675eaab5099fb7894f30eeaee9a2",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "dca718eb68c72c51fc7157c4c2ebc8ce7ac79b95fc9355c5427ded99e913ec4c",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "260cda5ff2ed5d01dd0fd6e7e09bc80126e00d8bdc55f3269d05129e32f6f99d",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "592e98a492cb782aa7cd67e9afad76e51cd68f5160367600fe542c2d96aa0ad4",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "93cdf398abc68e388d1b46d49d8e1197544930ecd3e81cc58d0a87a4579d60ed",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "5d97aa26830c1cd6c520815255882f148040587fd7cdddb61ef66e4c081566e0",
-        ),
+        "darwin-amd64": "sha256-d6lOvTfqtNFKzq8wo3I0iReDA1hDD81+CXYe7Wnwi+U=",
+        "darwin-arm64": "sha256-TzSQZUNJ1v7o1AVYYu/ar5Qi7KH/0qFTkzlP2UiuM3c=",
+        "linux-amd64": "sha256-lQQ5dZ7OkCFXz5FbIJuNaU5vZ16qtQmft4lPMO6u6aI=",
+        "linux-arm": "sha256-3KcY62jHLFH8cVfEwuvIznrHm5X8k1XFQn3tmekT7Ew=",
+        "linux-arm64": "sha256-JgzaX/LtXQHdD9bn4JvIASbgDYvcVfMmnQUSnjL2+Z0=",
+        "linux-i386": "sha256-WS6YpJLLeCqnzWfpr6125RzWj1FgNnYA/lQsLZaqCtQ=",
+        "linux-ppc64le": "sha256-k83zmKvGjjiNG0bUnY4Rl1RJMOzT6BzFjQqHpFedYO0=",
+        "windows-amd64": "sha256-XZeqJoMMHNbFIIFSVYgvFIBAWH/Xzd22HvZuTAgVZuA=",
     },
     "3.11.0": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "5a3d13545a302eb2623236353ccd3eaa01150c869f4d7f7a635073847fd7d932",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "f4717f8d1dab79bace3ff5d9d48bebef62310421fd479205ef54a56204f97415",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "6c3440d829a56071a4386dd3ce6254eab113bc9b1fe924a6ee99f7ff869b9e0b",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "cddbef72886c82a123038883f32b04e739cc4bd7b9e5f869740d51e50a38be01",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "57d36ff801ce8c0201ce9917c5a2d3b4da33e5d4ea154320962c7d6fb13e1f2c",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "fad897763f3b965bc4d75c8f95748ebc0330a5859d9ea170a4885571facacdb1",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "6481a51095f408773212ab53edc2ead8a70e39eba67c2491e11c4229a251f9b5",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "55477fa4295fb3043835397a19e99a138bb4859fbe7cd2d099de28df9d8786f1",
-        ),
+        "darwin-amd64": "sha256-Wj0TVFowLrJiMjY1PM0+qgEVDIafTX96Y1BzhH/X2TI=",
+        "darwin-arm64": "sha256-9HF/jR2rebrOP/XZ1Ivr72IxBCH9R5IF71SlYgT5dBU=",
+        "linux-amd64": "sha256-bDRA2CmlYHGkOG3TzmJU6rETvJsf6SSm7pn3/4abngs=",
+        "linux-arm": "sha256-zdvvcohsgqEjA4iD8ysE5znMS9e55fhpdA1R5Qo4vgE=",
+        "linux-arm64": "sha256-V9Nv+AHOjAIBzpkXxaLTtNoz5dTqFUMglix9b7E+Hyw=",
+        "linux-i386": "sha256-+tiXdj87llvE11yPlXSOvAMwpYWdnqFwpIhVcfrKzbE=",
+        "linux-ppc64le": "sha256-ZIGlEJX0CHcyEqtT7cLq2KcOOeumfCSR4RxCKaJR+bU=",
+        "windows-amd64": "sha256-VUd/pClfswQ4NTl6GemaE4u0hZ++fNLQmd4o352HhvE=",
     },
     "3.11.1": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "2548a90e5cc957ccc5016b47060665a9d2cd4d5b4d61dcc32f5de3144d103826",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "43d0198a7a2ea2639caafa81bb0596c97bee2d4e40df50b36202343eb4d5c46b",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "0b1be96b66fab4770526f136f5f1a385a47c41923d33aab0dcb500e0f6c1bf7c",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "77b797134ea9a121f2ede9d159a43a8b3895a9ff92cc24b71b77fb726d9eba6d",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "919173e8fb7a3b54d76af9feb92e49e86d5a80c5185020bae8c393fa0f0de1e8",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "1581a4ce9d0014c49a3b2c6421f048d5c600e8cceced636eb4559073c335af0b",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "6ab8f2e253c115b17eda1e10e96d1637047efd315e9807bcb1d0d0bcad278ab7",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "bc37d5d283e57c5dfa94f92ff704c8e273599ff8df3f8132cef5ca73f6a23d0a",
-        ),
+        "darwin-amd64": "sha256-JUipDlzJV8zFAWtHBgZlqdLNTVtNYdzDL13jFE0QOCY=",
+        "darwin-arm64": "sha256-Q9AZinouomOcqvqBuwWWyXvuLU5A31CzYgI0PrTVxGs=",
+        "linux-amd64": "sha256-Cxvpa2b6tHcFJvE29fGjhaR8QZI9M6qw3LUA4PbBv3w=",
+        "linux-arm": "sha256-d7eXE06poSHy7enRWaQ6iziVqf+SzCS3G3f7cm2eum0=",
+        "linux-arm64": "sha256-kZFz6Pt6O1TXavn+uS5J6G1agMUYUCC66MOT+g8N4eg=",
+        "linux-i386": "sha256-FYGkzp0AFMSaOyxkIfBI1cYA6Mzs7WNutFWQc8M1rws=",
+        "linux-ppc64le": "sha256-arjy4lPBFbF+2h4Q6W0WNwR+/TFemAe8sdDQvK0nirc=",
+        "windows-amd64": "sha256-vDfV0oPlfF36lPkv9wTI4nNZn/jfP4EyzvXKc/aiPQo=",
     },
     "3.11.2": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "404938fd2c6eff9e0dab830b0db943fca9e1572cd3d7ee40904705760faa390f",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "f61a3aa55827de2d8c64a2063fd744b618b443ed063871b79f52069e90813151",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "781d826daec584f9d50a01f0f7dadfd25a3312217a14aa2fbb85107b014ac8ca",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "444b65100e224beee0a3a3a54cb19dad37388fa9217ab2782ba63551c4a2e128",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "0a60baac83c3106017666864e664f52a4e16fbd578ac009f9a85456a9241c5db",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "dee028554da99415eb19b4b1fd423db390f8f4d49e4c4cbc3df5d6f658ec7f38",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "04cbb8d053f2d8023e5cc6b771e9fa384fdd341eb7193a0fb592b7e2a036bf3d",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "bca0c5b99a0e6621032f1767e61a1723b86c5f4ef565fa58be8be6d619a4276a",
-        ),
+        "darwin-amd64": "sha256-QEk4/Sxu/54Nq4MLDblD/KnhVyzT1+5AkEcFdg+qOQ8=",
+        "darwin-arm64": "sha256-9ho6pVgn3i2MZKIGP9dEthi0Q+0GOHG3n1IGnpCBMVE=",
+        "linux-amd64": "sha256-eB2Cba7FhPnVCgHw99rf0lozEiF6FKovu4UQewFKyMo=",
+        "linux-arm": "sha256-REtlEA4iS+7go6OlTLGdrTc4j6kherJ4K6Y1UcSi4Sg=",
+        "linux-arm64": "sha256-CmC6rIPDEGAXZmhk5mT1Kk4W+9V4rACfmoVFapJBxds=",
+        "linux-i386": "sha256-3uAoVU2plBXrGbSx/UI9s5D49NSeTEy8PfXW9ljsfzg=",
+        "linux-ppc64le": "sha256-BMu40FPy2AI+XMa3cen6OE/dNB63GToPtZK34qA2vz0=",
+        "windows-amd64": "sha256-vKDFuZoOZiEDLxdn5hoXI7hsX071ZfpYvovm1hmkJ2o=",
     },
     "3.11.3": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "9d029df37664b50e427442a600e4e065fa75fd74dac996c831ac68359654b2c4",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "267e4d50b68e8854b9cc44517da9ab2f47dec39787fed9f7eba42080d61ac7f8",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "ca2d5d40d4cdfb9a3a6205dd803b5bc8def00bd2f13e5526c127e9b667974a89",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "0816db0efd033c78c3cc1c37506967947b01965b9c0739fe13ec2b1eea08f601",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "9f58e707dcbe9a3b7885c4e24ef57edfb9794490d72705b33a93fa1f3572cce4",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "09c111400d953eda371aaa6e5f0f65acc7af6c6b31a9f327414bb6f0756ea215",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "9f0a8299152ec714cee7bdf61066ba83d34d614c63e97843d30815b55c942612",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "ae146d2a90600c6958bc801213daef467237cf475e26ab3f476dfb8e0d9549b7",
-        ),
+        "darwin-amd64": "sha256-nQKd83ZktQ5CdEKmAOTgZfp1/XTayZbIMaxoNZZUssQ=",
+        "darwin-arm64": "sha256-Jn5NULaOiFS5zERRfamrL0few5eH/tn366QggNYax/g=",
+        "linux-amd64": "sha256-yi1dQNTN+5o6YgXdgDtbyN7wC9LxPlUmwSfptmeXSok=",
+        "linux-arm": "sha256-CBbbDv0DPHjDzBw3UGlnlHsBllucBzn+E+wrHuoI9gE=",
+        "linux-arm64": "sha256-n1jnB9y+mjt4hcTiTvV+37l5RJDXJwWzOpP6HzVyzOQ=",
+        "linux-i386": "sha256-CcERQA2VPto3GqpuXw9lrMevbGsxqfMnQUu28HVuohU=",
+        "linux-ppc64le": "sha256-nwqCmRUuxxTO5732EGa6g9NNYUxj6XhD0wgVtVyUJhI=",
+        "windows-amd64": "sha256-rhRtKpBgDGlYvIASE9rvRnI3z0deJqs/R237jg2VSbc=",
     },
     "3.12.0": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "8223beb796ff19b59e615387d29be8c2025c5d3aea08485a262583de7ba7d708",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "879f61d2ad245cb3f5018ab8b66a87619f195904a4df3b077c98ec0780e36c37",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "da36e117d6dbc57c8ec5bab2283222fbd108db86c83389eebe045ad1ef3e2c3b",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "1d1d3b0b6397825c3f91ec5f5e66eb415a4199ccfaf063ca399d64854897f3f0",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "658839fed8f9be2169f5df68e55cb2f0aa731a50df454caf183186766800bbd0",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "3815f4caa054be027ae1d6c17a302ee1fd7ff805d631f7ff75c9d093c41ab389",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "252d952b0e1b4ed2013710ddedf687ed5545d9f95a4fd72de0ff9617ff69155c",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "52138ba8caec50c358c7aee41aac28d6a8a037878ada3cf5ce6c1049fc772547",
-        ),
+        "darwin-amd64": "sha256-giO+t5b/GbWeYVOH0pvowgJcXTrqCEhaJiWD3nun1wg=",
+        "darwin-arm64": "sha256-h59h0q0kXLP1AYq4tmqHYZ8ZWQSk3zsHfJjsB4DjbDc=",
+        "linux-amd64": "sha256-2jbhF9bbxXyOxbqyKDIi+9EI24bIM4nuvgRa0e8+LDs=",
+        "linux-arm": "sha256-HR07C2OXglw/kexfXmbrQVpBmcz68GPKOZ1khUiX8/A=",
+        "linux-arm64": "sha256-ZYg5/tj5viFp9d9o5Vyy8KpzGlDfRUyvGDGGdmgAu9A=",
+        "linux-i386": "sha256-OBX0yqBUvgJ64dbBejAu4f1/+AXWMff/dcnQk8Qas4k=",
+        "linux-ppc64le": "sha256-JS2VKw4bTtIBNxDd7faH7VVF2flaT9ct4P+WF/9pFVw=",
+        "windows-amd64": "sha256-UhOLqMrsUMNYx67kGqwo1qigN4eK2jz1zmwQSfx3JUc=",
     },
     "3.12.1": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "f487b5d8132bd2091378258a3029e33ee10f71575b2167cdfeaf6d0144d20938",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "e82e0433589b1b5170807d6fec75baedba40620458510bbd30cdb9d2246415fe",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "1a7074f58ef7190f74ce6db5db0b70e355a655e2013c4d5db2317e63fa9e3dea",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "6ae6d1cb3b9f7faf68d5cd327eaa53c432f01e8fd67edba4e4c744dcbd8a0883",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "50548d4fedef9d8d01d1ed5a2dd5c849271d1017127417dc4c7ef6777ae68f7e",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "983addced237a8eb921c2c8c953310d92031a6ce4599632edbe7cdb2c95a701e",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "32b25dba14549a4097bf3dd62221cf6df06279ded391f7479144e3a215982aaf",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "9040f8f37c90600a51db4934c04bc9c2adc058cb2161e20b5193b3ba46de10fa",
-        ),
+        "darwin-amd64": "sha256-9Ie12BMr0gkTeCWKMCnjPuEPcVdbIWfN/q9tAUTSCTg=",
+        "darwin-arm64": "sha256-6C4EM1ibG1FwgH1v7HW67bpAYgRYUQu9MM250iRkFf4=",
+        "linux-amd64": "sha256-GnB09Y73GQ90zm212wtw41WmVeIBPE1dsjF+Y/qePeo=",
+        "linux-arm": "sha256-aubRyzuff69o1c0yfqpTxDLwHo/Wftuk5MdE3L2KCIM=",
+        "linux-arm64": "sha256-UFSNT+3vnY0B0e1aLdXISScdEBcSdBfcTH72d3rmj34=",
+        "linux-i386": "sha256-mDrdztI3qOuSHCyMlTMQ2SAxps5FmWMu2+fNsslacB4=",
+        "linux-ppc64le": "sha256-MrJduhRUmkCXvz3WIiHPbfBied7TkfdHkUTjohWYKq8=",
+        "windows-amd64": "sha256-kED483yQYApR20k0wEvJwq3AWMshYeILUZOzukbeEPo=",
     },
     "3.12.2": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "6e8bfc84a640e0dc47cc49cfc2d0a482f011f4249e2dff2a7e23c7ef2df1b64e",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "b60ee16847e28879ae298a20ba4672fc84f741410f438e645277205824ddbf55",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "2b6efaa009891d3703869f4be80ab86faa33fa83d9d5ff2f6492a8aebe97b219",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "39cc63757901eaea5f0c30b464d3253a5d034ffefcb9b9d3c9e284887b9bb381",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "cfafbae85c31afde88c69f0e5053610c8c455826081c1b2d665d9b44c31b3759",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "ecd4d0f3feb0f8448ed11e182e493e74c36572e1b52d47ecbed3e99919c8390d",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "fb0313bfd6ec5a08d8755efb7e603f76633726160040434fd885e74b6c10e387",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "35dc439baad85728dafd2be0edd4721ae5b770c5cf72c3adf9558b1415a9cae6",
-        ),
+        "darwin-amd64": "sha256-bov8hKZA4NxHzEnPwtCkgvAR9CSeLf8qfiPH7y3xtk4=",
+        "darwin-arm64": "sha256-tg7haEfiiHmuKYogukZy/IT3QUEPQ45kUncgWCTdv1U=",
+        "linux-amd64": "sha256-K276oAmJHTcDhp9L6Aq4b6oz+oPZ1f8vZJKorr6Xshk=",
+        "linux-arm": "sha256-OcxjdXkB6upfDDC0ZNMlOl0DT/78ubnTyeKEiHubs4E=",
+        "linux-arm64": "sha256-z6+66Fwxr96Ixp8OUFNhDIxFWCYIHBstZl2bRMMbN1k=",
+        "linux-i386": "sha256-7NTQ8/6w+ESO0R4YLkk+dMNlcuG1LUfsvtPpmRnIOQ0=",
+        "linux-ppc64le": "sha256-+wMTv9bsWgjYdV77fmA/dmM3JhYAQENP2IXnS2wQ44c=",
+        "windows-amd64": "sha256-NdxDm6rYVyja/Svg7dRyGuW3cMXPcsOt+VWLFBWpyuY=",
     },
     "3.12.3": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "1bdbbeec5a12dd0c1cd4efd8948a156d33e1e2f51140e2a51e1e5e7b11b81d47",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "240b0a7da9cae208000eff3d3fb95e0fa1f4903d95be62c3f276f7630b12dae1",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "1b2313cd198d45eab00cc37c38f6b1ca0a948ba279c29e322bdf426d406129b5",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "6b67cf5fc441c1fcb4a860629b2ec613d0e6c8ac536600445f52a033671e985e",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "79ef06935fb47e432c0c91bdefd140e5b543ec46376007ca14a52e5ed3023088",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "cb789c4753bf66c8426f6be4091349c0780aaf996af0a1de48318f9f8d6b7bc8",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "8f2182ae53dd129a176ee15a09754fa942e9e7e9adab41fd60a39833686fe5e6",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "f3e2e9d69bb0549876aef6e956976f332e482592494874d254ef49c4862c5712",
-        ),
+        "darwin-amd64": "sha256-G9u+7FoS3Qwc1O/YlIoVbTPh4vURQOKlHh5eexG4HUc=",
+        "darwin-arm64": "sha256-JAsKfanK4ggADv89P7leD6H0kD2VvmLD8nb3YwsS2uE=",
+        "linux-amd64": "sha256-GyMTzRmNReqwDMN8OPaxygqUi6J5wp4yK99CbUBhKbU=",
+        "linux-arm": "sha256-a2fPX8RBwfy0qGBimy7GE9DmyKxTZgBEX1KgM2cemF4=",
+        "linux-arm64": "sha256-ee8Gk1+0fkMsDJG979FA5bVD7EY3YAfKFKUuXtMCMIg=",
+        "linux-i386": "sha256-y3icR1O/ZshCb2vkCRNJwHgKr5lq8KHeSDGPn41re8g=",
+        "linux-ppc64le": "sha256-jyGCrlPdEpoXbuFaCXVPqULp5+mtq0H9YKOYM2hv5eY=",
+        "windows-amd64": "sha256-8+Lp1puwVJh2rvbpVpdvMy5IJZJJSHTSVO9JxIYsVxI=",
     },
     "3.13.0": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "d44aa324ba6b2034e1f9eec34b80ec386a5e2c88a3db47f7276b3b5981ebd2a1",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "fda10c694f2e926d8b4195c12001e83413b598fb7a828c8b6751ae4a355e0ca6",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "138676351483e61d12dfade70da6c03d471bbdcac84eaadeb5e1d06fa114a24f",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "bb2cdde0d12c55f65e88e7c398e67463e74bc236f68b7f307a73174b35628c2e",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "d12a0e73a7dbff7d89d13e0c6eb73f5095f72d70faea30531941d320678904d2",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "f644910b9eb5f0a8427397c06dc0ddd9412925a0631decf2740363d38a8c9190",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "d9be0057c21ce5994885630340b4f2725a68510deca6e3c455030d83336e4797",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "8989f94407d31da2697a7354fba5f5c436b27ea193f76de6f1d37a51898a97a1",
-        ),
+        "darwin-amd64": "sha256-1EqjJLprIDTh+e7DS4DsOGpeLIij20f3J2s7WYHr0qE=",
+        "darwin-arm64": "sha256-/aEMaU8ukm2LQZXBIAHoNBO1mPt6goyLZ1GuSjVeDKY=",
+        "linux-amd64": "sha256-E4Z2NRSD5h0S363nDabAPUcbvcrITqreteHQb6EUok8=",
+        "linux-arm": "sha256-uyzd4NEsVfZeiOfDmOZ0Y+dLwjb2i38wenMXSzVijC4=",
+        "linux-arm64": "sha256-0SoOc6fb/32J0T4Mbrc/UJX3LXD66jBTGUHTIGeJBNI=",
+        "linux-i386": "sha256-9kSRC5618KhCc5fAbcDd2UEpJaBjHezydANj04qMkZA=",
+        "linux-ppc64le": "sha256-2b4AV8Ic5ZlIhWMDQLTyclpoUQ3spuPEVQMNgzNuR5c=",
+        "windows-amd64": "sha256-iYn5RAfTHaJpenNU+6X1xDayfqGT923m8dN6UYmKl6E=",
     },
     "3.13.1": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "e207e009b931162b0383b463c333a2792355200e91dbcf167c97c150e9f5fedb",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "46596d6d2d9aa545eb74f40684858fac0841df373ca760af1259d3493161d8c9",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "98c363564d00afd0cc3088e8f830f2a0eeb5f28755b3d8c48df89866374a1ed0",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "a9c188c1a79d2eb1721aece7c4e7cfcd56fa76d1e37bd7c9c05d3969bb0499b4",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "8c4a0777218b266a7b977394aaf0e9cef30ed2df6e742d683e523d75508d6efe",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "384e1f97b6dafad62ccdd856e9453b68143e4dbdc7b9cf9a2a2f79c2aa7c2cc9",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "f0d4ae95b4db25d03ced987e30d424564bd4727af6a4a0b7fca41f14203306fb",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "6e16fbc5e50a5841be2dc725e790234f09aa2a5ebe289493c90f65ecae7b156f",
-        ),
+        "darwin-amd64": "sha256-4gfgCbkxFisDg7RjwzOieSNVIA6R288WfJfBUOn1/ts=",
+        "darwin-arm64": "sha256-RlltbS2apUXrdPQGhIWPrAhB3zc8p2CvElnTSTFh2Mk=",
+        "linux-amd64": "sha256-mMNjVk0Ar9DMMIjo+DDyoO618odVs9jEjfiYZjdKHtA=",
+        "linux-arm": "sha256-qcGIwaedLrFyGuznxOfPzVb6dtHje9fJwF05absEmbQ=",
+        "linux-arm64": "sha256-jEoHdyGLJmp7l3OUqvDpzvMO0t9udC1oPlI9dVCNbv4=",
+        "linux-i386": "sha256-OE4fl7ba+tYszdhW6UU7aBQ+Tb3Huc+aKi95wqp8LMk=",
+        "linux-ppc64le": "sha256-8NSulbTbJdA87Zh+MNQkVkvUcnr2pKC3/KQfFCAzBvs=",
+        "windows-amd64": "sha256-bhb7xeUKWEG+Lccl55AjTwmqKl6+KJSTyQ9l7K57FW8=",
     },
     "3.13.2": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "977c2faa49993aa8baa2c727f8f35a357576d6278d4d8618a5a010a56ad2dbee",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "00f00c66165ba0dcd9efdbef66a5508fb4fe4425991c0e599e0710f8ff7aa02e",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "55a8e6dce87a1e52c61e0ce7a89bf85b38725ba3e8deb51d4a08ade8a2c70b2d",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "06e8436bde78d53ddb5095ba146fe6c7001297c7dceb9ef6b68992c3ecfde770",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "f5654aaed63a0da72852776e1d3f851b2ea9529cb5696337202703c2e1ed2321",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "7d1307e708d4eb043686c8635df567773221397d5d0151d37000b7c472170b3a",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "11d96134cc4ec106c23cd8c163072e9aed6cd73e36a3da120e5876d426203f37",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "1ef931cb40bfa049fa5ee337ec16181345d7d0c8ab863fe9b04abe320fa2ae6e",
-        ),
+        "darwin-amd64": "sha256-l3wvqkmZOqi6oscn+PNaNXV21ieNTYYYpaAQpWrS2+4=",
+        "darwin-arm64": "sha256-APAMZhZboNzZ79vvZqVQj7T+RCWZHA5ZngcQ+P96oC4=",
+        "linux-amd64": "sha256-Vajm3Oh6HlLGHgznqJv4WzhyW6Po3rUdSgit6KLHCy0=",
+        "linux-arm": "sha256-BuhDa9541T3bUJW6FG/mxwASl8fc6572tomSw+z953A=",
+        "linux-arm64": "sha256-9WVKrtY6DacoUnduHT+FGy6pUpy1aWM3ICcDwuHtIyE=",
+        "linux-i386": "sha256-fRMH5wjU6wQ2hshjXfVndzIhOX1dAVHTcAC3xHIXCzo=",
+        "linux-ppc64le": "sha256-EdlhNMxOwQbCPNjBYwcumu1s1z42o9oSDlh21CYgPzc=",
+        "windows-amd64": "sha256-Hvkxy0C/oEn6XuM37BYYE0XX0Mirhj/psEq+Mg+irm4=",
     },
     "3.13.3": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "da654c9e0fd4fcb50cc5dba051c1c9cf398e21ffa5064b47ac89a9697e139d39",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "61ba210cd65c53be5c0021c8fc8e0b94f4c122aff32f5ed0e4ea81728108ea20",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "bbb6e7c6201458b235f335280f35493950dcd856825ddcfd1d3b40ae757d5c7d",
-        ),
-        "linux-arm": _artifact(
-            platform = "linux-arm",
-            sha256 = "0170b15f3951be399e27e0cfdc21edb211d3b6b2698e078f993d9558d9446e3f",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "44aaa094ae24d01e8c36e327e1837fd3377a0f9152626da088384c5bc6d94562",
-        ),
-        "linux-i386": _artifact(
-            platform = "linux-i386",
-            sha256 = "a92929ba472ff4d31b83bcdd957f94ebb8c396c371c840afd04fa6a7fba61515",
-        ),
-        "linux-ppc64le": _artifact(
-            platform = "linux-ppc64le",
-            sha256 = "85afc540af42ebbb6e6a4fe270b04ce1fa27fa72845cd1d352feea0f55df1ffc",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "abb5e06a3587d8da7cca60c801cfbaa5178f4252c367b2469b3f123da2357cac",
-        ),
+        "darwin-amd64": "sha256-2mVMng/U/LUMxdugUcHJzzmOIf+lBktHrImpaX4TnTk=",
+        "darwin-arm64": "sha256-YbohDNZcU75cACHI/I4LlPTBIq/zL17Q5OqBcoEI6iA=",
+        "linux-amd64": "sha256-u7bnxiAUWLI18zUoDzVJOVDc2FaCXdz9HTtArnV9XH0=",
+        "linux-arm": "sha256-AXCxXzlRvjmeJ+DP3CHtshHTtrJpjgePmT2VWNlEbj8=",
+        "linux-arm64": "sha256-RKqglK4k0B6MNuMn4YN/0zd6D5FSYm2giDhMW8bZRWI=",
+        "linux-i386": "sha256-qSkpukcv9NMbg7zdlX+U67jDlsNxyECv0E+mp/umFRU=",
+        "linux-ppc64le": "sha256-ha/FQK9C67tuak/icLBM4fon+nKEXNHTUv7qD1XfH/w=",
+        "windows-amd64": "sha256-q7XgajWH2Np8ymDIAc+6pRePQlLDZ7JGmz8SPaI1fKw=",
+    },
+    "3.14.0": {
+        "darwin-amd64": "sha256-gEWGiWSW97Pal/VgieoA8iDgdelptv32wLe5zcIt4SA=",
+        "darwin-arm64": "sha256-wvNvMomgHHyTyhH4TXQKFw4K8dLQKAvVI6QJpiuN+h0=",
+        "linux-amd64": "sha256-9D4cM4feJFR1BqsF0k5TCcDOCyKMI72Kpk6exLggZlE=",
+        "linux-arm": "sha256-zzjf3q1yZq5WZidDvaDHhlWBTwreyjgtGweoErsaWZo=",
+        "linux-arm64": "sha256-sp5hZ0cxsV9q09GjEYqZ08wqslqRGq0bisjHLVqdKVI=",
+        "linux-i386": "sha256-xvEQY262Aqz79zjeWIBh2zAesLrOnvl24+8ccLRkDgc=",
+        "linux-ppc64le": "sha256-8fnTVhckhj7dTAbYmssuL9iuDxtyBYzriR+hw0bOXbw=",
+        "windows-amd64": "sha256-+o37UUHnogD8xu4pBVRpcHKkWEeRtP7OS5xgr1AfNRI=",
+    },
+    "3.14.1": {
+        "darwin-amd64": "sha256-Z5KCNrN8TngLn7XmFPs7muzpDWDwsbTLdAbuKSwtrjs=",
+        "darwin-arm64": "sha256-lkaPknzG77SiuS/ZQZ9A7SHWNK8vPoT7jvpZUmx6ADs=",
+        "linux-amd64": "sha256-dUluqCT5IwX/fSivN/SvV1Nr9RODmcgk3/mXudI53UI=",
+        "linux-arm": "sha256-9QwAwmK3RDVTDmd7zsB2N6rtoe2S74CbSVgaTmGCy74=",
+        "linux-arm64": "sha256-+GW4rUIo/QmQu8W1BhXrbLnrMcmpynI4QB7Yl7u+kDM=",
+        "linux-i386": "sha256-PJTtBgHg5iwZWn6bdSYrGBKMgoRmKqDggLtUjcbUe80=",
+        "linux-ppc64le": "sha256-TYU6uP40Yih8cnL7rdX3NTHs3W+g2zfTFjDkGuGuId4=",
+        "windows-amd64": "sha256-imx4ojpOSXrYvSiBOFiK2z5bSb6NvoKjIA/nspfawYQ=",
+    },
+    "3.14.2": {
+        "darwin-amd64": "sha256-ZMYzrhlL3ne357eTaigUp0F4F9yLe7fScL0kp6F7jRI=",
+        "darwin-arm64": "sha256-/1Av05sGSX+j1aUews7QK5/P2w6alI0xX7Gy8T3cOfs=",
+        "linux-amd64": "sha256-CIWlAdWGwelJ6bETvz+zKQsLv3TblESh2MJyOhQwBqU=",
+        "linux-arm": "sha256-tw+2+izfClx4IyDJ1+exVfyuwmAWkhjJgxa7PPDUMdk=",
+        "linux-arm64": "sha256-xl1qlVe7NZq8LA0mZw3oULUjJ9w5dq1vnhTCmOo+G2E=",
+        "linux-i386": "sha256-DgjNVsyVKrRkbFfF7HzeJBLDk3Ouw99lmhRZfdmHRGE=",
+        "linux-ppc64le": "sha256-87yFgv8VHmGc0oXZzfn+8cVzPuVSLYvtLvaA7wf4ciM=",
+        "windows-amd64": "sha256-qglOQ12nStV0+Wkkw37NDHXwvnB6xgTvl+1gIda8B4Q=",
+    },
+    "3.14.3": {
+        "darwin-amd64": "sha256-TV0BqUx9awfnFpDcGYi/MiloAoTIf0JC0oxvHMmWU74=",
+        "darwin-arm64": "sha256-3/eUFStit8Gp/2FdUQ+GV7zXo3J8Zo4NnUlV9w1fdXM=",
+        "linux-amd64": "sha256-PJDyThgPjCB7ihjl7ILLD6SYWKegqG5O1SqYOYaB4As=",
+        "linux-arm": "sha256-1P+I8C1nMexdvehqZ785Hmc9DZ6HkBcn+/Yjcq/xBuw=",
+        "linux-arm64": "sha256-heFXPnb6YK8Uun6ex12yEptohCA76GaJP6Cz9+QczV4=",
+        "linux-i386": "sha256-r4nl31zSHv5NyqR4sZqvF9IoIHFvk8HwmLAPG3z+GQU=",
+        "linux-ppc64le": "sha256-qrEhykcOKlAs2oSamz6S7rmjLiE7Dwp5qVoE43XSbOc=",
+        "windows-amd64": "sha256-NpxtscEU7yoAeT6aWH2217LHKiPjf9kFyN63jpqPevY=",
+    },
+    "3.14.4": {
+        "darwin-amd64": "sha256-c0NK6sNq0GjOLlWCuIUaKG3GKOrhZJSibirQskpxmfk=",
+        "darwin-arm64": "sha256-YenFRV8Gsq0KEoCXW/ZYkucHrcGddmsM9OkAbjt7S2w=",
+        "linux-amd64": "sha256-pYRO8sOO9t3ztaj32R5+Do68OaOLs/yAE9Ypwe8pwlk=",
+        "linux-arm": "sha256-liKXyUTAbh8nURGm49gON8np6P7ZZ9Sr7I789/yfsmA=",
+        "linux-arm64": "sha256-ETzMU7fFfCq6DNCqVgtVAIQbGLUhDXhkGs/dxT2sirI=",
+        "linux-i386": "sha256-LLP/Ayvhw5txmbMk1Y0K4FvE/km5vmqi/L6z/APx+ec=",
+        "linux-ppc64le": "sha256-0NYltD9mUK03ZChSCyI4uqJAC/7bQ7Lg8krXJH8PWbU=",
+        "windows-amd64": "sha256-C5Uds+rdkt/jNrWp3bBkDlzXDTmr29fTEl6ftZsitmk=",
+    },
+    "3.15.0": {
+        "darwin-amd64": "sha256-zK7gOvcuXcForpueMmfitGGw67eneEkEj0VnKGFYd30=",
+        "darwin-arm64": "sha256-Ag3xD9KbB5HzmqVxnSkmqZX3jBoqdIeSPKJkhaBWWQk=",
+        "linux-amd64": "sha256-p0dHrEB3e4bT/28b4gFQS7plykbNaLX+JdPDlNDc90U=",
+        "linux-arm": "sha256-YU1TqxGSZn+szn6NTohP8GflaEGZp+UiPogIq8Q+kn8=",
+        "linux-arm64": "sha256-w7AoH8pMAwVIIR3W6bAy7gqfxT6rYU9qy6/2MWgs6Ag=",
+        "linux-i386": "sha256-iiZ8dSfjwTYC/up0MiCciTH27s1L/13tOY1weRx0pbc=",
+        "linux-ppc64le": "sha256-vOwZza2Vyume3OBGzNgJDydeYzgcy2rMtDBIGfwm4AQ=",
+        "windows-amd64": "sha256-I/Dun8k9Ml3bxN/ayXyDvADHeEAWVBBFdWz5q7NvIdw=",
     },
     "3.4.2": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "c33b7ee72b0006f23b33f5032b531dd609fff7b08a4324f9ba07722a4f3fec9a",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "cacde7768420dd41111a4630e047c231afa01f67e49cc0c6429563e024da4b98",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "486cad35b9ac1da88781847f2fcaaaed729e44705eb42593322e4b52d0f2c1a1",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "76ff3f8c21c9af5b80abdd87ec07629ad88dbfe6206decc4d3024f26398554b9",
-        ),
+        "darwin-amd64": "sha256-wzt+5ysABvI7M/UDK1Md1gn/97CKQyT5ugdyKk8/7Jo=",
+        "linux-amd64": "sha256-ys3ndoQg3UERGkYw4EfCMa+gH2fknMDGQpVj4CTaS5g=",
+        "linux-arm64": "sha256-SGytNbmsHaiHgYR/L8qq7XKeRHBetCWTMi5LUtDywaE=",
+        "windows-amd64": "sha256-dv8/jCHJr1uAq92H7AdimtiNv+YgbezE0wJPJjmFVLk=",
     },
     "3.5.3": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "451ad70dfe286e3979c78ecf7074f4749d93644da8aa2cc778e2f969771f1794",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "2170a1a644a9e0b863f00c17b761ce33d4323da64fc74562a3a6df2abbf6cd70",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "e1348d94ce4caace43689ee2dfa5f8bcd8687c12053d9c13d79875b65d6b72aa",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "33fef4740b255b58a52e5504622068fd8a7d9aea19f1a84438f5cc1c5aade0d6",
-        ),
+        "darwin-amd64": "sha256-RRrXDf4objl5x47PcHT0dJ2TZE2oqizHeOL5aXcfF5Q=",
+        "linux-amd64": "sha256-IXChpkSp4Lhj8AwXt2HOM9QyPaZPx0Vio6bfKrv2zXA=",
+        "linux-arm64": "sha256-4TSNlM5Mqs5DaJ7i36X4vNhofBIFPZwT15h1tl1rcqo=",
+        "windows-amd64": "sha256-M/70dAslW1ilLlUEYiBo/Yp9muoZ8ahEOPXMHFqt4NY=",
     },
     "3.6.3": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "84a1ff17dd03340652d96e8be5172a921c97825fd278a2113c8233a4e8db5236",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "a50b499dbd0bbec90761d50974bf1e67cc6d503ea20d03b4a1275884065b7e9e",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "07c100849925623dc1913209cd1a30f0a9b80a5b4d6ff2153c609d11b043e262",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "6fe647628bc27e7ae77d015da4d5e1c63024f673062ac7bc11453ccc55657713",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "797d2abd603a2646f2fb9c3fabba46f2fabae5cbd1eb87c20956ec5b4a2fc634",
-        ),
+        "darwin-amd64": "sha256-hKH/F90DNAZS2W6L5RcqkhyXgl/SeKIRPIIzpOjbUjY=",
+        "darwin-arm64": "sha256-pQtJnb0LvskHYdUJdL8eZ8xtUD6iDQO0oSdYhAZbfp4=",
+        "linux-amd64": "sha256-B8EAhJklYj3BkTIJzRow8Km4CltNb/IVPGCdEbBD4mI=",
+        "linux-arm64": "sha256-b+ZHYovCfnrnfQFdpNXhxjAk9nMGKse8EUU8zFVldxM=",
+        "windows-amd64": "sha256-eX0qvWA6Jkby+5w/q7pG8vq65cvR64fCCVbsW0ovxjQ=",
     },
     "3.7.2": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "5a0738afb1e194853aab00258453be8624e0a1d34fcc3c779989ac8dbcd59436",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "260d4b8bffcebc6562ea344dfe88efe252cf9511dd6da3cccebf783773d42aec",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "4ae30e48966aba5f807a4e140dad6736ee1a392940101e4d79ffb4ee86200a9e",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "b0214eabbb64791f563bd222d17150ce39bf4e2f5de49f49fdb456ce9ae8162f",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "299165f0af46bece9a61b41305cca8e8d5ec5319a4b694589cd71e6b75aca77e",
-        ),
+        "darwin-amd64": "sha256-Wgc4r7HhlIU6qwAlhFO+hiTgodNPzDx3mYmsjbzVlDY=",
+        "darwin-arm64": "sha256-Jg1Li//OvGVi6jRN/ojv4lLPlRHdbaPMzr94N3PUKuw=",
+        "linux-amd64": "sha256-SuMOSJZqul+Aek4UDa1nNu4aOSlAEB5Nef+07oYgCp4=",
+        "linux-arm64": "sha256-sCFOq7tkeR9WO9Ii0XFQzjm/Ti9d5J9J/bRWzproFi8=",
+        "windows-amd64": "sha256-KZFl8K9Gvs6aYbQTBcyo6NXsUxmktpRYnNcea3Wsp34=",
     },
     "3.8.1": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "3b6d87d360a51bf0f2344edd54e3580a8e8de2c4a4fd92eccef3e811f7e81bb3",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "5f0fea586781fb867b92c10133786949ab6a447f297d5c12e1e8f5dd3a9ed712",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "d643f48fe28eeb47ff68a1a7a26fc5142f348d02c8bc38d699674016716f61cd",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "dbf5118259717d86c57d379317402ed66016c642cc0d684f3505da6f194b760d",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "a75003fc692131652d3bd218dd4007692390a1dd156f11fd7668e389bdd8f765",
-        ),
+        "darwin-amd64": "sha256-O22H02ClG/DyNE7dVONYCo6N4sSk/ZLszvPoEffoG7M=",
+        "darwin-arm64": "sha256-Xw/qWGeB+4Z7ksEBM3hpSatqRH8pfVwS4ej13Tqe1xI=",
+        "linux-amd64": "sha256-1kP0j+KO60f/aKGnom/FFC80jQLIvDjWmWdAFnFvYc0=",
+        "linux-arm64": "sha256-2/URgllxfYbFfTeTF0Au1mAWxkLMDWhPNQXabxlLdg0=",
+        "windows-amd64": "sha256-p1AD/GkhMWUtO9IY3UAHaSOQod0VbxH9dmjjib3Y92U=",
     },
     "3.8.2": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "25bb4a70b0d9538a97abb3aaa57133c0779982a8091742a22026e60d8614f8a0",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "dfddc0696597c010ed903e486fe112a18535ab0c92e35335aa54af2360077900",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "6cb9a48f72ab9ddfecab88d264c2f6508ab3cd42d9c09666be16a7bf006bed7b",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "238db7f55e887f9c1038b7e43585b84389a05fff5424e70557886cad1635b3ce",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "051959311ed5a3d49596b298b9e9618e2a0ad6a9270c134802f205698348ba5e",
-        ),
+        "darwin-amd64": "sha256-JbtKcLDZU4qXq7OqpXEzwHeZgqgJF0KiICbmDYYU+KA=",
+        "darwin-arm64": "sha256-393AaWWXwBDtkD5Ib+ESoYU1qwyS41M1qlSvI2AHeQA=",
+        "linux-amd64": "sha256-bLmkj3Krnd/sq4jSZML2UIqzzULZwJZmvhanvwBr7Xs=",
+        "linux-arm64": "sha256-I4239V6If5wQOLfkNYW4Q4mgX/9UJOcFV4hsrRY1s84=",
+        "windows-amd64": "sha256-BRlZMR7Vo9SVlrKYuelhjioK1qknDBNIAvIFaYNIul4=",
     },
     "3.9.0": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "7e5a2f2a6696acf278ea17401ade5c35430e2caa57f67d4aa99c607edcc08f5e",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "22cf080ded5dd71ec15d33c13586ace9b6002e97518a76df628e67ecedd5aa70",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "1484ffb0c7a608d8069470f48b88d729e88c41a1b6602f145231e8ea7b43b50a",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "5c0aa709c5aaeedd190907d70f9012052c1eea7dff94bffe941b879a33873947",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "631d333bce5f2274c00af753d54bb62886cdb17a958d2aff698c196612c9e8cb",
-        ),
+        "darwin-amd64": "sha256-flovKmaWrPJ46hdAGt5cNUMOLKpX9n1KqZxgftzAj14=",
+        "darwin-arm64": "sha256-Is8IDe1d1x7BXTPBNYas6bYALpdRinbfYo5n7O3VqnA=",
+        "linux-amd64": "sha256-FIT/sMemCNgGlHD0i4jXKeiMQaG2YC8UUjHo6ntDtQo=",
+        "linux-arm64": "sha256-XAqnCcWq7t0ZCQfXD5ASBSwe6n3/lL/+lBuHmjOHOUc=",
+        "windows-amd64": "sha256-Yx0zO85fInTACvdT1Uu2KIbNsXqVjSr/aYwZZhLJ6Ms=",
     },
     "3.9.1": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "3cd0ad43154506ef65003bb871e71ab88d080b855ecbaa183e41f774bc7fb46e",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "df47fb682a3ddc9904ee5fe21e60a788cced3556df0496b46278644074b2618a",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "73df7ddd5ab05e96230304bf0e6e31484b1ba136d0fc22679345c0b4bd43f7ac",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "655dbceb4ab4b246af2214e669b9d44e3a35f170f39df8eebdb8d87619c585d1",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "9d6c1f4a2b328be15c548665e49e1628ebb4246258ab2cba6e0ee893b9881314",
-        ),
+        "darwin-amd64": "sha256-PNCtQxVFBu9lADu4cecauI0IC4Vey6oYPkH3dLx/tG4=",
+        "darwin-arm64": "sha256-30f7aCo93JkE7l/iHmCniMztNVbfBJa0YnhkQHSyYYo=",
+        "linux-amd64": "sha256-c9993VqwXpYjAwS/Dm4xSEsboTbQ/CJnk0XAtL1D96w=",
+        "linux-arm64": "sha256-ZV2860q0skavIhTmabnUTjo18XDznfjuvbjYdhnFhdE=",
+        "windows-amd64": "sha256-nWwfSisyi+FcVIZl5J4WKOu0JGJYqyy6bg7ok7mIExQ=",
     },
     "3.9.2": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "35d7ff8bea561831d78dce8f7bf614a7ffbcad3ff88d4c2f06a51bfa51c017e2",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "6250a6b92603a9c14194932e9dc22380ac423779519521452163493db33b68c8",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "3f5be38068a1829670440ccf00b3b6656fd90d0d9cfd4367539f3b13e4c20531",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "e4e2f9aad786042d903534e3131bc5300d245c24bbadf64fc46cca1728051dbc",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "d0d98a2a1f4794fcfc437000f89d337dc9278b6b7672f30e164f96c9413a7a74",
-        ),
+        "darwin-amd64": "sha256-Ndf/i+pWGDHXjc6Pe/YUp/+8rT/4jUwvBqUb+lHAF+I=",
+        "darwin-arm64": "sha256-YlCmuSYDqcFBlJMuncIjgKxCN3lRlSFFIWNJPbM7aMg=",
+        "linux-amd64": "sha256-P1vjgGihgpZwRAzPALO2ZW/ZDQ2c/UNnU587E+TCBTE=",
+        "linux-arm64": "sha256-5OL5qteGBC2QNTTjExvFMA0kXCS7rfZPxGzKFygFHbw=",
+        "windows-amd64": "sha256-0NmKKh9HlPz8Q3AA+J0zfckni2t2cvMOFk+WyUE6enQ=",
     },
     "3.9.3": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "ca3d57bb68135fa45a7acc2612d472e8ad01b78f49eaca57490aefef74a61c95",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "db20ee8758616e1d69e90aedc5eb940751888bdd2b031badf2080a05df4c9eb7",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "2d07360a9d93b18488f1ddb9de818b92ba738acbec6e1c66885a88703fa7b21c",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "59168c08c32293759005d0c509ce4be9038d7663827e05564c779e59658d8299",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "cdd24727d233e620ce6e8ec21646a6218bde94cf3d5f24e9c4ae6a114939975d",
-        ),
+        "darwin-amd64": "sha256-yj1Xu2gTX6RaeswmEtRy6K0Bt49J6spXSQrv73SmHJU=",
+        "darwin-arm64": "sha256-2yDuh1hhbh1p6QrtxeuUB1GIi90rAxut8ggKBd9Mnrc=",
+        "linux-amd64": "sha256-LQc2Cp2TsYSI8d253oGLkrpzisvsbhxmiFqIcD+nshw=",
+        "linux-arm64": "sha256-WRaMCMMik3WQBdDFCc5L6QONdmOCfgVWTHeeWWWNgpk=",
+        "windows-amd64": "sha256-zdJHJ9Iz5iDObo7CFkamIYvelM89XyTpxK5qEUk5l10=",
     },
     "3.9.4": {
-        "darwin-amd64": _artifact(
-            platform = "darwin-amd64",
-            sha256 = "fe5930feca6fd1bd2c57df01c1f381c6444d1c3d2b857526bf6cbfbd6bf906b4",
-        ),
-        "darwin-arm64": _artifact(
-            platform = "darwin-arm64",
-            sha256 = "a73d91751153169781b3ab5b4702ba1a2631fc8242eba33828b5905870059312",
-        ),
-        "linux-amd64": _artifact(
-            platform = "linux-amd64",
-            sha256 = "31960ff2f76a7379d9bac526ddf889fb79241191f1dbe2a24f7864ddcb3f6560",
-        ),
-        "linux-arm64": _artifact(
-            platform = "linux-arm64",
-            sha256 = "d24163e466f7884c55079d1050968e80a05b633830047116cdfd8ae28d35b0c0",
-        ),
-        "windows-amd64": _artifact(
-            platform = "windows-amd64",
-            sha256 = "7cdc1342bc1863b6d5ce695fbef4d3b0d65c7c5bcef6ec6adf8fc9aa53821262",
-        ),
+        "darwin-amd64": "sha256-/lkw/spv0b0sV98BwfOBxkRNHD0rhXUmv2y/vWv5BrQ=",
+        "darwin-arm64": "sha256-pz2RdRFTFpeBs6tbRwK6GiYx/IJC66M4KLWQWHAFkxI=",
+        "linux-amd64": "sha256-MZYP8vdqc3nZusUm3fiJ+3kkEZHx2+KiT3hk3cs/ZWA=",
+        "linux-arm64": "sha256-0kFj5Gb3iExVB50QUJaOgKBbYzgwBHEWzf2K4o01sMA=",
+        "windows-amd64": "sha256-fNwTQrwYY7bVzmlfvvTTsNZcfFvO9uxq34/JqlOCEmI=",
     },
 }
