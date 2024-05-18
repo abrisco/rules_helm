@@ -1,3 +1,5 @@
+load("//helm/private:current_toolchain.bzl", "current_helm_toolchain")
+
 exports_files(
     glob(["**/*.bzl"]),
     visibility = ["//visibility:public"],
@@ -5,6 +7,14 @@ exports_files(
 
 toolchain_type(
     name = "toolchain_type",
+    visibility = ["//visibility:public"],
+)
+
+current_helm_toolchain(
+    name = "current_toolchain",
+    # Marked manual so that `bazel test //...` passes
+    # even if no toolchain is registered.
+    tags = ["manual"],
     visibility = ["//visibility:public"],
 )
 
