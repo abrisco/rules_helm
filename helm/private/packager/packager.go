@@ -534,7 +534,7 @@ func findGeneratedPackage(logging string) (string, error) {
 }
 
 func writeResultsMetadata(packageBase string, metadataOutput string) error {
-	re := regexp.MustCompile(`(.*)-([\d][\d\w\-\.]+)\.tgz`)
+	re := regexp.MustCompile(`(.*)-([\d][\d\w\-\.+]+)\.tgz`)
 	match := re.FindAllStringSubmatch(packageBase, 2)
 
 	if len(match) == 0 {
