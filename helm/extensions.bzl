@@ -3,7 +3,7 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//helm:repositories.bzl", "helm_host_alias_repository", "helm_toolchain_repository")
-load("//helm/private:versions.bzl", "DEFAULT_HELM_URL_TEMPLATES", "DEFAULT_HELM_VERSION", "HELM_VERSIONS")
+load("//helm/private:versions.bzl", "CONSTRAINTS", "DEFAULT_HELM_URL_TEMPLATES", "DEFAULT_HELM_VERSION", "HELM_VERSIONS")
 load("//tests:test_deps.bzl", "helm_test_deps")
 
 _HELM_TAR_BUILD_CONTENT = """\
@@ -27,11 +27,18 @@ def _register_toolchains(version, helm_url_templates):
 
     helm_version_info = HELM_VERSIONS[version]
 
-    for platform, info in helm_version_info.items():
+    for platform, integrity in helm_version_info.items():
         if platform.startswith("windows"):
             compression = "zip"
         else:
             compression = "tar.gz"
+
+        # The URLs for linux-i386 artifacts are actually published under
+        # a different name. The check below accounts for this.
+        # https://github.com/abrisco/rules_helm/issues/76
+        url_platform = platform
+        if url_platform == "linux-i386":
+            url_platform = "linux-386"
 
         name = "helm_{}".format(platform.replace("-", "_"))
         maybe(
@@ -40,20 +47,20 @@ def _register_toolchains(version, helm_url_templates):
             urls = [
                 template.format(
                     version = version,
-                    platform = platform,
+                    platform = url_platform,
                     compression = compression,
                 )
                 for template in helm_url_templates
             ],
             build_file_content = _HELM_TAR_BUILD_CONTENT,
-            sha256 = info.sha256,
-            strip_prefix = platform,
+            integrity = integrity,
+            strip_prefix = url_platform,
         )
         maybe(
             helm_toolchain_repository,
             name = name + "_toolchain",
             platform = platform,
-            exec_compatible_with = helm_version_info[platform].constraints,
+            exec_compatible_with = CONSTRAINTS[platform],
         )
 
     maybe(

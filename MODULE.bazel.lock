@@ -1448,7 +1448,7 @@
   "moduleExtensions": {
     "//helm:extensions.bzl%helm": {
       "general": {
-        "bzlTransitiveDigest": "+F9X7y/djTcj3+nzXISA0E2mPqRRunfCIEKkUlLg3S0=",
+        "bzlTransitiveDigest": "T9MUX1sVfUP+QvkBrE9ZH5kyvkk/1WzNU0004l0aOo4=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1458,10 +1458,10 @@
             "attributes": {
               "name": "_main~helm~helm_linux_ppc64le",
               "urls": [
-                "https://get.helm.sh/helm-v3.13.3-linux-ppc64le.tar.gz"
+                "https://get.helm.sh/helm-v3.15.0-linux-ppc64le.tar.gz"
               ],
               "build_file_content": "package(default_visibility = [\"//visibility:public\"])\nexports_files(glob([\"**\"]))\n",
-              "sha256": "85afc540af42ebbb6e6a4fe270b04ce1fa27fa72845cd1d352feea0f55df1ffc",
+              "integrity": "sha256-vOwZza2Vyume3OBGzNgJDydeYzgcy2rMtDBIGfwm4AQ=",
               "strip_prefix": "linux-ppc64le"
             }
           },
@@ -1483,10 +1483,10 @@
             "attributes": {
               "name": "_main~helm~helm_linux_arm",
               "urls": [
-                "https://get.helm.sh/helm-v3.13.3-linux-arm.tar.gz"
+                "https://get.helm.sh/helm-v3.15.0-linux-arm.tar.gz"
               ],
               "build_file_content": "package(default_visibility = [\"//visibility:public\"])\nexports_files(glob([\"**\"]))\n",
-              "sha256": "0170b15f3951be399e27e0cfdc21edb211d3b6b2698e078f993d9558d9446e3f",
+              "integrity": "sha256-YU1TqxGSZn+szn6NTohP8GflaEGZp+UiPogIq8Q+kn8=",
               "strip_prefix": "linux-arm"
             }
           },
@@ -1544,10 +1544,10 @@
             "attributes": {
               "name": "_main~helm~helm_windows_amd64",
               "urls": [
-                "https://get.helm.sh/helm-v3.13.3-windows-amd64.zip"
+                "https://get.helm.sh/helm-v3.15.0-windows-amd64.zip"
               ],
               "build_file_content": "package(default_visibility = [\"//visibility:public\"])\nexports_files(glob([\"**\"]))\n",
-              "sha256": "abb5e06a3587d8da7cca60c801cfbaa5178f4252c367b2469b3f123da2357cac",
+              "integrity": "sha256-I/Dun8k9Ml3bxN/ayXyDvADHeEAWVBBFdWz5q7NvIdw=",
               "strip_prefix": "windows-amd64"
             }
           },
@@ -1568,10 +1568,10 @@
             "attributes": {
               "name": "_main~helm~helm_darwin_arm64",
               "urls": [
-                "https://get.helm.sh/helm-v3.13.3-darwin-arm64.tar.gz"
+                "https://get.helm.sh/helm-v3.15.0-darwin-arm64.tar.gz"
               ],
               "build_file_content": "package(default_visibility = [\"//visibility:public\"])\nexports_files(glob([\"**\"]))\n",
-              "sha256": "61ba210cd65c53be5c0021c8fc8e0b94f4c122aff32f5ed0e4ea81728108ea20",
+              "integrity": "sha256-Ag3xD9KbB5HzmqVxnSkmqZX3jBoqdIeSPKJkhaBWWQk=",
               "strip_prefix": "darwin-arm64"
             }
           },
@@ -1588,11 +1588,11 @@
             "attributes": {
               "name": "_main~helm~helm_linux_i386",
               "urls": [
-                "https://get.helm.sh/helm-v3.13.3-linux-i386.tar.gz"
+                "https://get.helm.sh/helm-v3.15.0-linux-386.tar.gz"
               ],
               "build_file_content": "package(default_visibility = [\"//visibility:public\"])\nexports_files(glob([\"**\"]))\n",
-              "sha256": "a92929ba472ff4d31b83bcdd957f94ebb8c396c371c840afd04fa6a7fba61515",
-              "strip_prefix": "linux-i386"
+              "integrity": "sha256-iiZ8dSfjwTYC/up0MiCciTH27s1L/13tOY1weRx0pbc=",
+              "strip_prefix": "linux-386"
             }
           },
           "helm_linux_ppc64le_toolchain": {
@@ -1613,10 +1613,10 @@
             "attributes": {
               "name": "_main~helm~helm_darwin_amd64",
               "urls": [
-                "https://get.helm.sh/helm-v3.13.3-darwin-amd64.tar.gz"
+                "https://get.helm.sh/helm-v3.15.0-darwin-amd64.tar.gz"
               ],
               "build_file_content": "package(default_visibility = [\"//visibility:public\"])\nexports_files(glob([\"**\"]))\n",
-              "sha256": "da654c9e0fd4fcb50cc5dba051c1c9cf398e21ffa5064b47ac89a9697e139d39",
+              "integrity": "sha256-zK7gOvcuXcForpueMmfitGGw67eneEkEj0VnKGFYd30=",
               "strip_prefix": "darwin-amd64"
             }
           },
@@ -1626,10 +1626,10 @@
             "attributes": {
               "name": "_main~helm~helm_linux_amd64",
               "urls": [
-                "https://get.helm.sh/helm-v3.13.3-linux-amd64.tar.gz"
+                "https://get.helm.sh/helm-v3.15.0-linux-amd64.tar.gz"
               ],
               "build_file_content": "package(default_visibility = [\"//visibility:public\"])\nexports_files(glob([\"**\"]))\n",
-              "sha256": "bbb6e7c6201458b235f335280f35493950dcd856825ddcfd1d3b40ae757d5c7d",
+              "integrity": "sha256-p0dHrEB3e4bT/28b4gFQS7plykbNaLX+JdPDlNDc90U=",
               "strip_prefix": "linux-amd64"
             }
           },
@@ -1639,10 +1639,10 @@
             "attributes": {
               "name": "_main~helm~helm_linux_arm64",
               "urls": [
-                "https://get.helm.sh/helm-v3.13.3-linux-arm64.tar.gz"
+                "https://get.helm.sh/helm-v3.15.0-linux-arm64.tar.gz"
               ],
               "build_file_content": "package(default_visibility = [\"//visibility:public\"])\nexports_files(glob([\"**\"]))\n",
-              "sha256": "44aaa094ae24d01e8c36e327e1837fd3377a0f9152626da088384c5bc6d94562",
+              "integrity": "sha256-w7AoH8pMAwVIIR3W6bAy7gqfxT6rYU9qy6/2MWgs6Ag=",
               "strip_prefix": "linux-arm64"
             }
           },
