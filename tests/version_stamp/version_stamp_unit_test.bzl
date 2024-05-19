@@ -59,7 +59,7 @@ def version_stamp_test_suite(name):
         content = """\
 {
     "name": "version_stamp",
-    "version": "0.1.0-STABLE-STAMP-VALUE-VOLATILE-STAMP-VALUE"
+    "version": "0.1.0+STABLE-STAMP-VALUE-VOLATILE-STAMP-VALUE"
 }
 """.splitlines(),
         newline = "unix",
@@ -77,7 +77,7 @@ def version_stamp_test_suite(name):
         content = """\
 {
     "name": "version_stamp",
-    "version": "0.1.0-stable-volatile"
+    "version": "0.1.0+stable-volatile"
 }
 """.splitlines(),
         newline = "unix",
