@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "4e59a06045f9ca12a04dd7dc18ff7a844795443f3225895fc4ee1ebf237a4608",
+  "moduleFileHash": "400547835de165e1ed298c775443efbccbfa86c8eed7b75f9c5b19fb53eac5c6",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -18,7 +18,7 @@
   "moduleDepGraph": {
     "<root>": {
       "name": "rules_helm",
-      "version": "0.3.2",
+      "version": "0.4.0",
       "key": "<root>",
       "repoName": "rules_helm",
       "executionPlatformsToRegister": [],
@@ -36,7 +36,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 18,
+            "line": 19,
             "column": 23
           },
           "imports": {},
@@ -50,7 +50,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 19,
+                "line": 20,
                 "column": 16
               }
             }
@@ -64,7 +64,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 21,
+            "line": 22,
             "column": 21
           },
           "imports": {
@@ -86,7 +86,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 22,
+                "line": 23,
                 "column": 13
               }
             }
