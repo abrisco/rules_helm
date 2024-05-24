@@ -8,6 +8,7 @@ def helm_chart(
         name,
         chart = None,
         chart_json = None,
+        crds = None,
         values = None,
         values_json = None,
         substitutions = {},
@@ -38,6 +39,7 @@ def helm_chart(
         name (str): The name of the [helm_package](#helm_package) target.
         chart (str, optional): The path to the chart directory. Defaults to `Chart.yaml`.
         chart_json (str, optional): The json encoded contents of `Chart.yaml`.
+        crds (list, optional): A list of crd files to include in the package.
         values (str, optional): The path to the values file. Defaults to `values.yaml`.
         values_json (str, optional): The json encoded contents of `values.yaml`.
         substitutions (dict, optional): A dictionary of substitutions to apply to `values.yaml`.
@@ -58,10 +60,14 @@ def helm_chart(
     if templates == None:
         templates = native.glob(["templates/**"])
 
+    if crds == None:
+        crds = native.glob(["crds/**"], allow_empty=True)
+
     helm_package(
         name = name,
         chart = chart,
         chart_json = chart_json,
+        crds = crds,
         deps = deps,
         images = images,
         templates = templates,
