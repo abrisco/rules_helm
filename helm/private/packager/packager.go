@@ -43,6 +43,7 @@ type ImageIndex struct {
 }
 
 type TemplatesManfiest map[string]string
+type CrdsManfiest map[string]string
 type DepsManfiest []string
 
 type HelmResultMetadata struct {
@@ -86,6 +87,7 @@ type HelmChart struct {
 
 type Arguments struct {
 	TemplatesManifest  string
+	CrdsManifest       string
 	Chart              string
 	Values             string
 	Substitutions      string
@@ -103,6 +105,7 @@ func parseArgs() Arguments {
 	var args Arguments
 
 	flag.StringVar(&args.TemplatesManifest, "templates_manifest", "", "A helm file containing a list of all helm template files")
+	flag.StringVar(&args.CrdsManifest, "crds_manifest", "", "A helm file containing a list of all helm crd files")
 	flag.StringVar(&args.Chart, "chart", "", "The helm `chart.yaml` file")
 	flag.StringVar(&args.Values, "values", "", "The helm `values.yaml` file.")
 	flag.StringVar(&args.Substitutions, "substitutions", "", "A json file containing key value pairs to substitute into the values file")
@@ -381,7 +384,7 @@ func copyFile(source string, dest string) error {
 	return nil
 }
 
-func installHelmContent(workingDir string, stampedChartContent string, stampedValuesContent string, templatesManifest string, depsManifest string) error {
+func installHelmContent(workingDir string, stampedChartContent string, stampedValuesContent string, templatesManifest string, crdsManifest string, depsManifest string) error {
 	err := os.MkdirAll(workingDir, 0700)
 	if err != nil {
 		return fmt.Errorf("Error creating working directory %s: %w", workingDir, err)
@@ -399,13 +402,13 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 		return fmt.Errorf("Error writing values file %s: %w", valuesYaml, err)
 	}
 
-	manifestContent, err := os.ReadFile(templatesManifest)
+	templatesManifestContent, err := os.ReadFile(templatesManifest)
 	if err != nil {
 		return fmt.Errorf("Error reading templates manifest %s: %w", templatesManifest, err)
 	}
 
 	var templates TemplatesManfiest
-	err = json.Unmarshal(manifestContent, &templates)
+	err = json.Unmarshal(templatesManifestContent, &templates)
 	if err != nil {
 		return fmt.Errorf("Error unmarshalling templates manifest %s: %w", templatesManifest, err)
 	}
@@ -492,6 +495,100 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 			}
 		}
 
+	}
+
+	crdsManifestContent, err := os.ReadFile(crdsManifest)
+	if err != nil {
+		return fmt.Errorf("Error reading crds manifest %s: %w", crdsManifest, err)
+	}
+
+	var crds CrdsManfiest
+	err = json.Unmarshal(crdsManifestContent, &crds)
+	if err != nil {
+		return fmt.Errorf("Error unmarshalling crds manifest %s: %w", crdsManifest, err)
+	}
+
+	crdsDir := filepath.Join(workingDir, "crds")
+	crdsRoot := ""
+
+	// Copy all templates
+	for crdPath, crdShortpath := range crds {
+		fileInfo, err := os.Stat(crdPath)
+		if err != nil {
+			return fmt.Errorf("Error getting info for %s: %w", crdPath, err)
+		}
+
+		if fileInfo.IsDir() {
+			destDirBasePath := filepath.Join(crdsDir) // Destination is the base crds directory
+
+			// Walk the source directory and copy each item to the destination
+			err := filepath.Walk(crdPath, func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					return fmt.Errorf("Error during walking the directory %s: %w", path, err)
+				}
+
+				relPath, err := filepath.Rel(crdPath, path)
+				if err != nil {
+					return fmt.Errorf("Error calculating relative path from %s to %s: %w", crdPath, path, err)
+				}
+
+				targetPath := filepath.Join(destDirBasePath, relPath)
+
+				if info.IsDir() {
+					return os.MkdirAll(targetPath, 0750)
+				} else {
+					if err := os.MkdirAll(filepath.Dir(targetPath), 0750); err != nil {
+						return fmt.Errorf("Error creating directory %s: %w", targetPath, err)
+					}
+					// Copy the file to the target path
+					return copyFile(path, targetPath)
+				}
+			})
+
+			if err != nil {
+				return fmt.Errorf("Error copying directory contents from %s to %s: %w", crdPath, destDirBasePath, err)
+			}
+		} else {
+			// Locate the templates directory so we can start copying files
+			// into the new templates directory at the right location
+			if len(crdsRoot) == 0 {
+				var current = filepath.Clean(crdShortpath)
+				for {
+					if len(current) == 0 {
+						return errors.New("Failed to find crds directory")
+					}
+					parent := filepath.Dir(current)
+					if filepath.Base(parent) == "crds" {
+						crdsRoot = filepath.Clean(parent)
+						break
+					}
+					current = parent
+				}
+			}
+
+			if !strings.HasPrefix(filepath.Clean(crdShortpath), crdsRoot) {
+				return fmt.Errorf(
+					"Crd path (%s) does not start with crd root (%s)",
+					filepath.Clean(crdShortpath), crdsRoot)
+			}
+
+			targetFile, err := filepath.Rel(crdsRoot, crdShortpath)
+			if err != nil {
+				return err
+			}
+
+			crdDest := filepath.Join(crdsDir, targetFile)
+			crdDestDir := filepath.Dir(crdDest)
+			err = os.MkdirAll(crdDestDir, 0700)
+			if err != nil {
+				return fmt.Errorf("Error creating crd parent directory %s: %w", crdDestDir, err)
+			}
+
+			err = copyFile(crdPath, crdDest)
+			if err != nil {
+				return fmt.Errorf("Error copying crd %s: %w", crdPath, err)
+			}
+		}
 	}
 
 	// Copy over any dependency chart files
@@ -660,7 +757,7 @@ func main() {
 
 	// Create a directory in which to run helm package
 	tmpPath := filepath.Join(dir, chart.Name)
-	err = installHelmContent(tmpPath, stampedChartContent, stampedValuesContent, args.TemplatesManifest, args.DepsManifest)
+	err = installHelmContent(tmpPath, stampedChartContent, stampedValuesContent, args.TemplatesManifest, args.CrdsManifest, args.DepsManifest)
 	if err != nil {
 		log.Fatal(err)
 	}

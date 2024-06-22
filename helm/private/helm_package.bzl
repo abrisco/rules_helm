@@ -102,6 +102,13 @@ def _helm_package_impl(ctx):
     )
     args.add("-templates_manifest", templates_manifest)
 
+    crds_manifest = ctx.actions.declare_file("{}/crds_manifest.json".format(ctx.label.name))
+    ctx.actions.write(
+        output = crds_manifest,
+        content = json.encode_indent({file.path: file.short_path for file in ctx.files.crds}, indent = " " * 4),
+    )
+    args.add("-crds_manifest", crds_manifest)
+
     deps = []
     if ctx.attr.deps:
         deps.extend([dep[HelmPackageInfo].chart for dep in ctx.attr.deps])
@@ -159,7 +166,7 @@ def _helm_package_impl(ctx):
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
         inputs = depset(
-            ctx.files.templates + stamps + image_inputs + deps + [chart_yaml, values_yaml, templates_manifest, substitutions_file],
+            ctx.files.templates + ctx.files.crds + stamps + image_inputs + deps + [chart_yaml, values_yaml, templates_manifest, crds_manifest, substitutions_file],
         ),
         tools = depset([toolchain.helm]),
         mnemonic = "HelmPackage",
@@ -191,6 +198,11 @@ helm_package = rule(
         ),
         "chart_json": attr.string(
             doc = "The `Chart.yaml` file of the helm chart as a json object",
+        ),
+        "crds": attr.label_list(
+            doc = "All crds associated with the current helm chart. E.g., the `./crds` directory",
+            default = [],
+            allow_files = True,
         ),
         "deps": attr.label_list(
             doc = "Other helm packages this package depends on.",

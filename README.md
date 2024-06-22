@@ -162,7 +162,7 @@ A rule for performing `helm lint` on a helm package
 ## helm_package
 
 <pre>
-helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-deps">deps</a>, <a href="#helm_package-chart">chart</a>, <a href="#helm_package-chart_json">chart_json</a>, <a href="#helm_package-images">images</a>, <a href="#helm_package-stamp">stamp</a>, <a href="#helm_package-substitutions">substitutions</a>, <a href="#helm_package-templates">templates</a>, <a href="#helm_package-values">values</a>,
+helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-deps">deps</a>, <a href="#helm_package-chart">chart</a>, <a href="#helm_package-chart_json">chart_json</a>, <a href="#helm_package-crds">crds</a>, <a href="#helm_package-images">images</a>, <a href="#helm_package-stamp">stamp</a>, <a href="#helm_package-substitutions">substitutions</a>, <a href="#helm_package-templates">templates</a>, <a href="#helm_package-values">values</a>,
              <a href="#helm_package-values_json">values_json</a>)
 </pre>
 
@@ -177,6 +177,7 @@ Rules for creating Helm chart packages.
 | <a id="helm_package-deps"></a>deps |  Other helm packages this package depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_package-chart"></a>chart |  The `Chart.yaml` file of the helm chart   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="helm_package-chart_json"></a>chart_json |  The `Chart.yaml` file of the helm chart as a json object   | String | optional |  `""`  |
+| <a id="helm_package-crds"></a>crds | All crds associated with the current helm chart. E.g., the `./crds` directory  | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | `[]` |
 | <a id="helm_package-images"></a>images |  A list of                 [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags)                 targets.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_package-stamp"></a>stamp |  Whether to encode build information into the helm actions. Possible values:<br><br>- `stamp = 1`: Always stamp the build information into the helm actions, even in                 [--nostamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) builds.                 This setting should be avoided, since it potentially kills remote caching for the target and                 any downstream actions that depend on it.<br><br>- `stamp = 0`: Always replace build information by constant values. This gives good build result caching.<br><br>- `stamp = -1`: Embedding of build information is controlled by the                 [--[no]stamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) flag.<br><br>Stamped targets are not rebuilt unless their dependencies change.   | Integer | optional |  `-1`  |
 | <a id="helm_package-substitutions"></a>substitutions |  A dictionary of substitutions to apply to the `values.yaml` file.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
