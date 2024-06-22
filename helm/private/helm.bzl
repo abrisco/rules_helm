@@ -61,7 +61,7 @@ def helm_chart(
         templates = native.glob(["templates/**"])
 
     if crds == None:
-        crds = native.glob(["crds/**"], allow_empty=True)
+        crds = native.glob(["crds/**"], allow_empty = True)
 
     helm_package(
         name = name,
