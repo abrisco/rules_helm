@@ -177,7 +177,7 @@ Rules for creating Helm chart packages.
 | <a id="helm_package-deps"></a>deps |  Other helm packages this package depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_package-chart"></a>chart |  The `Chart.yaml` file of the helm chart   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="helm_package-chart_json"></a>chart_json |  The `Chart.yaml` file of the helm chart as a json object   | String | optional |  `""`  |
-| <a id="helm_package-crds"></a>crds | All crds associated with the current helm chart. E.g., the `./crds` directory  | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | `[]` |
+| <a id="helm_package-crds"></a>crds |  All crds associated with the current helm chart. E.g., the `./crds` directory   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_package-images"></a>images |  A list of                 [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags)                 targets.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_package-stamp"></a>stamp |  Whether to encode build information into the helm actions. Possible values:<br><br>- `stamp = 1`: Always stamp the build information into the helm actions, even in                 [--nostamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) builds.                 This setting should be avoided, since it potentially kills remote caching for the target and                 any downstream actions that depend on it.<br><br>- `stamp = 0`: Always replace build information by constant values. This gives good build result caching.<br><br>- `stamp = -1`: Embedding of build information is controlled by the                 [--[no]stamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) flag.<br><br>Stamped targets are not rebuilt unless their dependencies change.   | Integer | optional |  `-1`  |
 | <a id="helm_package-substitutions"></a>substitutions |  A dictionary of substitutions to apply to the `values.yaml` file.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
@@ -341,9 +341,9 @@ str: A json encoded string which represents `Chart.yaml` contents.
 ## helm_chart
 
 <pre>
-helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">chart</a>, <a href="#helm_chart-chart_json">chart_json</a>, <a href="#helm_chart-values">values</a>, <a href="#helm_chart-values_json">values_json</a>, <a href="#helm_chart-substitutions">substitutions</a>, <a href="#helm_chart-templates">templates</a>, <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>,
-           <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-install_opts">install_opts</a>, <a href="#helm_chart-upgrade_opts">upgrade_opts</a>, <a href="#helm_chart-uninstall_opts">uninstall_opts</a>, <a href="#helm_chart-data">data</a>,
-           <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">kwargs</a>)
+helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">chart</a>, <a href="#helm_chart-chart_json">chart_json</a>, <a href="#helm_chart-crds">crds</a>, <a href="#helm_chart-values">values</a>, <a href="#helm_chart-values_json">values_json</a>, <a href="#helm_chart-substitutions">substitutions</a>, <a href="#helm_chart-templates">templates</a>, <a href="#helm_chart-images">images</a>,
+           <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-install_opts">install_opts</a>, <a href="#helm_chart-upgrade_opts">upgrade_opts</a>, <a href="#helm_chart-uninstall_opts">uninstall_opts</a>,
+           <a href="#helm_chart-data">data</a>, <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">kwargs</a>)
 </pre>
 
 Rules for producing a helm package and some convenience targets.
@@ -366,6 +366,7 @@ Rules for producing a helm package and some convenience targets.
 | <a id="helm_chart-name"></a>name |  The name of the [helm_package](#helm_package) target.   |  none |
 | <a id="helm_chart-chart"></a>chart |  The path to the chart directory. Defaults to `Chart.yaml`.   |  `None` |
 | <a id="helm_chart-chart_json"></a>chart_json |  The json encoded contents of `Chart.yaml`.   |  `None` |
+| <a id="helm_chart-crds"></a>crds |  A list of crd files to include in the package.   |  `None` |
 | <a id="helm_chart-values"></a>values |  The path to the values file. Defaults to `values.yaml`.   |  `None` |
 | <a id="helm_chart-values_json"></a>values_json |  The json encoded contents of `values.yaml`.   |  `None` |
 | <a id="helm_chart-substitutions"></a>substitutions |  A dictionary of substitutions to apply to `values.yaml`.   |  `{}` |
