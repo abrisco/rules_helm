@@ -162,11 +162,15 @@ def _helm_package_impl(ctx):
 
     args.add("-workspace_name", ctx.workspace_name)
 
+    for ln in ctx.attr.files:
+        fmt = "%s=" + ctx.attr.files[ln]
+        args.add_all(ln.files, before_each = "-add_files", format_each = fmt, uniquify = True)
+
     ctx.actions.run(
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
         inputs = depset(
-            ctx.files.templates + ctx.files.crds + stamps + image_inputs + deps + [chart_yaml, values_yaml, templates_manifest, crds_manifest, substitutions_file],
+            ctx.files.templates + ctx.files.crds + ctx.files.files + stamps + image_inputs + deps + [chart_yaml, values_yaml, templates_manifest, crds_manifest, substitutions_file],
         ),
         tools = depset([toolchain.helm]),
         mnemonic = "HelmPackage",
@@ -248,6 +252,25 @@ helm_package = rule(
         ),
         "values_json": attr.string(
             doc = "The `values.yaml` file for the current package as a json object.",
+        ),
+        "files": attr.label_keyed_string_dict(
+            doc = """\
+                Additional files to be added to the chart.
+
+                Specified as a map from label to string. \
+                The label key should correspond to a `filegroup` and \
+                the string value denotes directory name in the chart \
+                where all the files and directories structure under \
+                the filegroup will be copied to.
+
+                Example is:
+                {
+                   "//myapp:configs" : "configs",
+                   "//myapp:data" : "data"
+                }"
+            """,
+            allow_empty = True,
+            allow_files = True,
         ),
         "_json_to_yaml": attr.label(
             doc = "A tools for converting json files to yaml files.",
