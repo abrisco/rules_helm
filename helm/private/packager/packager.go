@@ -121,6 +121,7 @@ type Arguments struct {
 	TemplatesManifest  string
 	CrdsManifest       string
 	Chart              string
+	Version            string
 	Values             string
 	Substitutions      string
 	DepsManifest       string
@@ -140,6 +141,7 @@ func parseArgs() Arguments {
 	flag.StringVar(&args.TemplatesManifest, "templates_manifest", "", "A helm file containing a list of all helm template files")
 	flag.StringVar(&args.CrdsManifest, "crds_manifest", "", "A helm file containing a list of all helm crd files")
 	flag.StringVar(&args.Chart, "chart", "", "The helm `chart.yaml` file")
+	flag.StringVar(&args.Version, "version", "", "Chart version override")
 	flag.StringVar(&args.Values, "values", "", "The helm `values.yaml` file.")
 	flag.StringVar(&args.Substitutions, "substitutions", "", "A json file containing key value pairs to substitute into the values file")
 	flag.StringVar(&args.DepsManifest, "deps_manifest", "", "A file containing a list of all helm dependency (`charts/*.tgz`) files")
@@ -873,7 +875,11 @@ func main() {
 	}
 
 	// Build the helm package
-	command := exec.Command(filepath.Join(cwd, args.Helm), "package", ".")
+	var helmCmdArgs = []string{"package", "."}
+	if args.Version != "" {
+		helmCmdArgs = append(helmCmdArgs, "--version", args.Version)
+	}
+	command := exec.Command(filepath.Join(cwd, args.Helm), helmCmdArgs...)
 	command.Dir = tmpPath
 	command.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", kubeconfig))
 	out, err := command.CombinedOutput()

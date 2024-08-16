@@ -1,5 +1,6 @@
 """Helm rules"""
 
+load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 load("//helm:providers.bzl", "HelmPackageInfo")
 load("//helm/private:helm_utils.bzl", "is_stamping_enabled")
 load("//helm/private:json_to_yaml.bzl", "json_to_yaml")
@@ -86,6 +87,10 @@ def _helm_package_impl(ctx):
     args.add("-helm", toolchain.helm)
 
     args.add("-chart", chart_yaml)
+
+    if ctx.attr.version:
+        args.add("-version", ctx.attr.version[BuildSettingInfo].value)
+
     args.add("-values", values_yaml)
 
     substitutions_file = ctx.actions.declare_file("{}/substitutions.json".format(ctx.label.name))
@@ -199,6 +204,12 @@ helm_package = rule(
         "chart": attr.label(
             doc = "The `Chart.yaml` file of the helm chart",
             allow_single_file = True,
+        ),
+        "version": attr.label(
+            doc = """
+                Optional chart version override ('--version' argument to 'helm package').
+                Should be string_flag label.
+            """,
         ),
         "chart_json": attr.string(
             doc = "The `Chart.yaml` file of the helm chart as a json object",
