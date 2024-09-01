@@ -79,7 +79,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-11
+          - os: macos-14
           - os: ubuntu-20.04
           - os: windows-2019
     steps:
@@ -141,7 +141,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-11
+          - os: macos-14
           - os: ubuntu-20.04
           - os: windows-2019
     steps:
