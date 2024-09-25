@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "6315e0d3bb0d2aab95762c73e1f5cc3a2452f85fc1005d02b2336ea569d8e435",
+  "moduleFileHash": "699001ffaa85605dd9fd582ebff1869aa9f9f64f6f0774b09b535b9a57354596",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -18,7 +18,7 @@
   "moduleDepGraph": {
     "<root>": {
       "name": "rules_helm",
-      "version": "0.5.1",
+      "version": "0.6.0",
       "key": "<root>",
       "repoName": "rules_helm",
       "executionPlatformsToRegister": [],
