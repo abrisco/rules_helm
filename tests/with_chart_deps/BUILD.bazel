@@ -1,3 +1,4 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
 load("//helm:defs.bzl", "helm_chart", "helm_lint_test")
 
 exports_files(["Chart.lock"])
@@ -6,10 +7,21 @@ helm_chart(
     name = "with_chart_deps",
     chart = "Chart.yaml",
     values = "values.yaml",
-    deps = ["@helm_test_deps__with_chart_deps//:redis"],
+    deps = [
+        "@helm_test_deps__with_chart_deps_postgresql//:postgresql",
+        "@helm_test_deps__with_chart_deps_redis//:redis",
+    ],
 )
 
 helm_lint_test(
-    name = "with_chart_deps_test",
+    name = "with_chart_deps_lint_test",
     chart = ":with_chart_deps",
+)
+
+go_test(
+    name = "with_chart_deps_test",
+    srcs = ["with_chart_deps_test.go"],
+    data = [":with_chart_deps"],
+    env = {"HELM_CHART": "$(rlocationpath :with_chart_deps)"},
+    deps = ["@io_bazel_rules_go//go/runfiles"],
 )

@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "e945bbdd6d0f7f3b0044761dd9517c07c4c2aa558121e84e53ebcaa0f12c2f10",
+  "moduleFileHash": "0ca9844b6b319986e1f50c5e3d6274b99328a2bb7c69c961c6ea20ef913679cf",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -75,7 +75,8 @@
             "helm_linux_arm64_toolchain": "helm_linux_arm64_toolchain",
             "helm_windows_amd64_toolchain": "helm_windows_amd64_toolchain",
             "go_yaml_yaml": "go_yaml_yaml",
-            "helm_test_deps__with_chart_deps": "helm_test_deps__with_chart_deps",
+            "helm_test_deps__with_chart_deps_redis": "helm_test_deps__with_chart_deps_redis",
+            "helm_test_deps__with_chart_deps_postgresql": "helm_test_deps__with_chart_deps_postgresql",
             "rules_helm_test_container_base": "rules_helm_test_container_base"
           },
           "devImports": [],
@@ -1448,7 +1449,7 @@
   "moduleExtensions": {
     "//helm:extensions.bzl%helm": {
       "general": {
-        "bzlTransitiveDigest": "h2+xYaZhJ4K60qj0o7MM8JImY/fHa70ahSnbzaXM9+I=",
+        "bzlTransitiveDigest": "LebN36RBPxncgh2DBTR7Ygqsz6Yt9DWN2GWg+BJ91B4=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1465,18 +1466,6 @@
               "strip_prefix": "linux-ppc64le"
             }
           },
-          "helm_test_deps__with_chart_deps": {
-            "bzlFile": "@@//helm/private:helm_import.bzl",
-            "ruleClassName": "helm_import_repository",
-            "attributes": {
-              "name": "_main~helm~helm_test_deps__with_chart_deps",
-              "repository": "https://charts.bitnami.com/bitnami",
-              "url": "https://charts.bitnami.com/bitnami/redis-14.4.0.tgz",
-              "version": "14.4.0",
-              "sha256": "43374837646a67539eb2999cd8973dc54e8fcdc14896761e594b9d616734edf2",
-              "chart_name": "redis"
-            }
-          },
           "helm_linux_arm": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
@@ -1488,6 +1477,30 @@
               "build_file_content": "package(default_visibility = [\"//visibility:public\"])\nexports_files(glob([\"**\"]))\n",
               "integrity": "sha256-YU1TqxGSZn+szn6NTohP8GflaEGZp+UiPogIq8Q+kn8=",
               "strip_prefix": "linux-arm"
+            }
+          },
+          "helm_test_deps__with_chart_deps_postgresql": {
+            "bzlFile": "@@//helm/private:helm_import.bzl",
+            "ruleClassName": "helm_import_repository",
+            "attributes": {
+              "name": "_main~helm~helm_test_deps__with_chart_deps_postgresql",
+              "repository": "https://charts.bitnami.com/bitnami",
+              "url": "https://charts.bitnami.com/bitnami/postgresql-14.0.5.tgz",
+              "version": "14.0.5",
+              "sha256": "38d9b6657aa3b0cc16d190570dbaf96796e997d03a1665264dac9966343e4d1b",
+              "chart_name": "postgresql"
+            }
+          },
+          "helm_test_deps__with_chart_deps_redis": {
+            "bzlFile": "@@//helm/private:helm_import.bzl",
+            "ruleClassName": "helm_import_repository",
+            "attributes": {
+              "name": "_main~helm~helm_test_deps__with_chart_deps_redis",
+              "repository": "https://charts.bitnami.com/bitnami",
+              "url": "https://charts.bitnami.com/bitnami/redis-14.4.0.tgz",
+              "version": "14.4.0",
+              "sha256": "43374837646a67539eb2999cd8973dc54e8fcdc14896761e594b9d616734edf2",
+              "chart_name": "redis"
             }
           },
           "helm_linux_arm_toolchain": {
