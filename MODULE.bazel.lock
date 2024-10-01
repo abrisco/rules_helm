@@ -1597,7 +1597,7 @@
   "moduleExtensions": {
     "//helm:extensions.bzl%helm": {
       "general": {
-        "bzlTransitiveDigest": "fynAN9dDzUPYgm/zJAaqiY7qti6DRvdU7Q8KqFSawF8=",
+        "bzlTransitiveDigest": "8Rm4Te5bUTMaUVodvTPMRrQH1tpZ0x4Z0fXwFwHQVnM=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
