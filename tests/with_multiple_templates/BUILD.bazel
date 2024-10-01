@@ -1,5 +1,11 @@
-load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 load("//helm:defs.bzl", "helm_chart", "helm_lint_test")
+load(":with_multiple_templates_utils.bzl", "copy_to_directory")
+
+go_binary(
+    name = "copy_to_dir",
+    srcs = ["copy_to_dir.go"],
+)
 
 copy_to_directory(
     name = "templates",
