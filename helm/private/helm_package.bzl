@@ -8,8 +8,8 @@ OciPushRepositoryInfo = provider(
     doc = "Repository and image information for a given oci_push target",
     fields = {
         "image_root": "File: The directory containing the image files for the oci_push target",
-        "repository_file": "File: The file containing the repository path for the oci_push target",
         "remote_tags_file": "File (optional): The file containing remote tags (one per line) used for the oci_push target",
+        "repository_file": "File: The file containing the repository path for the oci_push target",
     },
 )
 
