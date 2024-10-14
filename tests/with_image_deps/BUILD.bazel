@@ -18,6 +18,7 @@ helm_chart(
     images = [
         ":image_a.push",
         "//tests/with_image_deps:image_b.push",
+        "//tests/with_image_deps:image_c.push",
     ],
     target_compatible_with = EXCLUDE_WINDOWS,
     values = "values.yaml",
@@ -36,12 +37,14 @@ helm_package_regex_test(
     values_patterns = [
         r"image_a:\s+url:\s+\"docker.io/rules_helm/test/image_a@sha256:[a-z0-9]{64}\"",
         r"image_b:\s+url:\s+\"docker.io/rules_helm/test/image_b@sha256:[a-z0-9]{64}\"",
+        r"image_c:\s+url:\s+\"docker.io/rules_helm/test/image_c:1.2.3\"",
     ],
 )
 
 _IMAGES = [
     "image_a",
     "image_b",
+    "image_c",
 ]
 
 [
@@ -73,5 +76,13 @@ oci_push(
     image = ":image_b",
     remote_tags = ["latest"],
     repository_file = ":image_b.repository.txt",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+oci_push(
+    name = "image_c.push",
+    image = ":image_c",
+    remote_tags = ["1.2.3"],
+    repository = "docker.io/rules_helm/test/image_c",
     target_compatible_with = EXCLUDE_WINDOWS,
 )
