@@ -1848,7 +1848,7 @@
     },
     "//tests:test_extensions.bzl%helm_test": {
       "general": {
-        "bzlTransitiveDigest": "qHejmtdG1KooXvbCDA+o+rHotlLcinh3kL0qnj7PWT8=",
+        "bzlTransitiveDigest": "QSw7yFJb8tbBXfdJyxyoYtCQUIWhZLXDkpcTZrpe6AA=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {

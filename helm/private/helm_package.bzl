@@ -212,6 +212,25 @@ helm_package = rule(
             doc = "Other helm packages this package depends on.",
             providers = [HelmPackageInfo],
         ),
+        "files": attr.label_keyed_string_dict(
+            doc = """\
+                Additional files to be added to the chart.
+
+                Specified as a map from label to string. \
+                The label key should correspond to a `filegroup` and \
+                the string value denotes directory name in the chart \
+                where all the files and directories structure under \
+                the filegroup will be copied to.
+
+                Example is:
+                {
+                  "//myapp:configs" : "configs",
+                  "//myapp:data" : "data"
+                }"
+                """,
+            allow_empty = True,
+            allow_files = True,
+        ),
         "images": attr.label_list(
             doc = """\
                 A list of \
@@ -252,25 +271,6 @@ helm_package = rule(
         ),
         "values_json": attr.string(
             doc = "The `values.yaml` file for the current package as a json object.",
-        ),
-        "files": attr.label_keyed_string_dict(
-            doc = """\
-                Additional files to be added to the chart.
-
-                Specified as a map from label to string. \
-                The label key should correspond to a `filegroup` and \
-                the string value denotes directory name in the chart \
-                where all the files and directories structure under \
-                the filegroup will be copied to.
-
-                Example is:
-                {
-                   "//myapp:configs" : "configs",
-                   "//myapp:data" : "data"
-                }"
-            """,
-            allow_empty = True,
-            allow_files = True,
         ),
         "_json_to_yaml": attr.label(
             doc = "A tools for converting json files to yaml files.",
