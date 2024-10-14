@@ -2,16 +2,25 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//helm:repositories.bzl", "helm_host_alias_repository", "helm_toolchain_repository")
-load("//helm/private:versions.bzl", "CONSTRAINTS", "DEFAULT_HELM_URL_TEMPLATES", "DEFAULT_HELM_VERSION", "HELM_VERSIONS")
-load("//tests:test_deps.bzl", "helm_test_deps")
+load(
+    "//helm:repositories.bzl",
+    "helm_host_alias_repository",
+    "helm_toolchain_repository",
+)
+load(
+    "//helm/private:versions.bzl",
+    "CONSTRAINTS",
+    "DEFAULT_HELM_URL_TEMPLATES",
+    "DEFAULT_HELM_VERSION",
+    "HELM_VERSIONS",
+)
 
 _HELM_TAR_BUILD_CONTENT = """\
 package(default_visibility = ["//visibility:public"])
 exports_files(glob(["**"]))
 """
 
-def _impl(ctx):
+def _helm_impl(ctx):
     module = ctx.modules[0]
     options = module.tags.options
     version = options[0].version
@@ -19,7 +28,6 @@ def _impl(ctx):
 
     _register_toolchains(version, helm_url_templates)
     _register_go_yaml()
-    helm_test_deps()
 
 def _register_toolchains(version, helm_url_templates):
     if not version in HELM_VERSIONS:
@@ -45,10 +53,15 @@ def _register_toolchains(version, helm_url_templates):
             http_archive,
             name = name,
             urls = [
-                template.format(
-                    version = version,
-                    platform = url_platform,
-                    compression = compression,
+                template.replace(
+                    "{version}",
+                    version,
+                ).replace(
+                    "{platform}",
+                    url_platform,
+                ).replace(
+                    "{compression}",
+                    compression,
                 )
                 for template in helm_url_templates
             ],
@@ -79,11 +92,21 @@ def _register_go_yaml():
     )
 
 options = tag_class(attrs = {
-    "helm_url_templates": attr.string_list(default = DEFAULT_HELM_URL_TEMPLATES),
-    "version": attr.string(default = DEFAULT_HELM_VERSION),
+    "helm_url_templates": attr.string_list(
+        doc = (
+            "A url template used to download helm. The template can contain the following " +
+            "format strings `{platform}` for the helm platform, `{version}` for the helm " +
+            "version, and `{compression}` for the archive type containing the helm binary."
+        ),
+        default = DEFAULT_HELM_URL_TEMPLATES,
+    ),
+    "version": attr.string(
+        doc = "The version of helm to download for the toolchain.",
+        default = DEFAULT_HELM_VERSION,
+    ),
 })
 
 helm = module_extension(
-    implementation = _impl,
+    implementation = _helm_impl,
     tag_classes = {"options": options},
 )

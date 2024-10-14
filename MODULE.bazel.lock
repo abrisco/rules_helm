@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "699001ffaa85605dd9fd582ebff1869aa9f9f64f6f0774b09b535b9a57354596",
+  "moduleFileHash": "a9802872e10afd9c2b6f8679df942e5c8559a4d5bcc3323dca240900299d671f",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -74,10 +74,7 @@
             "helm_linux_amd64_toolchain": "helm_linux_amd64_toolchain",
             "helm_linux_arm64_toolchain": "helm_linux_arm64_toolchain",
             "helm_windows_amd64_toolchain": "helm_windows_amd64_toolchain",
-            "go_yaml_yaml": "go_yaml_yaml",
-            "helm_test_deps__with_chart_deps_postgresql": "helm_test_deps__with_chart_deps_postgresql",
-            "helm_test_deps__with_chart_deps_redis": "helm_test_deps__with_chart_deps_redis",
-            "rules_helm_test_container_base": "rules_helm_test_container_base"
+            "go_yaml_yaml": "go_yaml_yaml"
           },
           "devImports": [],
           "tags": [
@@ -92,6 +89,25 @@
               }
             }
           ],
+          "hasDevUseExtension": false,
+          "hasNonDevUseExtension": true
+        },
+        {
+          "extensionBzlFile": "@rules_helm//tests:test_extensions.bzl",
+          "extensionName": "helm_test",
+          "usingModule": "<root>",
+          "location": {
+            "file": "@@//:MODULE.bazel",
+            "line": 43,
+            "column": 26
+          },
+          "imports": {
+            "helm_test_deps__with_chart_deps_postgresql": "helm_test_deps__with_chart_deps_postgresql",
+            "helm_test_deps__with_chart_deps_redis": "helm_test_deps__with_chart_deps_redis",
+            "rules_helm_test_container_base": "rules_helm_test_container_base"
+          },
+          "devImports": [],
+          "tags": [],
           "hasDevUseExtension": false,
           "hasNonDevUseExtension": true
         }
@@ -1597,7 +1613,7 @@
   "moduleExtensions": {
     "//helm:extensions.bzl%helm": {
       "general": {
-        "bzlTransitiveDigest": "8Rm4Te5bUTMaUVodvTPMRrQH1tpZ0x4Z0fXwFwHQVnM=",
+        "bzlTransitiveDigest": "cFu0CTf/nnzQEIf18AuVW1QyZq0chKCya1YoU0qrJwk=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1625,30 +1641,6 @@
               "build_file_content": "package(default_visibility = [\"//visibility:public\"])\nexports_files(glob([\"**\"]))\n",
               "integrity": "sha256-oVqN38NzYosTzSqYcgZ1YAQJGh9qkcO57o3m8LHizpA=",
               "strip_prefix": "linux-arm"
-            }
-          },
-          "helm_test_deps__with_chart_deps_postgresql": {
-            "bzlFile": "@@//helm/private:helm_import.bzl",
-            "ruleClassName": "helm_import_repository",
-            "attributes": {
-              "name": "_main~helm~helm_test_deps__with_chart_deps_postgresql",
-              "repository": "https://charts.bitnami.com/bitnami",
-              "url": "https://charts.bitnami.com/bitnami/postgresql-14.0.5.tgz",
-              "version": "14.0.5",
-              "sha256": "38d9b6657aa3b0cc16d190570dbaf96796e997d03a1665264dac9966343e4d1b",
-              "chart_name": "postgresql"
-            }
-          },
-          "helm_test_deps__with_chart_deps_redis": {
-            "bzlFile": "@@//helm/private:helm_import.bzl",
-            "ruleClassName": "helm_import_repository",
-            "attributes": {
-              "name": "_main~helm~helm_test_deps__with_chart_deps_redis",
-              "repository": "https://charts.bitnami.com/bitnami",
-              "url": "https://charts.bitnami.com/bitnami/redis-14.4.0.tgz",
-              "version": "14.4.0",
-              "sha256": "43374837646a67539eb2999cd8973dc54e8fcdc14896761e594b9d616734edf2",
-              "chart_name": "redis"
             }
           },
           "helm_linux_arm_toolchain": {
@@ -1819,22 +1811,6 @@
               ]
             }
           },
-          "rules_helm_test_container_base": {
-            "bzlFile": "@@rules_oci~2.0.0//oci/private:pull.bzl",
-            "ruleClassName": "oci_alias",
-            "attributes": {
-              "name": "_main~helm~rules_helm_test_container_base",
-              "target_name": "rules_helm_test_container_base",
-              "scheme": "https",
-              "registry": "index.docker.io",
-              "repository": "library/alpine",
-              "identifier": "sha256:2042a492bcdd847a01cd7f119cd48caa180da696ed2aedd085001a78664407d6",
-              "platforms": {},
-              "platform": "@@//helm:rules_helm_test_container_base_single",
-              "bzlmod_repository": "",
-              "reproducible": true
-            }
-          },
           "go_yaml_yaml": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
@@ -1859,12 +1835,68 @@
                 "@platforms//cpu:aarch64"
               ]
             }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
+      }
+    },
+    "//tests:test_extensions.bzl%helm_test": {
+      "general": {
+        "bzlTransitiveDigest": "qHejmtdG1KooXvbCDA+o+rHotlLcinh3kL0qnj7PWT8=",
+        "accumulatedFileDigests": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "helm_test_deps__with_chart_deps_postgresql": {
+            "bzlFile": "@@//helm/private:helm_import.bzl",
+            "ruleClassName": "helm_import_repository",
+            "attributes": {
+              "name": "_main~helm_test~helm_test_deps__with_chart_deps_postgresql",
+              "repository": "https://charts.bitnami.com/bitnami",
+              "url": "https://charts.bitnami.com/bitnami/postgresql-14.0.5.tgz",
+              "version": "14.0.5",
+              "sha256": "38d9b6657aa3b0cc16d190570dbaf96796e997d03a1665264dac9966343e4d1b",
+              "chart_name": "postgresql"
+            }
+          },
+          "helm_test_deps__with_chart_deps_redis": {
+            "bzlFile": "@@//helm/private:helm_import.bzl",
+            "ruleClassName": "helm_import_repository",
+            "attributes": {
+              "name": "_main~helm_test~helm_test_deps__with_chart_deps_redis",
+              "repository": "https://charts.bitnami.com/bitnami",
+              "url": "https://charts.bitnami.com/bitnami/redis-14.4.0.tgz",
+              "version": "14.4.0",
+              "sha256": "43374837646a67539eb2999cd8973dc54e8fcdc14896761e594b9d616734edf2",
+              "chart_name": "redis"
+            }
+          },
+          "rules_helm_test_container_base": {
+            "bzlFile": "@@rules_oci~2.0.0//oci/private:pull.bzl",
+            "ruleClassName": "oci_alias",
+            "attributes": {
+              "name": "_main~helm_test~rules_helm_test_container_base",
+              "target_name": "rules_helm_test_container_base",
+              "scheme": "https",
+              "registry": "index.docker.io",
+              "repository": "library/alpine",
+              "identifier": "sha256:2042a492bcdd847a01cd7f119cd48caa180da696ed2aedd085001a78664407d6",
+              "platforms": {},
+              "platform": "@@//tests:rules_helm_test_container_base_single",
+              "bzlmod_repository": "",
+              "reproducible": true
+            }
           },
           "rules_helm_test_container_base_single": {
             "bzlFile": "@@rules_oci~2.0.0//oci/private:pull.bzl",
             "ruleClassName": "oci_pull",
             "attributes": {
-              "name": "_main~helm~rules_helm_test_container_base_single",
+              "name": "_main~helm_test~rules_helm_test_container_base_single",
               "scheme": "https",
               "registry": "index.docker.io",
               "repository": "library/alpine",
