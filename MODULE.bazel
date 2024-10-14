@@ -31,12 +31,6 @@ use_repo(
     "helm_windows_amd64_toolchain",
 )
 use_repo(helm, "go_yaml_yaml")
-use_repo(
-    helm,
-    "helm_test_deps__with_chart_deps_postgresql",
-    "helm_test_deps__with_chart_deps_redis",
-    "rules_helm_test_container_base",
-)
 
 register_toolchains(
     "@helm_darwin_amd64_toolchain//:toolchain",
@@ -44,4 +38,12 @@ register_toolchains(
     "@helm_linux_amd64_toolchain//:toolchain",
     "@helm_linux_arm64_toolchain//:toolchain",
     "@helm_windows_amd64_toolchain//:toolchain",
+)
+
+helm_test = use_extension("@rules_helm//tests:test_extensions.bzl", "helm_test")
+use_repo(
+    helm_test,
+    "helm_test_deps__with_chart_deps_postgresql",
+    "helm_test_deps__with_chart_deps_redis",
+    "rules_helm_test_container_base",
 )
