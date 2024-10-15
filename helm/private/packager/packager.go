@@ -22,12 +22,14 @@ type ImageInfo struct {
 	Label      string
 	Repository string
 	Digest     string
+	RemoteTag  string
 }
 
 type ImageManifest struct {
 	Label          string `json:"label"`
 	RepositoryPath string `json:"repository_path"`
 	ImageRootPath  string `json:"image_root_path"`
+	RemoteTagsPath string `json:"remote_tags_path"`
 }
 
 type ImageIndexManifest struct {
@@ -227,6 +229,20 @@ func imageManifestToImageInfo(imageManifest ImageManifest) (ImageInfo, error) {
 	}
 
 	imageInfo.Digest = imageIndex.Manifests[0].Digest
+
+	if imageManifest.RemoteTagsPath != "" {
+		remoteTagsContent, err := os.ReadFile(imageManifest.RemoteTagsPath)
+		if err != nil {
+			return imageInfo, fmt.Errorf("read remote tags file %q: %w", imageManifest.RemoteTagsPath, err)
+		}
+
+		remoteTags := strings.Split(strings.Trim(string(remoteTagsContent), "\n"), "\n")
+		if len(remoteTags) == 1 {
+			// With many remote tags we can't say for sure which one should be used
+			imageInfo.RemoteTag = remoteTags[0]
+		}
+	}
+
 	return imageInfo, nil
 }
 
@@ -243,17 +259,43 @@ func loadImageStamps(imageManifestPath string) ([]ReplacementGroup, error) {
 
 	replacementGroups := []ReplacementGroup{}
 
+	isSingleImage := len(imageInfos) == 1
+
 	for _, imageInfo := range imageInfos {
+		repository := imageInfo.Repository
+		digest := imageInfo.Digest
+		tag := imageInfo.RemoteTag
+
 		workspaceLabel := strings.Replace(imageInfo.Label, "@@", "@", 1)
 		bzmodLabel := fmt.Sprintf("@%s", imageInfo.Label)
-		imageUrl := fmt.Sprintf("%s@%s", imageInfo.Repository, imageInfo.Digest)
+		imageUrl := fmt.Sprintf("%s@%s", repository, digest)
+
+		replacements := map[string]string{
+			workspaceLabel:                 imageUrl,
+			workspaceLabel + ".repository": repository,
+			workspaceLabel + ".digest":     digest,
+			bzmodLabel:                     imageUrl,
+			bzmodLabel + ".repository":     repository,
+			bzmodLabel + ".digest":         digest,
+		}
+		if tag != "" {
+			replacements[workspaceLabel+".tag"] = tag
+			replacements[bzmodLabel+".tag"] = tag
+		}
+
+		// in case of single image add well-known replacements for image details
+		if isSingleImage {
+			replacements["bazel.image.url"] = imageUrl
+			replacements["bazel.image.repository"] = repository
+			replacements["bazel.image.digest"] = digest
+			if tag != "" {
+				replacements["bazel.image.tag"] = tag
+			}
+		}
 
 		replacementGroups = append(replacementGroups, ReplacementGroup{
-			Name: imageInfo.Label,
-			Replacements: map[string]string{
-				workspaceLabel: imageUrl,
-				bzmodLabel:     imageUrl,
-			},
+			Name:         imageInfo.Label,
+			Replacements: replacements,
 		})
 	}
 

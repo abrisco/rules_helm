@@ -8,6 +8,7 @@ OciPushRepositoryInfo = provider(
     doc = "Repository and image information for a given oci_push target",
     fields = {
         "image_root": "File: The directory containing the image files for the oci_push target",
+        "remote_tags_file": "File (optional): The file containing remote tags (one per line) used for the oci_push target",
         "repository_file": "File: The file containing the repository path for the oci_push target",
     },
 )
@@ -31,9 +32,14 @@ def _oci_push_repository_aspect_impl(target, ctx):
             target.label,
         ))
 
+    remote_tags_file = None
+    if hasattr(ctx.rule.file, "remote_tags") and ctx.rule.file.remote_tags:
+        remote_tags_file = ctx.rule.file.remote_tags
+
     return [OciPushRepositoryInfo(
         repository_file = output,
         image_root = ctx.rule.file.image,
+        remote_tags_file = remote_tags_file,
     )]
 
 # This aspect exists because rules_oci seems reluctant to create a provider
@@ -133,6 +139,12 @@ def _helm_package_impl(ctx):
             str(image.label).strip("@").replace("/", "_").replace(":", "_") + ".image_manifest",
         ))
         push_info = image[DefaultInfo]
+
+        remote_tags_path = None
+        if image[OciPushRepositoryInfo].remote_tags_file:
+            remote_tags_path = image[OciPushRepositoryInfo].remote_tags_file.path
+            image_inputs.append(image[OciPushRepositoryInfo].remote_tags_file)
+
         ctx.actions.write(
             output = single_image_manifest,
             content = json.encode_indent(
@@ -140,6 +152,7 @@ def _helm_package_impl(ctx):
                     label = str(image.label),
                     repository_path = image[OciPushRepositoryInfo].repository_file.path,
                     image_root_path = image[OciPushRepositoryInfo].image_root.path,
+                    remote_tags_path = remote_tags_path,
                 ),
             ),
         )
