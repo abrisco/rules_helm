@@ -43,7 +43,7 @@ bazel_dep(name = "rules_helm", version = "{version}")
 - [helm_lint_test](#helm_lint_test)
 - [helm_package](#helm_package)
 - [helm_push](#helm_push)
-- [helm_push_registry](#helm_push_registry)
+- [helm_push_images](#helm_push_images)
 - [helm_register_toolchains](#helm_register_toolchains)
 - [helm_toolchain](#helm_toolchain)
 - [helm_uninstall](#helm_uninstall)
@@ -88,7 +88,6 @@ load(
 load(
     "//helm/private:helm_install.bzl",
     _helm_install = "helm_install",
-    _helm_push = "helm_push",
     _helm_uninstall = "helm_uninstall",
     _helm_upgrade = "helm_upgrade",
 )
@@ -103,7 +102,8 @@ load(
 )
 load(
     "//helm/private:helm_registry.bzl",
-    _helm_push_registry = "helm_push_registry",
+    _helm_push = "helm_push",
+    _helm_push_images = "helm_push_images",
 )
 load(
     ":providers.bzl",
@@ -126,8 +126,9 @@ helm_install = _helm_install
 helm_lint_aspect = _helm_lint_aspect
 helm_lint_test = _helm_lint_test
 helm_package = _helm_package
-helm_push_registry = _helm_push_registry
 helm_push = _helm_push
+helm_push_images = _helm_push_images
+helm_push_registry = _helm_push
 helm_register_toolchains = _helm_register_toolchains
 helm_toolchain = _helm_toolchain
 helm_uninstall = _helm_uninstall

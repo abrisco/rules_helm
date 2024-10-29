@@ -45,7 +45,7 @@ bazel_dep(name = "rules_helm", version = "{version}")
 - [helm_lint_test](#helm_lint_test)
 - [helm_package](#helm_package)
 - [helm_push](#helm_push)
-- [helm_push_registry](#helm_push_registry)
+- [helm_push_images](#helm_push_images)
 - [helm_register_toolchains](#helm_register_toolchains)
 - [helm_toolchain](#helm_toolchain)
 - [helm_uninstall](#helm_uninstall)
@@ -123,7 +123,7 @@ A rule that allows pre-packaged Helm charts to be used within Bazel.
 helm_install(<a href="#helm_install-name">name</a>, <a href="#helm_install-data">data</a>, <a href="#helm_install-helm_opts">helm_opts</a>, <a href="#helm_install-install_name">install_name</a>, <a href="#helm_install-opts">opts</a>, <a href="#helm_install-package">package</a>)
 </pre>
 
-Produce a script for performing a helm install action
+Produce an executable for performing a `helm install` operation.
 
 **ATTRIBUTES**
 
@@ -191,10 +191,10 @@ Rules for creating Helm chart packages.
 ## helm_push
 
 <pre>
-helm_push(<a href="#helm_push-name">name</a>, <a href="#helm_push-package">package</a>)
+helm_push(<a href="#helm_push-name">name</a>, <a href="#helm_push-include_images">include_images</a>, <a href="#helm_push-package">package</a>, <a href="#helm_push-registry_url">registry_url</a>)
 </pre>
 
-Produce a script for pushing all oci images used by a helm chart
+Produce an executable for performing a helm push to a registry.
 
 **ATTRIBUTES**
 
@@ -202,7 +202,28 @@ Produce a script for pushing all oci images used by a helm chart
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_push-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="helm_push-package"></a>package |  The helm package to upload images from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="helm_push-include_images"></a>include_images |  If True, images depended on by `package` will be pushed as well.   | Boolean | optional |  `False`  |
+| <a id="helm_push-package"></a>package |  The helm package to push to the registry.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="helm_push-registry_url"></a>registry_url |  The URL of the registry.   | String | required |  |
+
+
+<a id="helm_push_images"></a>
+
+## helm_push_images
+
+<pre>
+helm_push_images(<a href="#helm_push_images-name">name</a>, <a href="#helm_push_images-package">package</a>)
+</pre>
+
+Produce an executable for pushing all oci images used by a helm chart.
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="helm_push_images-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_push_images-package"></a>package |  The helm package to upload images from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
 <a id="helm_push_registry"></a>
@@ -210,10 +231,10 @@ Produce a script for pushing all oci images used by a helm chart
 ## helm_push_registry
 
 <pre>
-helm_push_registry(<a href="#helm_push_registry-name">name</a>, <a href="#helm_push_registry-package">package</a>, <a href="#helm_push_registry-registry_url">registry_url</a>)
+helm_push_registry(<a href="#helm_push_registry-name">name</a>, <a href="#helm_push_registry-include_images">include_images</a>, <a href="#helm_push_registry-package">package</a>, <a href="#helm_push_registry-registry_url">registry_url</a>)
 </pre>
 
-Produce a script for performing a helm push to a registry
+Produce an executable for performing a helm push to a registry.
 
 **ATTRIBUTES**
 
@@ -221,6 +242,7 @@ Produce a script for performing a helm push to a registry
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_push_registry-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_push_registry-include_images"></a>include_images |  If True, images depended on by `package` will be pushed as well.   | Boolean | optional |  `False`  |
 | <a id="helm_push_registry-package"></a>package |  The helm package to push to the registry.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="helm_push_registry-registry_url"></a>registry_url |  The URL of the registry.   | String | required |  |
 
@@ -252,7 +274,7 @@ A helm toolchain
 helm_uninstall(<a href="#helm_uninstall-name">name</a>, <a href="#helm_uninstall-data">data</a>, <a href="#helm_uninstall-helm_opts">helm_opts</a>, <a href="#helm_uninstall-install_name">install_name</a>, <a href="#helm_uninstall-opts">opts</a>)
 </pre>
 
-Produce a script for performing a helm uninstall action
+Produce an executable for performing a `helm uninstall` operation.
 
 **ATTRIBUTES**
 
@@ -274,7 +296,7 @@ Produce a script for performing a helm uninstall action
 helm_upgrade(<a href="#helm_upgrade-name">name</a>, <a href="#helm_upgrade-data">data</a>, <a href="#helm_upgrade-helm_opts">helm_opts</a>, <a href="#helm_upgrade-install_name">install_name</a>, <a href="#helm_upgrade-opts">opts</a>, <a href="#helm_upgrade-package">package</a>)
 </pre>
 
-Produce a script for performing a helm upgrade action
+Produce an executable for performing a `helm upgrade` operation.
 
 **ATTRIBUTES**
 
@@ -348,14 +370,15 @@ helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">char
 
 Rules for producing a helm package and some convenience targets.
 
-| target | rule |
-| --- | --- |
-| `{name}` | [helm_package](#helm_package) |
-| `{name}.push` | [helm_push](#helm_push) |
-| `{name}.push_registry` | [helm_push_registry](#helm_push_registry) |
-| `{name}.install` | [helm_install](#helm_install) |
-| `{name}.uninstall` | [helm_uninstall](#helm_uninstall) |
-| `{name}.upgrade` | [helm_upgrade](#helm_upgrade) |
+| target | rule | condition |
+| --- | --- | --- |
+| `{name}` | [helm_package](#helm_package) | `None` |
+| `{name}.push_images` | [helm_push_images](#helm_push_images) | `None` |
+| `{name}.push_registry` | [helm_push](#helm_push) (`include_images = False`) | `registry_url` is defined. |
+| `{name}.push` | [helm_push](#helm_push) (`include_images = True`) | `registry_url` is defined. |
+| `{name}.install` | [helm_install](#helm_install) | `None` |
+| `{name}.uninstall` | [helm_uninstall](#helm_uninstall) | `None` |
+| `{name}.upgrade` | [helm_upgrade](#helm_upgrade) | `None` |
 
 
 **PARAMETERS**

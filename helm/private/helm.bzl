@@ -1,8 +1,8 @@
 """Helm rules"""
 
-load("//helm/private:helm_install.bzl", "helm_install", "helm_push", "helm_uninstall", "helm_upgrade")
+load("//helm/private:helm_install.bzl", "helm_install", "helm_uninstall", "helm_upgrade")
 load("//helm/private:helm_package.bzl", "helm_package")
-load("//helm/private:helm_registry.bzl", "helm_push_registry")
+load("//helm/private:helm_registry.bzl", "helm_push", "helm_push_images")
 
 def helm_chart(
         name,
@@ -26,14 +26,15 @@ def helm_chart(
         **kwargs):
     """Rules for producing a helm package and some convenience targets.
 
-    | target | rule |
-    | --- | --- |
-    | `{name}` | [helm_package](#helm_package) |
-    | `{name}.push` | [helm_push](#helm_push) |
-    | `{name}.push_registry` | [helm_push_registry](#helm_push_registry) |
-    | `{name}.install` | [helm_install](#helm_install) |
-    | `{name}.uninstall` | [helm_uninstall](#helm_uninstall) |
-    | `{name}.upgrade` | [helm_upgrade](#helm_upgrade) |
+    | target | rule | condition |
+    | --- | --- | --- |
+    | `{name}` | [helm_package](#helm_package) | `None` |
+    | `{name}.push_images` | [helm_push_images](#helm_push_images) | `None` |
+    | `{name}.push_registry` | [helm_push](#helm_push) (`include_images = False`) | `registry_url` is defined. |
+    | `{name}.push` | [helm_push](#helm_push) (`include_images = True`) | `registry_url` is defined. |
+    | `{name}.install` | [helm_install](#helm_install) | `None` |
+    | `{name}.uninstall` | [helm_uninstall](#helm_uninstall) | `None` |
+    | `{name}.upgrade` | [helm_upgrade](#helm_upgrade) | `None` |
 
     Args:
         name (str): The name of the [helm_package](#helm_package) target.
@@ -78,15 +79,24 @@ def helm_chart(
         **kwargs
     )
 
-    helm_push(
-        name = name + ".push",
+    helm_push_images(
+        name = name + ".push_images",
         package = name,
         **kwargs
     )
 
     if registry_url:
-        helm_push_registry(
+        helm_push(
             name = name + ".push_registry",
+            package = name,
+            include_images = False,
+            registry_url = registry_url,
+            **kwargs
+        )
+
+        helm_push(
+            name = name + ".push",
+            include_images = True,
             package = name,
             registry_url = registry_url,
             **kwargs

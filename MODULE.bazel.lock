@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "a9802872e10afd9c2b6f8679df942e5c8559a4d5bcc3323dca240900299d671f",
+  "moduleFileHash": "f170566e66bcf0b9ec1764a312bc7bea9278484a2fa4b92f4df8c6b2eabd16f0",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -18,7 +18,7 @@
   "moduleDepGraph": {
     "<root>": {
       "name": "rules_helm",
-      "version": "0.6.0",
+      "version": "0.8.0",
       "key": "<root>",
       "repoName": "rules_helm",
       "executionPlatformsToRegister": [],
@@ -106,10 +106,14 @@
             "helm_test_deps__with_chart_deps_redis": "helm_test_deps__with_chart_deps_redis",
             "rules_helm_test_container_base": "rules_helm_test_container_base"
           },
-          "devImports": [],
+          "devImports": [
+            "helm_test_deps__with_chart_deps_postgresql",
+            "helm_test_deps__with_chart_deps_redis",
+            "rules_helm_test_container_base"
+          ],
           "tags": [],
-          "hasDevUseExtension": false,
-          "hasNonDevUseExtension": true
+          "hasDevUseExtension": true,
+          "hasNonDevUseExtension": false
         }
       ],
       "deps": {
@@ -1848,7 +1852,7 @@
     },
     "//tests:test_extensions.bzl%helm_test": {
       "general": {
-        "bzlTransitiveDigest": "fLUj6KqPIgj437Y/MbsFuE6HN4dod2UhituECab593Q=",
+        "bzlTransitiveDigest": "7adh97XVQwYjUiFGdD0yxK0f7gFVkhm/bi+c0a0vBCI=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
