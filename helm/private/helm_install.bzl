@@ -71,7 +71,7 @@ def _helm_install_impl(ctx):
     ]
 
 helm_install = rule(
-    doc = "Produce a script for performing a helm install action",
+    doc = "Produce an executable for performing a `helm install` operation.",
     implementation = _helm_install_impl,
     executable = True,
     attrs = {
@@ -179,7 +179,7 @@ def _helm_upgrade_impl(ctx):
     ]
 
 helm_upgrade = rule(
-    doc = "Produce a script for performing a helm upgrade action",
+    doc = "Produce an executable for performing a `helm upgrade` operation.",
     implementation = _helm_upgrade_impl,
     executable = True,
     attrs = {
@@ -274,7 +274,7 @@ def _helm_uninstall_impl(ctx):
     ]
 
 helm_uninstall = rule(
-    doc = "Produce a script for performing a helm uninstall action",
+    doc = "Produce an executable for performing a `helm uninstall` operation.",
     implementation = _helm_uninstall_impl,
     executable = True,
     attrs = {
@@ -306,69 +306,6 @@ helm_uninstall = rule(
         "_stamp_flag": attr.label(
             doc = "A setting used to determine whether or not the `--stamp` flag is enabled",
             default = Label("//helm/private:stamp"),
-        ),
-    },
-    toolchains = [
-        str(Label("//helm:toolchain_type")),
-    ],
-)
-
-def _helm_push_impl(ctx):
-    toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
-
-    if toolchain.helm.basename.endswith(".exe"):
-        pusher = ctx.actions.declare_file(ctx.label.name + ".bat")
-    else:
-        pusher = ctx.actions.declare_file(ctx.label.name + ".sh")
-
-    pkg_info = ctx.attr.package[HelmPackageInfo]
-
-    image_pushers = []
-    image_runfiles = []
-    for image in pkg_info.images:
-        image_pushers.append(image[DefaultInfo].files_to_run.executable)
-        image_runfiles.append(image[DefaultInfo].default_runfiles)
-
-    if image_pushers:
-        image_commands = "\n".join([pusher.short_path for pusher in image_pushers])
-    else:
-        image_commands = "echo 'No OCI images to push for Helm chart'"
-
-    ctx.actions.expand_template(
-        template = ctx.file._pusher,
-        output = pusher,
-        substitutions = {
-            "{image_pushers}": image_commands,
-        },
-        is_executable = True,
-    )
-
-    runfiles = ctx.runfiles([pusher] + image_pushers)
-    for ir in image_runfiles:
-        runfiles = runfiles.merge(ir)
-
-    return [
-        DefaultInfo(
-            files = depset([pusher]),
-            runfiles = runfiles,
-            executable = pusher,
-        ),
-    ]
-
-helm_push = rule(
-    doc = "Produce a script for pushing all oci images used by a helm chart",
-    implementation = _helm_push_impl,
-    executable = True,
-    attrs = {
-        "package": attr.label(
-            doc = "The helm package to upload images from.",
-            providers = [HelmPackageInfo],
-            mandatory = True,
-        ),
-        "_pusher": attr.label(
-            doc = "A template used to produce the pusher executable.",
-            allow_single_file = True,
-            default = Label("//helm/private/pusher:template"),
         ),
     },
     toolchains = [

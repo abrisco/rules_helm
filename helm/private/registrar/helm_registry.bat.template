@@ -1,5 +1,4 @@
 ECHO OFF
 
-
+{image_pushers}
 {helm} push {chart} {registry_url}
-

@@ -2,4 +2,5 @@
 
 set -euo pipefail
 
+{image_pushers}
 eval exec {helm} push {chart} {registry_url}
