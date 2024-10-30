@@ -1,5 +1,20 @@
 """rules_helm utility helpers"""
 
+def rlocationpath(file, workspace_name):
+    """Generate the Runfiles location path for a given file.
+
+    Args:
+        file (File): The file in question
+        workspace_name (str): The name of the current workspace.
+
+    Returns:
+        str: The rlocationpath value of `file`.
+    """
+    if file.short_path.startswith("../"):
+        return file.short_path[len("../"):]
+
+    return "{}/{}".format(workspace_name, file.short_path)
+
 StampSettingInfo = provider(
     doc = "Information about the `--stamp` command line flag",
     fields = {

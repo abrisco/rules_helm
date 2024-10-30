@@ -5,5 +5,5 @@ package(default_visibility = ["//visibility:public"])
 go_binary(
     name = "linter",
     srcs = ["linter.go"],
-    deps = ["@io_bazel_rules_go//go/tools/bazel"],
+    deps = ["@io_bazel_rules_go//go/runfiles"],
 )

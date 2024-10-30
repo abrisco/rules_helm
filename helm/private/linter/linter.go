@@ -14,13 +14,45 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/bazelbuild/rules_go/go/tools/bazel"
+	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
 type Arguments struct {
 	helm   string
 	pkg    string
 	output string
+}
+
+func get_runfile(runfile_path string) string {
+
+	runfiles, err := runfiles.New()
+	if err != nil {
+		log.Fatalf("Failed to load runfiles: ", err)
+	}
+
+	// Use the runfiles library to locate files
+	runfile, err := runfiles.Rlocation(runfile_path)
+	if err != nil {
+		log.Fatal("When reading file ", runfile_path, " got error ", err)
+	}
+
+	// Check that the file actually exist
+	if _, err := os.Stat(runfile); err != nil {
+		log.Fatal("File found by runfile doesn't exist")
+	}
+
+	return runfile
+}
+
+func makeAbsolutePath(path string) string {
+	if filepath.IsAbs(path) {
+		return path
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal("Couldn't determine current working directory")
+	}
+	return filepath.Join(cwd, path)
 }
 
 func parse_args() Arguments {
@@ -32,7 +64,7 @@ func parse_args() Arguments {
 
 	args_file, found := os.LookupEnv("RULES_HELM_HELM_LINT_TEST_ARGS_PATH")
 	if found {
-		content, err := os.ReadFile(args_file)
+		content, err := os.ReadFile(get_runfile(args_file))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -161,22 +193,6 @@ func lint(directory string, package_name string, helm string, output string) {
 	}
 }
 
-func get_runfile(runfile_path string) string {
-
-	// Use the runfiles library to locate files
-	runfile, err := bazel.Runfile(runfile_path)
-	if err != nil {
-		log.Fatal("When reading file ", runfile_path, " got error ", err)
-	}
-
-	// Check that the file actually exist
-	if _, err := os.Stat(runfile); err != nil {
-		log.Fatal("File found by runfile doesn't exist")
-	}
-
-	return runfile
-}
-
 func hashString(text string) string {
 	// Create a new SHA-256 hash
 	hasher := sha256.New()
@@ -202,8 +218,8 @@ func main() {
 	}
 
 	var prefix = ""
-	test_tmpdir, found := os.LookupEnv("TEST_TMPDIR")
-	if found {
+	test_tmpdir, is_test := os.LookupEnv("TEST_TMPDIR")
+	if is_test {
 		prefix = test_tmpdir
 	} else {
 		prefix = cwd
@@ -221,11 +237,21 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := extractPackage(get_runfile(args.pkg), dir); err != nil {
+	var pkg = args.pkg
+	var helm = args.helm
+	if is_test {
+		pkg = get_runfile(pkg)
+		helm = get_runfile(helm)
+	} else {
+		pkg = makeAbsolutePath(pkg)
+		helm = makeAbsolutePath(helm)
+	}
+
+	if err := extractPackage(pkg, dir); err != nil {
 		log.Fatal(err)
 	}
 
 	lint_dir := find_package_root(dir)
 
-	lint(dir, lint_dir, get_runfile(args.helm), args.output)
+	lint(dir, lint_dir, helm, args.output)
 }

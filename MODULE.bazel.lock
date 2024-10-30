@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "f170566e66bcf0b9ec1764a312bc7bea9278484a2fa4b92f4df8c6b2eabd16f0",
+  "moduleFileHash": "7431b04f6afbd3a94874d696173d2fc730b5df31def484942e3939b742007b72",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -45,7 +45,7 @@
             {
               "tagName": "download",
               "attributeValues": {
-                "version": "1.18.10"
+                "version": "1.23.0"
               },
               "devDependency": false,
               "location": {
@@ -117,9 +117,9 @@
         }
       ],
       "deps": {
-        "platforms": "platforms@0.0.8",
+        "platforms": "platforms@0.0.10",
         "bazel_skylib": "bazel_skylib@1.7.1",
-        "io_bazel_rules_go": "rules_go@0.45.1",
+        "io_bazel_rules_go": "rules_go@0.50.1",
         "aspect_bazel_lib": "aspect_bazel_lib@2.7.2",
         "rules_oci": "rules_oci@2.0.0",
         "io_bazel_stardoc": "stardoc@0.6.2",
@@ -127,14 +127,32 @@
         "local_config_platform": "local_config_platform@_"
       }
     },
-    "platforms@0.0.8": {
+    "platforms@0.0.10": {
       "name": "platforms",
-      "version": "0.0.8",
-      "key": "platforms@0.0.8",
+      "version": "0.0.10",
+      "key": "platforms@0.0.10",
       "repoName": "platforms",
       "executionPlatformsToRegister": [],
       "toolchainsToRegister": [],
-      "extensionUsages": [],
+      "extensionUsages": [
+        {
+          "extensionBzlFile": "@platforms//host:extension.bzl",
+          "extensionName": "host_platform",
+          "usingModule": "platforms@0.0.10",
+          "location": {
+            "file": "https://bcr.bazel.build/modules/platforms/0.0.10/MODULE.bazel",
+            "line": 9,
+            "column": 30
+          },
+          "imports": {
+            "host_platform": "host_platform"
+          },
+          "devImports": [],
+          "tags": [],
+          "hasDevUseExtension": false,
+          "hasNonDevUseExtension": true
+        }
+      ],
       "deps": {
         "rules_license": "rules_license@0.0.7",
         "bazel_tools": "bazel_tools@_",
@@ -146,9 +164,9 @@
         "attributes": {
           "name": "platforms",
           "urls": [
-            "https://github.com/bazelbuild/platforms/releases/download/0.0.8/platforms-0.0.8.tar.gz"
+            "https://github.com/bazelbuild/platforms/releases/download/0.0.10/platforms-0.0.10.tar.gz"
           ],
-          "integrity": "sha256-gVBAZgU4ns7LbaB8vLUJ1WN6OrmiS8abEQFTE2fYnXQ=",
+          "integrity": "sha256-IY7+juc20mo1cmY7N0olPAErcW2K8MB+hC6C8jigp+4=",
           "strip_prefix": "",
           "remote_patches": {},
           "remote_patch_strip": 0
@@ -167,7 +185,7 @@
       ],
       "extensionUsages": [],
       "deps": {
-        "platforms": "platforms@0.0.8",
+        "platforms": "platforms@0.0.10",
         "rules_license": "rules_license@0.0.7",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
@@ -187,10 +205,10 @@
         }
       }
     },
-    "rules_go@0.45.1": {
+    "rules_go@0.50.1": {
       "name": "rules_go",
-      "version": "0.45.1",
-      "key": "rules_go@0.45.1",
+      "version": "0.50.1",
+      "key": "rules_go@0.50.1",
       "repoName": "io_bazel_rules_go",
       "executionPlatformsToRegister": [],
       "toolchainsToRegister": [
@@ -200,9 +218,9 @@
         {
           "extensionBzlFile": "@io_bazel_rules_go//go:extensions.bzl",
           "extensionName": "go_sdk",
-          "usingModule": "rules_go@0.45.1",
+          "usingModule": "rules_go@0.50.1",
           "location": {
-            "file": "https://bcr.bazel.build/modules/rules_go/0.45.1/MODULE.bazel",
+            "file": "https://bcr.bazel.build/modules/rules_go/0.50.1/MODULE.bazel",
             "line": 16,
             "column": 23
           },
@@ -216,11 +234,11 @@
               "tagName": "download",
               "attributeValues": {
                 "name": "go_default_sdk",
-                "version": "1.21.1"
+                "version": "1.21.8"
               },
               "devDependency": false,
               "location": {
-                "file": "https://bcr.bazel.build/modules/rules_go/0.45.1/MODULE.bazel",
+                "file": "https://bcr.bazel.build/modules/rules_go/0.50.1/MODULE.bazel",
                 "line": 17,
                 "column": 16
               }
@@ -232,10 +250,10 @@
         {
           "extensionBzlFile": "@gazelle//:extensions.bzl",
           "extensionName": "go_deps",
-          "usingModule": "rules_go@0.45.1",
+          "usingModule": "rules_go@0.50.1",
           "location": {
-            "file": "https://bcr.bazel.build/modules/rules_go/0.45.1/MODULE.bazel",
-            "line": 32,
+            "file": "https://bcr.bazel.build/modules/rules_go/0.50.1/MODULE.bazel",
+            "line": 31,
             "column": 24
           },
           "imports": {
@@ -247,7 +265,8 @@
             "org_golang_google_grpc_cmd_protoc_gen_go_grpc": "org_golang_google_grpc_cmd_protoc_gen_go_grpc",
             "org_golang_google_protobuf": "org_golang_google_protobuf",
             "org_golang_x_net": "org_golang_x_net",
-            "org_golang_x_tools": "org_golang_x_tools"
+            "org_golang_x_tools": "org_golang_x_tools",
+            "bazel_gazelle_go_repository_config": "bazel_gazelle_go_repository_config"
           },
           "devImports": [],
           "tags": [
@@ -258,8 +277,8 @@
               },
               "devDependency": false,
               "location": {
-                "file": "https://bcr.bazel.build/modules/rules_go/0.45.1/MODULE.bazel",
-                "line": 33,
+                "file": "https://bcr.bazel.build/modules/rules_go/0.50.1/MODULE.bazel",
+                "line": 32,
                 "column": 18
               }
             }
@@ -271,10 +290,10 @@
       "deps": {
         "io_bazel_rules_go_bazel_features": "bazel_features@1.10.0",
         "bazel_skylib": "bazel_skylib@1.7.1",
-        "platforms": "platforms@0.0.8",
-        "rules_proto": "rules_proto@4.0.0",
+        "platforms": "platforms@0.0.10",
+        "rules_proto": "rules_proto@6.0.0",
         "com_google_protobuf": "protobuf@21.7",
-        "gazelle": "gazelle@0.34.0",
+        "gazelle": "gazelle@0.36.0",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       },
@@ -282,11 +301,11 @@
         "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
         "ruleClassName": "http_archive",
         "attributes": {
-          "name": "rules_go~0.45.1",
+          "name": "rules_go~0.50.1",
           "urls": [
-            "https://github.com/bazelbuild/rules_go/releases/download/v0.45.1/rules_go-v0.45.1.zip"
+            "https://github.com/bazelbuild/rules_go/releases/download/v0.50.1/rules_go-v0.50.1.zip"
           ],
-          "integrity": "sha256-ZzSnGZk7G6Tr6YBuhThkOVqNOWitJ/nddZwZaz6zq+g=",
+          "integrity": "sha256-9KkxRRjKas+hbMSrQ7C4zh5OpkuBw42KN3KIPxUzRrg=",
           "strip_prefix": "",
           "remote_patches": {},
           "remote_patch_strip": 0
@@ -429,7 +448,7 @@
       ],
       "deps": {
         "bazel_skylib": "bazel_skylib@1.7.1",
-        "platforms": "platforms@0.0.8",
+        "platforms": "platforms@0.0.10",
         "io_bazel_stardoc": "stardoc@0.6.2",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
@@ -548,7 +567,7 @@
         "aspect_bazel_lib": "aspect_bazel_lib@2.7.2",
         "bazel_features": "bazel_features@1.10.0",
         "bazel_skylib": "bazel_skylib@1.7.1",
-        "platforms": "platforms@0.0.8",
+        "platforms": "platforms@0.0.10",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       },
@@ -770,9 +789,9 @@
         "rules_cc": "rules_cc@0.0.9",
         "rules_java": "rules_java@7.1.0",
         "rules_license": "rules_license@0.0.7",
-        "rules_proto": "rules_proto@4.0.0",
+        "rules_proto": "rules_proto@6.0.0",
         "rules_python": "rules_python@0.10.2",
-        "platforms": "platforms@0.0.8",
+        "platforms": "platforms@0.0.10",
         "com_google_protobuf": "protobuf@21.7",
         "zlib": "zlib@1.3",
         "build_bazel_apple_support": "apple_support@1.5.0",
@@ -788,7 +807,7 @@
       "toolchainsToRegister": [],
       "extensionUsages": [],
       "deps": {
-        "platforms": "platforms@0.0.8",
+        "platforms": "platforms@0.0.10",
         "bazel_tools": "bazel_tools@_"
       }
     },
@@ -868,17 +887,18 @@
         }
       }
     },
-    "rules_proto@4.0.0": {
+    "rules_proto@6.0.0": {
       "name": "rules_proto",
-      "version": "4.0.0",
-      "key": "rules_proto@4.0.0",
+      "version": "6.0.0",
+      "key": "rules_proto@6.0.0",
       "repoName": "rules_proto",
       "executionPlatformsToRegister": [],
       "toolchainsToRegister": [],
       "extensionUsages": [],
       "deps": {
+        "rules_license": "rules_license@0.0.7",
         "bazel_skylib": "bazel_skylib@1.7.1",
-        "rules_cc": "rules_cc@0.0.9",
+        "bazel_features": "bazel_features@1.10.0",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       },
@@ -886,16 +906,16 @@
         "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
         "ruleClassName": "http_archive",
         "attributes": {
-          "name": "rules_proto~4.0.0",
+          "name": "rules_proto~6.0.0",
           "urls": [
-            "https://github.com/bazelbuild/rules_proto/archive/refs/tags/4.0.0.zip"
+            "https://github.com/bazelbuild/rules_proto/releases/download/6.0.0/rules_proto-6.0.0.tar.gz"
           ],
-          "integrity": "sha256-Lr5z6xyuRA19pNtRYMGjKaynwQpck4H/lwYyVjyhoq4=",
-          "strip_prefix": "rules_proto-4.0.0",
+          "integrity": "sha256-MD6G5yKlIPbzJqULQc/Ba5j+bRlVzkZkKlt6Z8EcD10=",
+          "strip_prefix": "rules_proto-6.0.0",
           "remote_patches": {
-            "https://bcr.bazel.build/modules/rules_proto/4.0.0/patches/module_dot_bazel.patch": "sha256-MclJO7tIAM2ElDAmscNId9pKTpOuDGHgVlW/9VBOIp0="
+            "https://bcr.bazel.build/modules/rules_proto/6.0.0/patches/module_dot_bazel_version.patch": "sha256-fjQjxMdkMeumhvx9JdFSYeHH+Ex4TaTXNFMi554NF8E="
           },
-          "remote_patch_strip": 0
+          "remote_patch_strip": 1
         }
       }
     },
@@ -953,7 +973,7 @@
         "bazel_skylib": "bazel_skylib@1.7.1",
         "rules_python": "rules_python@0.10.2",
         "rules_cc": "rules_cc@0.0.9",
-        "rules_proto": "rules_proto@4.0.0",
+        "rules_proto": "rules_proto@6.0.0",
         "rules_java": "rules_java@7.1.0",
         "rules_pkg": "rules_pkg@0.7.0",
         "com_google_abseil": "abseil-cpp@20211102.0",
@@ -984,10 +1004,10 @@
         }
       }
     },
-    "gazelle@0.34.0": {
+    "gazelle@0.36.0": {
       "name": "gazelle",
-      "version": "0.34.0",
-      "key": "gazelle@0.34.0",
+      "version": "0.36.0",
+      "key": "gazelle@0.36.0",
       "repoName": "bazel_gazelle",
       "executionPlatformsToRegister": [],
       "toolchainsToRegister": [],
@@ -995,10 +1015,10 @@
         {
           "extensionBzlFile": "@io_bazel_rules_go//go:extensions.bzl",
           "extensionName": "go_sdk",
-          "usingModule": "gazelle@0.34.0",
+          "usingModule": "gazelle@0.36.0",
           "location": {
-            "file": "https://bcr.bazel.build/modules/gazelle/0.34.0/MODULE.bazel",
-            "line": 12,
+            "file": "https://bcr.bazel.build/modules/gazelle/0.36.0/MODULE.bazel",
+            "line": 13,
             "column": 23
           },
           "imports": {
@@ -1012,10 +1032,10 @@
         {
           "extensionBzlFile": "@bazel_gazelle//internal/bzlmod:non_module_deps.bzl",
           "extensionName": "non_module_deps",
-          "usingModule": "gazelle@0.34.0",
+          "usingModule": "gazelle@0.36.0",
           "location": {
-            "file": "https://bcr.bazel.build/modules/gazelle/0.34.0/MODULE.bazel",
-            "line": 20,
+            "file": "https://bcr.bazel.build/modules/gazelle/0.36.0/MODULE.bazel",
+            "line": 21,
             "column": 32
           },
           "imports": {
@@ -1031,10 +1051,10 @@
         {
           "extensionBzlFile": "@bazel_gazelle//:extensions.bzl",
           "extensionName": "go_deps",
-          "usingModule": "gazelle@0.34.0",
+          "usingModule": "gazelle@0.36.0",
           "location": {
-            "file": "https://bcr.bazel.build/modules/gazelle/0.34.0/MODULE.bazel",
-            "line": 28,
+            "file": "https://bcr.bazel.build/modules/gazelle/0.36.0/MODULE.bazel",
+            "line": 29,
             "column": 24
           },
           "imports": {
@@ -1047,7 +1067,9 @@
             "org_golang_x_sync": "org_golang_x_sync",
             "org_golang_x_tools": "org_golang_x_tools",
             "org_golang_x_tools_go_vcs": "org_golang_x_tools_go_vcs",
-            "bazel_gazelle_go_repository_config": "bazel_gazelle_go_repository_config"
+            "bazel_gazelle_go_repository_config": "bazel_gazelle_go_repository_config",
+            "com_github_golang_protobuf": "com_github_golang_protobuf",
+            "org_golang_google_protobuf": "org_golang_google_protobuf"
           },
           "devImports": [],
           "tags": [
@@ -1058,8 +1080,8 @@
               },
               "devDependency": false,
               "location": {
-                "file": "https://bcr.bazel.build/modules/gazelle/0.34.0/MODULE.bazel",
-                "line": 29,
+                "file": "https://bcr.bazel.build/modules/gazelle/0.36.0/MODULE.bazel",
+                "line": 30,
                 "column": 18
               }
             },
@@ -1067,13 +1089,13 @@
               "tagName": "module",
               "attributeValues": {
                 "path": "golang.org/x/tools",
-                "sum": "h1:Iey4qkscZuv0VvIt8E0neZjtPVQFSc870HQ448QgEmQ=",
-                "version": "v0.13.0"
+                "sum": "h1:k8NLag8AGHnn+PHbl7g43CtqZAwG60vZkLqgyZgIHgQ=",
+                "version": "v0.18.0"
               },
               "devDependency": false,
               "location": {
-                "file": "https://bcr.bazel.build/modules/gazelle/0.34.0/MODULE.bazel",
-                "line": 33,
+                "file": "https://bcr.bazel.build/modules/gazelle/0.36.0/MODULE.bazel",
+                "line": 34,
                 "column": 15
               }
             }
@@ -1083,10 +1105,11 @@
         }
       ],
       "deps": {
+        "bazel_features": "bazel_features@1.10.0",
         "bazel_skylib": "bazel_skylib@1.7.1",
         "com_google_protobuf": "protobuf@21.7",
-        "io_bazel_rules_go": "rules_go@0.45.1",
-        "rules_proto": "rules_proto@4.0.0",
+        "io_bazel_rules_go": "rules_go@0.50.1",
+        "rules_proto": "rules_proto@6.0.0",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       },
@@ -1094,11 +1117,11 @@
         "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
         "ruleClassName": "http_archive",
         "attributes": {
-          "name": "gazelle~0.34.0",
+          "name": "gazelle~0.36.0",
           "urls": [
-            "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.34.0/bazel-gazelle-v0.34.0.tar.gz"
+            "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.36.0/bazel-gazelle-v0.36.0.tar.gz"
           ],
-          "integrity": "sha256-tzh/cu+1n4duTarkLx05EtDUVWPqx8sj0d4LCUq1iM8=",
+          "integrity": "sha256-dd8ojEsxyB61D1Hi4U9HY8t1SNquEmgXJHBkY3/Z6mI=",
           "strip_prefix": "",
           "remote_patches": {},
           "remote_patch_strip": 0
@@ -1183,10 +1206,10 @@
         }
       ],
       "deps": {
-        "platforms": "platforms@0.0.8",
+        "platforms": "platforms@0.0.10",
         "rules_cc": "rules_cc@0.0.9",
         "bazel_skylib": "bazel_skylib@1.7.1",
-        "rules_proto": "rules_proto@4.0.0",
+        "rules_proto": "rules_proto@6.0.0",
         "rules_license": "rules_license@0.0.7",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
@@ -1324,7 +1347,7 @@
         }
       ],
       "deps": {
-        "platforms": "platforms@0.0.8",
+        "platforms": "platforms@0.0.10",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       },
@@ -1411,7 +1434,7 @@
       "toolchainsToRegister": [],
       "extensionUsages": [],
       "deps": {
-        "platforms": "platforms@0.0.8",
+        "platforms": "platforms@0.0.10",
         "rules_cc": "rules_cc@0.0.9",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
@@ -1465,7 +1488,7 @@
       ],
       "deps": {
         "bazel_skylib": "bazel_skylib@1.7.1",
-        "platforms": "platforms@0.0.8",
+        "platforms": "platforms@0.0.10",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       },
@@ -1526,7 +1549,7 @@
       "extensionUsages": [],
       "deps": {
         "rules_cc": "rules_cc@0.0.9",
-        "platforms": "platforms@0.0.8",
+        "platforms": "platforms@0.0.10",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       },
@@ -1557,10 +1580,10 @@
       "extensionUsages": [],
       "deps": {
         "bazel_skylib": "bazel_skylib@1.7.1",
-        "rules_proto": "rules_proto@4.0.0",
+        "rules_proto": "rules_proto@6.0.0",
         "com_google_protobuf": "protobuf@21.7",
         "com_google_absl": "abseil-cpp@20211102.0",
-        "platforms": "platforms@0.0.8",
+        "platforms": "platforms@0.0.10",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       },
@@ -1591,7 +1614,7 @@
       "extensionUsages": [],
       "deps": {
         "com_google_absl": "abseil-cpp@20211102.0",
-        "platforms": "platforms@0.0.8",
+        "platforms": "platforms@0.0.10",
         "rules_cc": "rules_cc@0.0.9",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
@@ -1617,7 +1640,7 @@
   "moduleExtensions": {
     "//helm:extensions.bzl%helm": {
       "general": {
-        "bzlTransitiveDigest": "cFu0CTf/nnzQEIf18AuVW1QyZq0chKCya1YoU0qrJwk=",
+        "bzlTransitiveDigest": "PqkrsL6mq4yXE0K9v1lAssGpS7uXvdgG9Spj1LIRmIk=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1852,7 +1875,7 @@
     },
     "//tests:test_extensions.bzl%helm_test": {
       "general": {
-        "bzlTransitiveDigest": "7adh97XVQwYjUiFGdD0yxK0f7gFVkhm/bi+c0a0vBCI=",
+        "bzlTransitiveDigest": "Il07v34bQC0F0TXD/zqX8dYPcnapTKN53tEWs9CT0ZU=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -2616,81 +2639,81 @@
         "recordedRepoMappingEntries": []
       }
     },
-    "@@rules_go~0.45.1//go:extensions.bzl%go_sdk": {
+    "@@rules_go~0.50.1//go:extensions.bzl%go_sdk": {
       "os:osx,arch:aarch64": {
-        "bzlTransitiveDigest": "xfURZVeroCWFS8DgH/YnABOd/pNvk7lJqUG/7WOXuXc=",
+        "bzlTransitiveDigest": "oyhaMZERUbMh8wOsMaXImlXIt7lPb0cxzP2BOCyvtgQ=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
           "rules_helm__download_0_windows_amd64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:sdk.bzl",
             "ruleClassName": "go_download_sdk_rule",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_helm__download_0_windows_amd64",
-              "goos": "",
-              "goarch": "",
+              "name": "rules_go~0.50.1~go_sdk~rules_helm__download_0_windows_amd64",
+              "goos": "windows",
+              "goarch": "amd64",
               "sdks": {},
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.18.10"
+              "version": "1.23.0"
             }
           },
           "rules_helm__download_0_windows_arm64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:sdk.bzl",
             "ruleClassName": "go_download_sdk_rule",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_helm__download_0_windows_arm64",
-              "goos": "",
-              "goarch": "",
+              "name": "rules_go~0.50.1~go_sdk~rules_helm__download_0_windows_arm64",
+              "goos": "windows",
+              "goarch": "arm64",
               "sdks": {},
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.18.10"
+              "version": "1.23.0"
             }
           },
           "go_host_compatible_sdk_label": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:extensions.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:extensions.bzl",
             "ruleClassName": "host_compatible_toolchain",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~go_host_compatible_sdk_label",
+              "name": "rules_go~0.50.1~go_sdk~go_host_compatible_sdk_label",
               "toolchain": "@rules_helm__download_0//:ROOT"
             }
           },
           "rules_go__download_0_darwin_amd64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:sdk.bzl",
             "ruleClassName": "go_download_sdk_rule",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_go__download_0_darwin_amd64",
-              "goos": "",
-              "goarch": "",
+              "name": "rules_go~0.50.1~go_sdk~rules_go__download_0_darwin_amd64",
+              "goos": "darwin",
+              "goarch": "amd64",
               "sdks": {},
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.21.1"
+              "version": "1.21.8"
             }
           },
           "rules_helm__download_0_linux_amd64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:sdk.bzl",
             "ruleClassName": "go_download_sdk_rule",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_helm__download_0_linux_amd64",
-              "goos": "",
-              "goarch": "",
+              "name": "rules_go~0.50.1~go_sdk~rules_helm__download_0_linux_amd64",
+              "goos": "linux",
+              "goarch": "amd64",
               "sdks": {},
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.18.10"
+              "version": "1.23.0"
             }
           },
           "go_toolchains": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:sdk.bzl",
             "ruleClassName": "go_multiple_toolchains",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~go_toolchains",
+              "name": "rules_go~0.50.1~go_sdk~go_toolchains",
               "prefixes": [
                 "_0000_rules_helm__download_0_",
                 "_0001_rules_helm__download_0_darwin_amd64_",
@@ -2762,40 +2785,40 @@
                 "remote"
               ],
               "sdk_versions": [
-                "1.18.10",
-                "1.18.10",
-                "1.18.10",
-                "1.18.10",
-                "1.18.10",
-                "1.18.10",
-                "1.21.1",
-                "1.21.1",
-                "1.21.1",
-                "1.21.1",
-                "1.21.1",
-                "1.21.1"
+                "1.23.0",
+                "1.23.0",
+                "1.23.0",
+                "1.23.0",
+                "1.23.0",
+                "1.23.0",
+                "1.21.8",
+                "1.21.8",
+                "1.21.8",
+                "1.21.8",
+                "1.21.8",
+                "1.21.8"
               ]
             }
           },
           "rules_helm__download_0_linux_arm64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:sdk.bzl",
             "ruleClassName": "go_download_sdk_rule",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_helm__download_0_linux_arm64",
-              "goos": "",
-              "goarch": "",
+              "name": "rules_go~0.50.1~go_sdk~rules_helm__download_0_linux_arm64",
+              "goos": "linux",
+              "goarch": "arm64",
               "sdks": {},
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.18.10"
+              "version": "1.23.0"
             }
           },
           "io_bazel_rules_nogo": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:nogo.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:nogo.bzl",
             "ruleClassName": "go_register_nogo",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~io_bazel_rules_nogo",
+              "name": "rules_go~0.50.1~go_sdk~io_bazel_rules_nogo",
               "nogo": "@io_bazel_rules_go//:default_nogo",
               "includes": [
                 "'@@//:__subpackages__'"
@@ -2804,24 +2827,24 @@
             }
           },
           "rules_go__download_0_windows_arm64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:sdk.bzl",
             "ruleClassName": "go_download_sdk_rule",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_go__download_0_windows_arm64",
-              "goos": "",
-              "goarch": "",
+              "name": "rules_go~0.50.1~go_sdk~rules_go__download_0_windows_arm64",
+              "goos": "windows",
+              "goarch": "arm64",
               "sdks": {},
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.21.1"
+              "version": "1.21.8"
             }
           },
           "rules_helm__download_0": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:sdk.bzl",
             "ruleClassName": "go_download_sdk_rule",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_helm__download_0",
+              "name": "rules_go~0.50.1~go_sdk~rules_helm__download_0",
               "goos": "",
               "goarch": "",
               "sdks": {},
@@ -2831,29 +2854,29 @@
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.18.10",
+              "version": "1.23.0",
               "strip_prefix": "go"
             }
           },
           "rules_go__download_0_linux_arm64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:sdk.bzl",
             "ruleClassName": "go_download_sdk_rule",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_go__download_0_linux_arm64",
-              "goos": "",
-              "goarch": "",
+              "name": "rules_go~0.50.1~go_sdk~rules_go__download_0_linux_arm64",
+              "goos": "linux",
+              "goarch": "arm64",
               "sdks": {},
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.21.1"
+              "version": "1.21.8"
             }
           },
           "go_default_sdk": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:sdk.bzl",
             "ruleClassName": "go_download_sdk_rule",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~go_default_sdk",
+              "name": "rules_go~0.50.1~go_sdk~go_default_sdk",
               "goos": "",
               "goarch": "",
               "sdks": {},
@@ -2863,50 +2886,50 @@
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.21.1",
+              "version": "1.21.8",
               "strip_prefix": "go"
             }
           },
           "rules_go__download_0_linux_amd64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:sdk.bzl",
             "ruleClassName": "go_download_sdk_rule",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_go__download_0_linux_amd64",
-              "goos": "",
-              "goarch": "",
+              "name": "rules_go~0.50.1~go_sdk~rules_go__download_0_linux_amd64",
+              "goos": "linux",
+              "goarch": "amd64",
               "sdks": {},
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.21.1"
+              "version": "1.21.8"
             }
           },
           "rules_helm__download_0_darwin_amd64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:sdk.bzl",
             "ruleClassName": "go_download_sdk_rule",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_helm__download_0_darwin_amd64",
-              "goos": "",
-              "goarch": "",
+              "name": "rules_go~0.50.1~go_sdk~rules_helm__download_0_darwin_amd64",
+              "goos": "darwin",
+              "goarch": "amd64",
               "sdks": {},
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.18.10"
+              "version": "1.23.0"
             }
           },
           "rules_go__download_0_windows_amd64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
+            "bzlFile": "@@rules_go~0.50.1//go/private:sdk.bzl",
             "ruleClassName": "go_download_sdk_rule",
             "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_go__download_0_windows_amd64",
-              "goos": "",
-              "goarch": "",
+              "name": "rules_go~0.50.1~go_sdk~rules_go__download_0_windows_amd64",
+              "goos": "windows",
+              "goarch": "amd64",
               "sdks": {},
               "urls": [
                 "https://dl.google.com/go/{}"
               ],
-              "version": "1.21.1"
+              "version": "1.21.8"
             }
           }
         },
@@ -2922,340 +2945,19 @@
             "bazel_features~1.10.0~version_extension~bazel_features_version"
           ],
           [
-            "rules_go~0.45.1",
+            "rules_go~0.50.1",
             "bazel_tools",
             "bazel_tools"
           ],
           [
-            "rules_go~0.45.1",
+            "rules_go~0.50.1",
             "io_bazel_rules_go",
-            "rules_go~0.45.1"
+            "rules_go~0.50.1"
           ],
           [
-            "rules_go~0.45.1",
+            "rules_go~0.50.1",
             "io_bazel_rules_go_bazel_features",
             "bazel_features~1.10.0"
-          ]
-        ]
-      },
-      "os:linux,arch:amd64": {
-        "bzlTransitiveDigest": "L/cPIUW4/FOkbv0dYG0SLtG2DITT4s3n5k8ebIjZ8VI=",
-        "accumulatedFileDigests": {},
-        "envVariables": {},
-        "generatedRepoSpecs": {
-          "rules_helm__download_0_darwin_arm64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
-            "ruleClassName": "go_download_sdk_rule",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_helm__download_0_darwin_arm64",
-              "goos": "",
-              "goarch": "",
-              "sdks": {},
-              "urls": [
-                "https://dl.google.com/go/{}"
-              ],
-              "version": "1.18.10"
-            }
-          },
-          "rules_helm__download_0_windows_amd64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
-            "ruleClassName": "go_download_sdk_rule",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_helm__download_0_windows_amd64",
-              "goos": "",
-              "goarch": "",
-              "sdks": {},
-              "urls": [
-                "https://dl.google.com/go/{}"
-              ],
-              "version": "1.18.10"
-            }
-          },
-          "rules_helm__download_0_windows_arm64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
-            "ruleClassName": "go_download_sdk_rule",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_helm__download_0_windows_arm64",
-              "goos": "",
-              "goarch": "",
-              "sdks": {},
-              "urls": [
-                "https://dl.google.com/go/{}"
-              ],
-              "version": "1.18.10"
-            }
-          },
-          "rules_go__download_0_darwin_arm64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
-            "ruleClassName": "go_download_sdk_rule",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_go__download_0_darwin_arm64",
-              "goos": "",
-              "goarch": "",
-              "sdks": {},
-              "urls": [
-                "https://dl.google.com/go/{}"
-              ],
-              "version": "1.21.1"
-            }
-          },
-          "go_host_compatible_sdk_label": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:extensions.bzl",
-            "ruleClassName": "host_compatible_toolchain",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~go_host_compatible_sdk_label",
-              "toolchain": "@rules_helm__download_0//:ROOT"
-            }
-          },
-          "rules_go__download_0_darwin_amd64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
-            "ruleClassName": "go_download_sdk_rule",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_go__download_0_darwin_amd64",
-              "goos": "",
-              "goarch": "",
-              "sdks": {},
-              "urls": [
-                "https://dl.google.com/go/{}"
-              ],
-              "version": "1.21.1"
-            }
-          },
-          "go_toolchains": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
-            "ruleClassName": "go_multiple_toolchains",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~go_toolchains",
-              "prefixes": [
-                "_0000_rules_helm__download_0_",
-                "_0001_rules_helm__download_0_darwin_amd64_",
-                "_0002_rules_helm__download_0_darwin_arm64_",
-                "_0003_rules_helm__download_0_linux_arm64_",
-                "_0004_rules_helm__download_0_windows_amd64_",
-                "_0005_rules_helm__download_0_windows_arm64_",
-                "_0006_go_default_sdk_",
-                "_0007_rules_go__download_0_darwin_amd64_",
-                "_0008_rules_go__download_0_darwin_arm64_",
-                "_0009_rules_go__download_0_linux_arm64_",
-                "_0010_rules_go__download_0_windows_amd64_",
-                "_0011_rules_go__download_0_windows_arm64_"
-              ],
-              "geese": [
-                "",
-                "darwin",
-                "darwin",
-                "linux",
-                "windows",
-                "windows",
-                "",
-                "darwin",
-                "darwin",
-                "linux",
-                "windows",
-                "windows"
-              ],
-              "goarchs": [
-                "",
-                "amd64",
-                "arm64",
-                "arm64",
-                "amd64",
-                "arm64",
-                "",
-                "amd64",
-                "arm64",
-                "arm64",
-                "amd64",
-                "arm64"
-              ],
-              "sdk_repos": [
-                "rules_helm__download_0",
-                "rules_helm__download_0_darwin_amd64",
-                "rules_helm__download_0_darwin_arm64",
-                "rules_helm__download_0_linux_arm64",
-                "rules_helm__download_0_windows_amd64",
-                "rules_helm__download_0_windows_arm64",
-                "go_default_sdk",
-                "rules_go__download_0_darwin_amd64",
-                "rules_go__download_0_darwin_arm64",
-                "rules_go__download_0_linux_arm64",
-                "rules_go__download_0_windows_amd64",
-                "rules_go__download_0_windows_arm64"
-              ],
-              "sdk_types": [
-                "remote",
-                "remote",
-                "remote",
-                "remote",
-                "remote",
-                "remote",
-                "remote",
-                "remote",
-                "remote",
-                "remote",
-                "remote",
-                "remote"
-              ],
-              "sdk_versions": [
-                "1.18.10",
-                "1.18.10",
-                "1.18.10",
-                "1.18.10",
-                "1.18.10",
-                "1.18.10",
-                "1.21.1",
-                "1.21.1",
-                "1.21.1",
-                "1.21.1",
-                "1.21.1",
-                "1.21.1"
-              ]
-            }
-          },
-          "rules_helm__download_0_linux_arm64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
-            "ruleClassName": "go_download_sdk_rule",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_helm__download_0_linux_arm64",
-              "goos": "",
-              "goarch": "",
-              "sdks": {},
-              "urls": [
-                "https://dl.google.com/go/{}"
-              ],
-              "version": "1.18.10"
-            }
-          },
-          "io_bazel_rules_nogo": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:nogo.bzl",
-            "ruleClassName": "go_register_nogo",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~io_bazel_rules_nogo",
-              "nogo": "@io_bazel_rules_go//:default_nogo",
-              "includes": [
-                "'@@//:__subpackages__'"
-              ],
-              "excludes": []
-            }
-          },
-          "rules_go__download_0_windows_arm64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
-            "ruleClassName": "go_download_sdk_rule",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_go__download_0_windows_arm64",
-              "goos": "",
-              "goarch": "",
-              "sdks": {},
-              "urls": [
-                "https://dl.google.com/go/{}"
-              ],
-              "version": "1.21.1"
-            }
-          },
-          "rules_helm__download_0": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
-            "ruleClassName": "go_download_sdk_rule",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_helm__download_0",
-              "goos": "",
-              "goarch": "",
-              "sdks": {},
-              "experiments": [],
-              "patches": [],
-              "patch_strip": 0,
-              "urls": [
-                "https://dl.google.com/go/{}"
-              ],
-              "version": "1.18.10",
-              "strip_prefix": "go"
-            }
-          },
-          "rules_go__download_0_linux_arm64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
-            "ruleClassName": "go_download_sdk_rule",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_go__download_0_linux_arm64",
-              "goos": "",
-              "goarch": "",
-              "sdks": {},
-              "urls": [
-                "https://dl.google.com/go/{}"
-              ],
-              "version": "1.21.1"
-            }
-          },
-          "go_default_sdk": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
-            "ruleClassName": "go_download_sdk_rule",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~go_default_sdk",
-              "goos": "",
-              "goarch": "",
-              "sdks": {},
-              "experiments": [],
-              "patches": [],
-              "patch_strip": 0,
-              "urls": [
-                "https://dl.google.com/go/{}"
-              ],
-              "version": "1.21.1",
-              "strip_prefix": "go"
-            }
-          },
-          "rules_helm__download_0_darwin_amd64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
-            "ruleClassName": "go_download_sdk_rule",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_helm__download_0_darwin_amd64",
-              "goos": "",
-              "goarch": "",
-              "sdks": {},
-              "urls": [
-                "https://dl.google.com/go/{}"
-              ],
-              "version": "1.18.10"
-            }
-          },
-          "rules_go__download_0_windows_amd64": {
-            "bzlFile": "@@rules_go~0.45.1//go/private:sdk.bzl",
-            "ruleClassName": "go_download_sdk_rule",
-            "attributes": {
-              "name": "rules_go~0.45.1~go_sdk~rules_go__download_0_windows_amd64",
-              "goos": "",
-              "goarch": "",
-              "sdks": {},
-              "urls": [
-                "https://dl.google.com/go/{}"
-              ],
-              "version": "1.21.1"
-            }
-          }
-        },
-        "recordedRepoMappingEntries": [
-          [
-            "bazel_features~1.1.1",
-            "bazel_features_globals",
-            "bazel_features~1.1.1~version_extension~bazel_features_globals"
-          ],
-          [
-            "bazel_features~1.1.1",
-            "bazel_features_version",
-            "bazel_features~1.1.1~version_extension~bazel_features_version"
-          ],
-          [
-            "rules_go~0.45.1",
-            "bazel_tools",
-            "bazel_tools"
-          ],
-          [
-            "rules_go~0.45.1",
-            "io_bazel_rules_go",
-            "rules_go~0.45.1"
-          ],
-          [
-            "rules_go~0.45.1",
-            "io_bazel_rules_go_bazel_features",
-            "bazel_features~1.1.1"
           ]
         ]
       }
