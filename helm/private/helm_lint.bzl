@@ -1,6 +1,7 @@
 """Helm rules"""
 
 load("//helm:providers.bzl", "HelmPackageInfo")
+load(":helm_utils.bzl", "rlocationpath")
 
 def _helm_lint_aspect_impl(target, ctx):
     if HelmPackageInfo not in target:
@@ -57,9 +58,9 @@ def _helm_lint_test_impl(ctx):
         output = args_file,
         content = "\n".join([
             "-helm",
-            toolchain.helm.short_path,
+            rlocationpath(toolchain.helm, ctx.workspace_name),
             "-package",
-            helm_pkg_info.chart.short_path,
+            rlocationpath(helm_pkg_info.chart, ctx.workspace_name),
         ]),
     )
 
@@ -83,7 +84,7 @@ def _helm_lint_test_impl(ctx):
             executable = test_runner,
         ),
         testing.TestEnvironment({
-            "RULES_HELM_HELM_LINT_TEST_ARGS_PATH": args_file.short_path,
+            "RULES_HELM_HELM_LINT_TEST_ARGS_PATH": rlocationpath(args_file, ctx.workspace_name),
         }),
     ]
 
