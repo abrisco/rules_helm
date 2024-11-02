@@ -39,5 +39,7 @@ func BuildHelmCommand(helmPath string, args []string, pluginsDir string) (exec.C
 	env = append(env, fmt.Sprintf("HELM_REGISTRY_CONFIG=%s", filepath.Join(tempDir, "config.json")))
 	env = append(env, fmt.Sprintf("KUBECONFIG=%s", kubeconfig))
 
+	cmd.Env = env
+
 	return *cmd, nil
 }
