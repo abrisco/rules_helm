@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/abrisco/rules_helm/helm/private/helm_cmd"
 	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
@@ -67,6 +68,80 @@ func getHostFromURL(inputURL string) (string, error) {
 	return parsedURL.Host, nil
 }
 
+// Because the registrar runs outside of Bazel, there are environment variables
+// we want to explicitly allow from the host machine.
+func updateEnv(current []string) []string {
+
+	keysToRemove := []string{
+		"HELM_CACHE_HOME",
+		"HELM_CONFIG_HOME",
+		"HELM_DATA_HOME",
+		"HELM_REPOSITORY_CACHE",
+		"HELM_REPOSITORY_CONFIG",
+		"HELM_REGISTRY_CONFIG",
+		"KUBECONFIG",
+	}
+
+	// Convert envVars to a map for easier lookup
+	currentEnv := make(map[string]string)
+	for _, envVar := range current {
+		parts := strings.SplitN(envVar, "=", 2)
+		if len(parts) == 2 {
+			key := parts[0]
+			value := parts[1]
+			currentEnv[key] = value
+		}
+	}
+
+	// Convert replacements to a map for easier lookup
+	globalEnv := make(map[string]string)
+	for _, replacement := range os.Environ() {
+		parts := strings.SplitN(replacement, "=", 2)
+		if len(parts) == 2 {
+			key := parts[0]
+			value := parts[1]
+			globalEnv[key] = value
+		}
+	}
+
+	// Process the removal and replacement
+	for _, key := range keysToRemove {
+		if value, exists := globalEnv[key]; exists {
+			// If the key exists in the replacements map, update the original map
+			currentEnv[key] = value
+		} else {
+			// If the key does not exist in the replacements map, delete it
+			delete(currentEnv, key)
+		}
+	}
+
+	newEnv := make([]string, 0, len(currentEnv))
+	for key, value := range currentEnv {
+		newEnv = append(newEnv, fmt.Sprintf("%s=%s", key, value))
+	}
+
+	return newEnv
+}
+
+func runHelm(helmPath string, args []string, pluginsDir string, stdin *string) {
+	cmd, err := helm_cmd.BuildHelmCommand(helmPath, args, pluginsDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cmd.Env = updateEnv(cmd.Env)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if stdin != nil {
+		cmd.Stdin = strings.NewReader(*stdin)
+	}
+
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("Failed to run helm command: %w", err)
+	}
+}
+
 func main() {
 	// Get the file path for args
 	argsRlocation := os.Getenv("HELM_PUSH_ARGS_FILE")
@@ -84,6 +159,7 @@ func main() {
 
 	// Setup flags for helm, chart, registry_url, and image_pushers
 	rawHelmPath := flag.String("helm", "", "Path to helm binary")
+	rawHelmPluginsPath := flag.String("helm_plugins", "", "The path to helm plugins.")
 	rawChartPath := flag.String("chart", "", "Path to Helm .tgz file")
 	registryURL := flag.String("registry_url", "", "URL of registry to upload helm chart")
 	rawLoginURL := flag.String("login_url", "", "URL of registry to login to.")
@@ -98,6 +174,7 @@ func main() {
 	}
 
 	helmPath := getRunfile(*rawHelmPath)
+	helmPluginsPath := getRunfile(*rawHelmPluginsPath)
 	chartPath := getRunfile(*rawChartPath)
 
 	var imagePushers []string
@@ -144,17 +221,8 @@ func main() {
 			}
 		}
 
-		loginCmd := exec.Command(helmPath, "registry", "login", "--username", helmUser, "--password-stdin", loginUrl)
-		loginCmd.Stdout = os.Stdout
-		loginCmd.Stderr = os.Stderr
-
-		// Provide the password to stdin of the login command
-		loginCmd.Stdin = strings.NewReader(helmPassword)
-
 		log.Printf("Logging into Helm registry `%s`...\n", loginUrl)
-		if err := loginCmd.Run(); err != nil {
-			log.Fatalf("Failed to login to Helm registry: %v", err)
-		}
+		runHelm(helmPath, []string{"registry", "login", "--username", helmUser, "--password-stdin", loginUrl}, helmPluginsPath, &helmPassword)
 	} else if helmUser != "" {
 		log.Printf("WARNING: A Helm registry username was set but no associated `HELM_REGISTRY_PASSWORD`/`HELM_REGISTRY_PASSWORD_FILE` var was found. Skipping `helm registry login`.")
 	} else if helmPassword != "" {
@@ -174,12 +242,6 @@ func main() {
 	}
 
 	// Subprocess helm push
-	pushCmd := exec.Command(helmPath, "push", chartPath, *registryURL)
-	pushCmd.Stdout = os.Stdout
-	pushCmd.Stderr = os.Stderr
-
-	log.Printf("Running helm push: %s", pushCmd.String())
-	if err := pushCmd.Run(); err != nil {
-		log.Fatalf("Failed to push helm chart: %v", err)
-	}
+	log.Println("Running helm push...")
+	runHelm(helmPath, []string{"push", chartPath, *registryURL}, helmPluginsPath, nil)
 }

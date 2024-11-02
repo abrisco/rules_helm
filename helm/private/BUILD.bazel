@@ -5,7 +5,6 @@ stamp_build_setting(name = "stamp")
 filegroup(
     name = "bzl_srcs",
     srcs = glob(["**/*.bzl"]) + [
-        "//helm/private/packager:bzl_srcs",
         "//helm/private/pusher:bzl_srcs",
         "//helm/private/runner:bzl_srcs",
         "//helm/private/stamp:bzl_srcs",

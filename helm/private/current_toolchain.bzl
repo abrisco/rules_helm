@@ -12,7 +12,7 @@ def _current_helm_toolchain_impl(ctx):
     toolchain_info = ctx.toolchains["@rules_helm//helm:toolchain_type"]
     return [
         toolchain_info,
-        toolchain_info.default,
+        toolchain_info.default_info,
         toolchain_info.template_variables,
     ]
 

@@ -10,17 +10,18 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
+	"github.com/abrisco/rules_helm/helm/private/helm_cmd"
 	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
 type Arguments struct {
-	helm   string
-	pkg    string
-	output string
+	helm        string
+	helmPlugins string
+	pkg         string
+	output      string
 }
 
 func get_runfile(runfile_path string) string {
@@ -59,6 +60,7 @@ func parse_args() Arguments {
 	var args Arguments
 
 	flag.StringVar(&args.helm, "helm", "", "The path to a helm executable")
+	flag.StringVar(&args.helmPlugins, "helm_plugins", "", "The path to a helm plugins directory")
 	flag.StringVar(&args.output, "output", "", "The path to the Bazel `HelmPackage` action output")
 	flag.StringVar(&args.pkg, "package", "", "The path to the helm package to lint.")
 
@@ -165,10 +167,15 @@ func find_package_root(extract_dir string) string {
 	return file_info[0].Name()
 }
 
-func lint(directory string, package_name string, helm string, output string) {
-	command := exec.Command(helm, "lint", package_name)
-	command.Dir = directory
-	out, err := command.Output()
+func lint(directory string, package_name string, helm string, helmPluginsDir string, output string) {
+	cmd, err := helm_cmd.BuildHelmCommand(helm, []string{"lint", package_name}, helmPluginsDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cmd.Dir = directory
+
+	out, err := cmd.Output()
 	if err != nil {
 		os.Stderr.WriteString(string(out))
 		log.Fatal(err)
@@ -239,12 +246,15 @@ func main() {
 
 	var pkg = args.pkg
 	var helm = args.helm
+	var helmPlugins = args.helmPlugins
 	if is_test {
 		pkg = get_runfile(pkg)
 		helm = get_runfile(helm)
+		helmPlugins = get_runfile(helmPlugins)
 	} else {
 		pkg = makeAbsolutePath(pkg)
 		helm = makeAbsolutePath(helm)
+		helmPlugins = makeAbsolutePath(helmPlugins)
 	}
 
 	if err := extractPackage(pkg, dir); err != nil {
@@ -253,5 +263,5 @@ func main() {
 
 	lint_dir := find_package_root(dir)
 
-	lint(dir, lint_dir, helm, args.output)
+	lint(dir, lint_dir, helm, helmPlugins, args.output)
 }

@@ -25,11 +25,12 @@ def _helm_impl(ctx):
     options = module.tags.options
     version = options[0].version
     helm_url_templates = options[0].helm_url_templates
+    plugins = options[0].plugins
 
-    _register_toolchains(version, helm_url_templates)
+    _register_toolchains(version, helm_url_templates, plugins)
     _register_go_yaml()
 
-def _register_toolchains(version, helm_url_templates):
+def _register_toolchains(version, helm_url_templates, plugins):
     if not version in HELM_VERSIONS:
         fail("{} is not a supported version ({})".format(version, HELM_VERSIONS.keys()))
 
@@ -73,6 +74,7 @@ def _register_toolchains(version, helm_url_templates):
             helm_toolchain_repository,
             name = name + "_toolchain",
             platform = platform,
+            plugins = plugins,
             exec_compatible_with = CONSTRAINTS[platform],
         )
 
@@ -99,6 +101,10 @@ options = tag_class(attrs = {
             "version, and `{compression}` for the archive type containing the helm binary."
         ),
         default = DEFAULT_HELM_URL_TEMPLATES,
+    ),
+    "plugins": attr.string_list(
+        doc = "A list of plugins to add to the generated toolchain.",
+        default = [],
     ),
     "version": attr.string(
         doc = "The version of helm to download for the toolchain.",

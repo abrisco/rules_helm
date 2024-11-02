@@ -186,6 +186,27 @@ Rules for creating Helm chart packages.
 | <a id="helm_package-values_json"></a>values_json |  The `values.yaml` file for the current package as a json object.   | String | optional |  `""`  |
 
 
+<a id="helm_plugin"></a>
+
+## helm_plugin
+
+<pre>
+helm_plugin(<a href="#helm_plugin-name">name</a>, <a href="#helm_plugin-data">data</a>, <a href="#helm_plugin-plugin_name">plugin_name</a>, <a href="#helm_plugin-yaml">yaml</a>)
+</pre>
+
+Define a [helm plugin](https://helm.sh/docs/topics/plugins/).
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="helm_plugin-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_plugin-data"></a>data |  Additional files associated with the plugin.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="helm_plugin-plugin_name"></a>plugin_name |  An explicit name for the plugin. If unset, `name` will be used.   | String | optional |  `""`  |
+| <a id="helm_plugin-yaml"></a>yaml |  The yaml file representing the plugin   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+
+
 <a id="helm_push"></a>
 
 ## helm_push
@@ -267,10 +288,10 @@ if the following environment variables are defined:
 ## helm_toolchain
 
 <pre>
-helm_toolchain(<a href="#helm_toolchain-name">name</a>, <a href="#helm_toolchain-helm">helm</a>)
+helm_toolchain(<a href="#helm_toolchain-name">name</a>, <a href="#helm_toolchain-helm">helm</a>, <a href="#helm_toolchain-plugins">plugins</a>)
 </pre>
 
-A helm toolchain
+A helm toolchain.
 
 **ATTRIBUTES**
 
@@ -279,6 +300,7 @@ A helm toolchain
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_toolchain-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="helm_toolchain-helm"></a>helm |  A helm binary   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="helm_toolchain-plugins"></a>plugins |  Additional plugins to make available to helm.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 
 
 <a id="helm_uninstall"></a>
@@ -379,8 +401,8 @@ str: A json encoded string which represents `Chart.yaml` contents.
 
 <pre>
 helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">chart</a>, <a href="#helm_chart-chart_json">chart_json</a>, <a href="#helm_chart-crds">crds</a>, <a href="#helm_chart-values">values</a>, <a href="#helm_chart-values_json">values_json</a>, <a href="#helm_chart-substitutions">substitutions</a>, <a href="#helm_chart-templates">templates</a>, <a href="#helm_chart-images">images</a>,
-           <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-install_opts">install_opts</a>, <a href="#helm_chart-upgrade_opts">upgrade_opts</a>, <a href="#helm_chart-uninstall_opts">uninstall_opts</a>,
-           <a href="#helm_chart-data">data</a>, <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">kwargs</a>)
+           <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-login_url">login_url</a>, <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-install_opts">install_opts</a>, <a href="#helm_chart-upgrade_opts">upgrade_opts</a>,
+           <a href="#helm_chart-uninstall_opts">uninstall_opts</a>, <a href="#helm_chart-data">data</a>, <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">kwargs</a>)
 </pre>
 
 Rules for producing a helm package and some convenience targets.
@@ -413,6 +435,7 @@ Rules for producing a helm package and some convenience targets.
 | <a id="helm_chart-deps"></a>deps |  A list of helm package dependencies.   |  `None` |
 | <a id="helm_chart-install_name"></a>install_name |  The `helm install` name to use. `name` will be used if unset.   |  `None` |
 | <a id="helm_chart-registry_url"></a>registry_url |  The registry url for the helm chart. `{name}.push_registry` is only defined when a value is passed here.   |  `None` |
+| <a id="helm_chart-login_url"></a>login_url |  The registry url to log into for publishing helm charts.   |  `None` |
 | <a id="helm_chart-helm_opts"></a>helm_opts |  Additional options to pass to helm.   |  `[]` |
 | <a id="helm_chart-install_opts"></a>install_opts |  Additional options to pass to `helm install`.   |  `[]` |
 | <a id="helm_chart-upgrade_opts"></a>upgrade_opts |  Additional options to pass to `helm upgrade`.   |  `[]` |
@@ -427,7 +450,7 @@ Rules for producing a helm package and some convenience targets.
 ## helm_register_toolchains
 
 <pre>
-helm_register_toolchains(<a href="#helm_register_toolchains-version">version</a>, <a href="#helm_register_toolchains-helm_url_templates">helm_url_templates</a>)
+helm_register_toolchains(<a href="#helm_register_toolchains-version">version</a>, <a href="#helm_register_toolchains-helm_url_templates">helm_url_templates</a>, <a href="#helm_register_toolchains-plugins">plugins</a>)
 </pre>
 
 Register helm toolchains.
@@ -439,6 +462,7 @@ Register helm toolchains.
 | :------------- | :------------- | :------------- |
 | <a id="helm_register_toolchains-version"></a>version |  The version of Helm to use   |  `"3.16.1"` |
 | <a id="helm_register_toolchains-helm_url_templates"></a>helm_url_templates |  A list of url templates where helm can be downloaded.   |  `["https://get.helm.sh/helm-v{version}-{platform}.{compression}"]` |
+| <a id="helm_register_toolchains-plugins"></a>plugins |  Labels to `helm_plugin` targets to add to generated toolchains.   |  `[]` |
 
 
 <a id="rules_helm_dependencies"></a>

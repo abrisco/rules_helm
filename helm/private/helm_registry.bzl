@@ -34,6 +34,7 @@ def _helm_push_impl(ctx):
     args = ctx.actions.args()
     args.set_param_file_format("multiline")
     args.add("-helm", rlocationpath(toolchain.helm, ctx.workspace_name))
+    args.add("-helm_plugins", rlocationpath(toolchain.helm_plugins, ctx.workspace_name))
     args.add("-chart", rlocationpath(pkg_info.chart, ctx.workspace_name))
     args.add("-registry_url", ctx.attr.registry_url)
 
@@ -60,6 +61,7 @@ def _helm_push_impl(ctx):
         registrar,
         args_file,
         toolchain.helm,
+        toolchain.helm_plugins,
         pkg_info.chart,
     ]).merge(image_runfiles)
 

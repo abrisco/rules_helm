@@ -5,15 +5,7 @@ go_binary(
     srcs = ["packager.go"],
     visibility = ["//visibility:public"],
     deps = [
+        "//helm/private/helm_cmd",
         "@go_yaml_yaml",
     ],
-)
-
-filegroup(
-    name = "bzl_srcs",
-    srcs = glob(
-        ["**/*.bzl"],
-        allow_empty = True,
-    ),
-    visibility = ["//:__subpackages__"],
 )

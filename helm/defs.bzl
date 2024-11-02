@@ -106,6 +106,11 @@ load(
     _helm_push_images = "helm_push_images",
 )
 load(
+    "//helm/private:helm_toolchain.bzl",
+    _helm_plugin = "helm_plugin",
+    _helm_toolchain = "helm_toolchain",
+)
+load(
     ":providers.bzl",
     _HelmPackageInfo = "HelmPackageInfo",
 )
@@ -113,10 +118,6 @@ load(
     ":repositories.bzl",
     _helm_register_toolchains = "helm_register_toolchains",
     _rules_helm_dependencies = "rules_helm_dependencies",
-)
-load(
-    ":toolchain.bzl",
-    _helm_toolchain = "helm_toolchain",
 )
 
 helm_chart = _helm_chart
@@ -126,6 +127,7 @@ helm_install = _helm_install
 helm_lint_aspect = _helm_lint_aspect
 helm_lint_test = _helm_lint_test
 helm_package = _helm_package
+helm_plugin = _helm_plugin
 helm_push = _helm_push
 helm_push_images = _helm_push_images
 helm_push_registry = _helm_push
