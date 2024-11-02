@@ -14,6 +14,7 @@ def _helm_lint_aspect_impl(target, ctx):
 
     args = ctx.actions.args()
     args.add("-helm", toolchain.helm)
+    args.add("-helm_plugins", toolchain.helm_plugins.path)
     args.add("-package", helm_pkg_info.chart)
     args.add("-output", output)
 
@@ -22,7 +23,7 @@ def _helm_lint_aspect_impl(target, ctx):
         executable = ctx.executable._linter,
         mnemonic = "HelmLintCheck",
         inputs = [helm_pkg_info.chart],
-        tools = [toolchain.helm],
+        tools = [toolchain.helm, toolchain.helm_plugins],
         arguments = [args],
     )
 
@@ -54,14 +55,15 @@ def _helm_lint_test_impl(ctx):
     helm_pkg_info = ctx.attr.chart[HelmPackageInfo]
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
 
+    args = ctx.actions.args()
+    args.set_param_file_format("multiline")
+    args.add("-helm", rlocationpath(toolchain.helm, ctx.workspace_name))
+    args.add("-helm_plugins", rlocationpath(toolchain.helm_plugins, ctx.workspace_name))
+    args.add("-package", rlocationpath(helm_pkg_info.chart, ctx.workspace_name))
+
     ctx.actions.write(
         output = args_file,
-        content = "\n".join([
-            "-helm",
-            rlocationpath(toolchain.helm, ctx.workspace_name),
-            "-package",
-            rlocationpath(helm_pkg_info.chart, ctx.workspace_name),
-        ]),
+        content = args,
     )
 
     if toolchain.helm.basename.endswith(".exe"):
@@ -79,7 +81,7 @@ def _helm_lint_test_impl(ctx):
         DefaultInfo(
             files = depset([test_runner]),
             runfiles = ctx.runfiles(
-                files = [toolchain.helm, helm_pkg_info.chart, args_file],
+                files = [toolchain.helm, toolchain.helm_plugins, helm_pkg_info.chart, args_file],
             ).merge(ctx.attr._linter[DefaultInfo].default_runfiles),
             executable = test_runner,
         ),

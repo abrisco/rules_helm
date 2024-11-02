@@ -1,0 +1,31 @@
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("//helm:defs.bzl", "helm_plugin", "helm_toolchain")
+
+helm_plugin(
+    name = "helm_cm_push",
+    data = select({
+        "@platforms//os:linux": ["@helm_cm_push_linux//:data"],
+        "@platforms//os:macos": ["@helm_cm_push_macos//:data"],
+        "@platforms//os:windows": ["@helm_cm_push_windows//:data"],
+    }),
+    plugin_name = "helm-cm-push",
+    yaml = select({
+        "@platforms//os:linux": "@helm_cm_push_linux//:plugin.yaml",
+        "@platforms//os:macos": "@helm_cm_push_macos//:plugin.yaml",
+        "@platforms//os:windows": "@helm_cm_push_windows//:plugin.yaml",
+    }),
+)
+
+write_file(
+    name = "helm_bin",
+    out = "helm.sh",
+    content = [],
+)
+
+helm_toolchain(
+    name = "toolchain",
+    helm = ":helm_bin",
+    plugins = [
+        ":helm_cm_push",
+    ],
+)

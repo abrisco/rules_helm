@@ -90,6 +90,7 @@ def _helm_package_impl(ctx):
 
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
     args.add("-helm", toolchain.helm)
+    args.add("-helm_plugins", toolchain.helm_plugins.path)
 
     args.add("-chart", chart_yaml)
     args.add("-values", values_yaml)
@@ -179,7 +180,13 @@ def _helm_package_impl(ctx):
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
         inputs = depset(
-            ctx.files.templates + ctx.files.crds + stamps + image_inputs + deps + [chart_yaml, values_yaml, templates_manifest, crds_manifest, substitutions_file],
+            ctx.files.templates + ctx.files.crds + stamps + image_inputs + deps + [
+                chart_yaml,
+                values_yaml,
+                templates_manifest,
+                crds_manifest,
+                substitutions_file,
+            ],
         ),
         tools = depset([toolchain.helm]),
         mnemonic = "HelmPackage",

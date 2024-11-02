@@ -61,6 +61,7 @@ package(default_visibility = ["//visibility:public"])
 helm_toolchain(
     name = "toolchain_impl",
     helm = "@helm_{platform}//:{bin}",
+    plugins = {plugins},
 )
 
 toolchain(
@@ -89,6 +90,7 @@ def _helm_toolchain_repository_impl(repository_ctx):
         bin = bin,
         exec_compatible_with = json.encode(repository_ctx.attr.exec_compatible_with),
         target_compatible_with = json.encode(repository_ctx.attr.target_compatible_with),
+        plugins = json.encode(repository_ctx.attr.plugins),
     ))
 
     repository_ctx.file("WORKSPACE.bazel", _HELM_WORKSPACE_CONTENT.format(
@@ -106,6 +108,10 @@ helm_toolchain_repository = repository_rule(
         "platform": attr.string(
             doc = "Platform the Helm executable was built for.",
             mandatory = True,
+        ),
+        "plugins": attr.string_list(
+            doc = "A list of plugins to add to the generated toolchain.",
+            default = [],
         ),
         "target_compatible_with": attr.string_list(
             doc = "A list of constraints for the target platform for this toolchain.",
@@ -139,12 +145,13 @@ helm_host_alias_repository = repository_rule(
 )
 
 # buildifier: disable=unnamed-macro
-def helm_register_toolchains(version = DEFAULT_HELM_VERSION, helm_url_templates = DEFAULT_HELM_URL_TEMPLATES):
+def helm_register_toolchains(version = DEFAULT_HELM_VERSION, helm_url_templates = DEFAULT_HELM_URL_TEMPLATES, plugins = []):
     """Register helm toolchains.
 
     Args:
         version (str, optional): The version of Helm to use
         helm_url_templates (list, optional): A list of url templates where helm can be downloaded.
+        plugins (list, optional): Labels to `helm_plugin` targets to add to generated toolchains.
     """
     if not version in HELM_VERSIONS:
         fail("{} is not a supported version ({})".format(version, HELM_VERSIONS.keys()))
@@ -184,6 +191,7 @@ def helm_register_toolchains(version = DEFAULT_HELM_VERSION, helm_url_templates 
             helm_toolchain_repository,
             name = name + "_toolchain",
             platform = platform,
+            plugins = plugins,
             exec_compatible_with = CONSTRAINTS[platform],
         )
 

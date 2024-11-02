@@ -1,9 +1,11 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 
-package(default_visibility = ["//visibility:public"])
-
 go_binary(
     name = "linter",
     srcs = ["linter.go"],
-    deps = ["@io_bazel_rules_go//go/runfiles"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//helm/private/helm_cmd",
+        "@io_bazel_rules_go//go/runfiles",
+    ],
 )

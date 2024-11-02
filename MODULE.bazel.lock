@@ -1640,7 +1640,7 @@
   "moduleExtensions": {
     "//helm:extensions.bzl%helm": {
       "general": {
-        "bzlTransitiveDigest": "PqkrsL6mq4yXE0K9v1lAssGpS7uXvdgG9Spj1LIRmIk=",
+        "bzlTransitiveDigest": "Ek7mwRyjG12YfPwFfZysums7crTKL9/PrkF1LLhFb0k=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1676,6 +1676,7 @@
             "attributes": {
               "name": "_main~helm~helm_linux_arm_toolchain",
               "platform": "linux-arm",
+              "plugins": [],
               "exec_compatible_with": [
                 "@platforms//os:linux",
                 "@platforms//cpu:arm"
@@ -1688,6 +1689,7 @@
             "attributes": {
               "name": "_main~helm~helm_darwin_amd64_toolchain",
               "platform": "darwin-amd64",
+              "plugins": [],
               "exec_compatible_with": [
                 "@platforms//os:macos",
                 "@platforms//cpu:x86_64"
@@ -1700,6 +1702,7 @@
             "attributes": {
               "name": "_main~helm~helm_linux_arm64_toolchain",
               "platform": "linux-arm64",
+              "plugins": [],
               "exec_compatible_with": [
                 "@platforms//os:linux",
                 "@platforms//cpu:aarch64"
@@ -1712,6 +1715,7 @@
             "attributes": {
               "name": "_main~helm~helm_linux_i386_toolchain",
               "platform": "linux-i386",
+              "plugins": [],
               "exec_compatible_with": [
                 "@platforms//os:linux",
                 "@platforms//cpu:i386"
@@ -1737,6 +1741,7 @@
             "attributes": {
               "name": "_main~helm~helm_windows_amd64_toolchain",
               "platform": "windows-amd64",
+              "plugins": [],
               "exec_compatible_with": [
                 "@platforms//os:windows"
               ]
@@ -1781,6 +1786,7 @@
             "attributes": {
               "name": "_main~helm~helm_linux_ppc64le_toolchain",
               "platform": "linux-ppc64le",
+              "plugins": [],
               "exec_compatible_with": [
                 "@platforms//os:linux",
                 "@platforms//cpu:ppc"
@@ -1832,6 +1838,7 @@
             "attributes": {
               "name": "_main~helm~helm_linux_amd64_toolchain",
               "platform": "linux-amd64",
+              "plugins": [],
               "exec_compatible_with": [
                 "@platforms//os:linux",
                 "@platforms//cpu:x86_64"
@@ -1857,6 +1864,7 @@
             "attributes": {
               "name": "_main~helm~helm_darwin_arm64_toolchain",
               "platform": "darwin-arm64",
+              "plugins": [],
               "exec_compatible_with": [
                 "@platforms//os:macos",
                 "@platforms//cpu:aarch64"
@@ -1875,10 +1883,22 @@
     },
     "//tests:test_extensions.bzl%helm_test": {
       "general": {
-        "bzlTransitiveDigest": "/daJAFxR7sMlWp6zD7AgTn+TxYSzJhDCWX13TZSPZdo=",
+        "bzlTransitiveDigest": "1tWldiuOjZhyVE4Y1b297tdf7pIsHDgKx7xTTCrHt2g=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
+          "helm_cm_push_linux": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "name": "_main~helm_test~helm_cm_push_linux",
+              "urls": [
+                "https://github.com/chartmuseum/helm-push/releases/download/v0.10.4/helm-push_0.10.4_linux_amd64.tar.gz"
+              ],
+              "integrity": "sha256-KfH3E2mbR+PJwY1gtQVffA6LzBIh1mOcBX54fgi2Vqg=",
+              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nexports_files([\"plugin.yaml\"])\n\nfilegroup(\n    name = \"data\",\n    srcs = glob([\"bin/**\"]),\n)\n"
+            }
+          },
           "helm_test_deps__with_chart_deps_postgresql": {
             "bzlFile": "@@//helm/private:helm_import.bzl",
             "ruleClassName": "helm_import_repository",
@@ -1917,6 +1937,30 @@
               "platform": "@@//tests:rules_helm_test_container_base_single",
               "bzlmod_repository": "",
               "reproducible": true
+            }
+          },
+          "helm_cm_push_macos": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "name": "_main~helm_test~helm_cm_push_macos",
+              "urls": [
+                "https://github.com/chartmuseum/helm-push/releases/download/v0.10.4/helm-push_0.10.4_darwin_arm64.tar.gz"
+              ],
+              "integrity": "sha256-oKyCvUYCHt/LPcIj99ZaVP6PlpGPy7dgwTl/yo43SqI=",
+              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nexports_files([\"plugin.yaml\"])\n\nfilegroup(\n    name = \"data\",\n    srcs = glob([\"bin/**\"]),\n)\n"
+            }
+          },
+          "helm_cm_push_windows": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "name": "_main~helm_test~helm_cm_push_windows",
+              "urls": [
+                "https://github.com/chartmuseum/helm-push/releases/download/v0.10.4/helm-push_0.10.4_windows_amd64.tar.gz"
+              ],
+              "integrity": "sha256-aFkN3IJXd8TVlJ/NY3v2sZ4Rerp644e02u0HNqboELw=",
+              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nexports_files([\"plugin.yaml\"])\n\nfilegroup(\n    name = \"data\",\n    srcs = glob([\"bin/**\"]),\n)\n"
             }
           },
           "rules_helm_test_container_base_single": {

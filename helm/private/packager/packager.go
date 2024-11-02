@@ -10,11 +10,11 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
 
+	"github.com/abrisco/rules_helm/helm/private/helm_cmd"
 	"gopkg.in/yaml.v3"
 )
 
@@ -95,6 +95,7 @@ type Arguments struct {
 	Substitutions      string
 	DepsManifest       string
 	Helm               string
+	HelmPlugins        string
 	Output             string
 	MetadataOutput     string
 	ImageManifest      string
@@ -106,19 +107,20 @@ type Arguments struct {
 func parseArgs() Arguments {
 	var args Arguments
 
-	flag.StringVar(&args.TemplatesManifest, "templates_manifest", "", "A helm file containing a list of all helm template files")
-	flag.StringVar(&args.CrdsManifest, "crds_manifest", "", "A helm file containing a list of all helm crd files")
-	flag.StringVar(&args.Chart, "chart", "", "The helm `chart.yaml` file")
+	flag.StringVar(&args.TemplatesManifest, "templates_manifest", "", "A helm file containing a list of all helm template files.")
+	flag.StringVar(&args.CrdsManifest, "crds_manifest", "", "A helm file containing a list of all helm crd files.")
+	flag.StringVar(&args.Chart, "chart", "", "The helm `chart.yaml` file.")
 	flag.StringVar(&args.Values, "values", "", "The helm `values.yaml` file.")
-	flag.StringVar(&args.Substitutions, "substitutions", "", "A json file containing key value pairs to substitute into the values file")
-	flag.StringVar(&args.DepsManifest, "deps_manifest", "", "A file containing a list of all helm dependency (`charts/*.tgz`) files")
-	flag.StringVar(&args.Helm, "helm", "", "The path to a helm executable")
+	flag.StringVar(&args.Substitutions, "substitutions", "", "A json file containing key value pairs to substitute into the values file.")
+	flag.StringVar(&args.DepsManifest, "deps_manifest", "", "A file containing a list of all helm dependency (`charts/*.tgz`) files.")
+	flag.StringVar(&args.Helm, "helm", "", "The path to a helm executable.")
+	flag.StringVar(&args.HelmPlugins, "helm_plugins", "", "The path to a helm plugins directory.")
 	flag.StringVar(&args.Output, "output", "", "The path to the Bazel `HelmPackage` action output")
-	flag.StringVar(&args.MetadataOutput, "metadata_output", "", "The path to the Bazel `HelmPackage` action metadata output")
-	flag.StringVar(&args.ImageManifest, "image_manifest", "", "Information about Bazel produced container oci images used by the helm chart")
-	flag.StringVar(&args.StableStatusFile, "stable_status_file", "", "The stable status file (`ctx.info_file`)")
-	flag.StringVar(&args.VolatileStatusFile, "volatile_status_file", "", "The stable status file (`ctx.version_file`)")
-	flag.StringVar(&args.WorkspaceName, "workspace_name", "", "The name of the current Bazel workspace")
+	flag.StringVar(&args.MetadataOutput, "metadata_output", "", "The path to the Bazel `HelmPackage` action metadata output.")
+	flag.StringVar(&args.ImageManifest, "image_manifest", "", "Information about Bazel produced container oci images used by the helm chart.")
+	flag.StringVar(&args.StableStatusFile, "stable_status_file", "", "The stable status file (`ctx.info_file`).")
+	flag.StringVar(&args.VolatileStatusFile, "volatile_status_file", "", "The stable status file (`ctx.version_file`).")
+	flag.StringVar(&args.WorkspaceName, "workspace_name", "", "The name of the current Bazel workspace.")
 	flag.Parse()
 
 	return args
@@ -805,10 +807,14 @@ func main() {
 	}
 
 	// Build the helm package
-	command := exec.Command(filepath.Join(cwd, args.Helm), "package", ".")
-	command.Dir = tmpPath
-	command.Env = append(os.Environ(), fmt.Sprintf("KUBECONFIG=%s", kubeconfig))
-	out, err := command.CombinedOutput()
+	cmd, err := helm_cmd.BuildHelmCommand(filepath.Join(cwd, args.Helm), []string{"package", "."}, filepath.Join(cwd, args.HelmPlugins))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cmd.Dir = tmpPath
+
+	out, err := cmd.CombinedOutput()
 	if err != nil {
 		os.Stderr.WriteString(string(out))
 		log.Fatal(err)
