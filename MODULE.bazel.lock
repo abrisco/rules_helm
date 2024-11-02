@@ -1875,7 +1875,7 @@
     },
     "//tests:test_extensions.bzl%helm_test": {
       "general": {
-        "bzlTransitiveDigest": "Il07v34bQC0F0TXD/zqX8dYPcnapTKN53tEWs9CT0ZU=",
+        "bzlTransitiveDigest": "/daJAFxR7sMlWp6zD7AgTn+TxYSzJhDCWX13TZSPZdo=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {

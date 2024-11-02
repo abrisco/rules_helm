@@ -191,10 +191,15 @@ Rules for creating Helm chart packages.
 ## helm_push
 
 <pre>
-helm_push(<a href="#helm_push-name">name</a>, <a href="#helm_push-include_images">include_images</a>, <a href="#helm_push-package">package</a>, <a href="#helm_push-registry_url">registry_url</a>)
+helm_push(<a href="#helm_push-name">name</a>, <a href="#helm_push-env">env</a>, <a href="#helm_push-include_images">include_images</a>, <a href="#helm_push-login_url">login_url</a>, <a href="#helm_push-package">package</a>, <a href="#helm_push-registry_url">registry_url</a>)
 </pre>
 
 Produce an executable for performing a helm push to a registry.
+
+Before performing `helm push` the executable produced will conditionally perform [`helm registry login`](https://helm.sh/docs/helm/helm_registry_login/)
+if the following environment variables are defined:
+- `HELM_REGISTRY_USERNAME`: The value of `--username`.
+- `HELM_REGISTRY_PASSWORD`/`HELM_REGISTRY_PASSWORD_FILE`: The value of `--password` or a file containing the `--password` value.
 
 **ATTRIBUTES**
 
@@ -202,9 +207,11 @@ Produce an executable for performing a helm push to a registry.
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_push-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_push-env"></a>env |  Environment variables to set when running this target.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="helm_push-include_images"></a>include_images |  If True, images depended on by `package` will be pushed as well.   | Boolean | optional |  `False`  |
+| <a id="helm_push-login_url"></a>login_url |  The URL of the registry to use for `helm login`. E.g. `my.registry.io`   | String | optional |  `""`  |
 | <a id="helm_push-package"></a>package |  The helm package to push to the registry.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
-| <a id="helm_push-registry_url"></a>registry_url |  The URL of the registry.   | String | required |  |
+| <a id="helm_push-registry_url"></a>registry_url |  The registry URL at which to push the helm chart to. E.g. `oci://my.registry.io/chart-name`   | String | required |  |
 
 
 <a id="helm_push_images"></a>
@@ -212,7 +219,7 @@ Produce an executable for performing a helm push to a registry.
 ## helm_push_images
 
 <pre>
-helm_push_images(<a href="#helm_push_images-name">name</a>, <a href="#helm_push_images-package">package</a>)
+helm_push_images(<a href="#helm_push_images-name">name</a>, <a href="#helm_push_images-env">env</a>, <a href="#helm_push_images-package">package</a>)
 </pre>
 
 Produce an executable for pushing all oci images used by a helm chart.
@@ -223,6 +230,7 @@ Produce an executable for pushing all oci images used by a helm chart.
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_push_images-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_push_images-env"></a>env |  Environment variables to set when running this target.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="helm_push_images-package"></a>package |  The helm package to upload images from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
@@ -231,10 +239,15 @@ Produce an executable for pushing all oci images used by a helm chart.
 ## helm_push_registry
 
 <pre>
-helm_push_registry(<a href="#helm_push_registry-name">name</a>, <a href="#helm_push_registry-include_images">include_images</a>, <a href="#helm_push_registry-package">package</a>, <a href="#helm_push_registry-registry_url">registry_url</a>)
+helm_push_registry(<a href="#helm_push_registry-name">name</a>, <a href="#helm_push_registry-env">env</a>, <a href="#helm_push_registry-include_images">include_images</a>, <a href="#helm_push_registry-login_url">login_url</a>, <a href="#helm_push_registry-package">package</a>, <a href="#helm_push_registry-registry_url">registry_url</a>)
 </pre>
 
 Produce an executable for performing a helm push to a registry.
+
+Before performing `helm push` the executable produced will conditionally perform [`helm registry login`](https://helm.sh/docs/helm/helm_registry_login/)
+if the following environment variables are defined:
+- `HELM_REGISTRY_USERNAME`: The value of `--username`.
+- `HELM_REGISTRY_PASSWORD`/`HELM_REGISTRY_PASSWORD_FILE`: The value of `--password` or a file containing the `--password` value.
 
 **ATTRIBUTES**
 
@@ -242,9 +255,11 @@ Produce an executable for performing a helm push to a registry.
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="helm_push_registry-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_push_registry-env"></a>env |  Environment variables to set when running this target.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="helm_push_registry-include_images"></a>include_images |  If True, images depended on by `package` will be pushed as well.   | Boolean | optional |  `False`  |
+| <a id="helm_push_registry-login_url"></a>login_url |  The URL of the registry to use for `helm login`. E.g. `my.registry.io`   | String | optional |  `""`  |
 | <a id="helm_push_registry-package"></a>package |  The helm package to push to the registry.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
-| <a id="helm_push_registry-registry_url"></a>registry_url |  The URL of the registry.   | String | required |  |
+| <a id="helm_push_registry-registry_url"></a>registry_url |  The registry URL at which to push the helm chart to. E.g. `oci://my.registry.io/chart-name`   | String | required |  |
 
 
 <a id="helm_toolchain"></a>

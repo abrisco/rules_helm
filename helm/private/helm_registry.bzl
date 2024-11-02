@@ -1,6 +1,7 @@
 """Helm rules"""
 
 load("//helm:providers.bzl", "HelmPackageInfo")
+load(":helm_utils.bzl", "rlocationpath")
 
 def _get_image_push_commands(ctx, pkg_info):
     image_pushers = []
@@ -9,48 +10,58 @@ def _get_image_push_commands(ctx, pkg_info):
         image_pushers.append(image[DefaultInfo].files_to_run.executable)
         image_runfiles.append(image[DefaultInfo].default_runfiles)
 
-    if image_pushers:
-        image_commands = "\n".join([pusher.short_path for pusher in image_pushers])
-    else:
-        image_commands = "echo 'No OCI images to push for Helm chart.'"
-
     runfiles = ctx.runfiles(files = image_pushers)
     for ir in image_runfiles:
         runfiles = runfiles.merge(ir)
-    return image_commands, runfiles
+    return image_pushers, runfiles
 
 def _helm_push_impl(ctx):
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
 
     if toolchain.helm.basename.endswith(".exe"):
-        registrar = ctx.actions.declare_file(ctx.label.name + ".bat")
+        registrar = ctx.actions.declare_file(ctx.label.name + ".exe")
     else:
-        registrar = ctx.actions.declare_file(ctx.label.name + ".sh")
+        registrar = ctx.actions.declare_file(ctx.label.name)
 
-    registry_url = ctx.attr.registry_url
+    ctx.actions.symlink(
+        target_file = ctx.executable._registrar,
+        output = registrar,
+        is_executable = True,
+    )
+
     pkg_info = ctx.attr.package[HelmPackageInfo]
 
-    image_commands = ""
+    args = ctx.actions.args()
+    args.set_param_file_format("multiline")
+    args.add("-helm", rlocationpath(toolchain.helm, ctx.workspace_name))
+    args.add("-chart", rlocationpath(pkg_info.chart, ctx.workspace_name))
+    args.add("-registry_url", ctx.attr.registry_url)
+
+    if ctx.attr.login_url:
+        args.add("-login_url", ctx.attr.login_url)
+
     image_runfiles = ctx.runfiles()
     if ctx.attr.include_images:
-        image_commands, image_runfiles = _get_image_push_commands(
+        image_pushers, image_runfiles = _get_image_push_commands(
             ctx = ctx,
             pkg_info = pkg_info,
         )
 
-    ctx.actions.expand_template(
-        template = ctx.file._registrar,
-        output = registrar,
-        substitutions = {
-            "{chart}": pkg_info.chart.short_path,
-            "{helm}": toolchain.helm.short_path,
-            "{image_pushers}": image_commands,
-            "{registry_url}": registry_url,
-        },
-        is_executable = True,
+        if image_pushers:
+            args.add("-image_pusher", ",".join([rlocationpath(p, ctx.workspace_name) for p in image_pushers]))
+
+    args_file = ctx.actions.declare_file("{}.args.txt".format(ctx.label.name))
+    ctx.actions.write(
+        output = args_file,
+        content = args,
     )
 
-    runfiles = ctx.runfiles([registrar, toolchain.helm, pkg_info.chart]).merge(image_runfiles)
+    runfiles = ctx.runfiles([
+        registrar,
+        args_file,
+        toolchain.helm,
+        pkg_info.chart,
+    ]).merge(image_runfiles)
 
     return [
         DefaultInfo(
@@ -58,16 +69,34 @@ def _helm_push_impl(ctx):
             runfiles = runfiles,
             executable = registrar,
         ),
+        RunEnvironmentInfo(
+            environment = ctx.attr.env | {
+                "HELM_PUSH_ARGS_FILE": rlocationpath(args_file, ctx.workspace_name),
+            },
+        ),
     ]
 
 helm_push = rule(
-    doc = "Produce an executable for performing a helm push to a registry.",
+    doc = """\
+Produce an executable for performing a helm push to a registry.
+
+Before performing `helm push` the executable produced will conditionally perform [`helm registry login`](https://helm.sh/docs/helm/helm_registry_login/)
+if the following environment variables are defined:
+- `HELM_REGISTRY_USERNAME`: The value of `--username`.
+- `HELM_REGISTRY_PASSWORD`/`HELM_REGISTRY_PASSWORD_FILE`: The value of `--password` or a file containing the `--password` value.
+""",
     implementation = _helm_push_impl,
     executable = True,
     attrs = {
+        "env": attr.string_dict(
+            doc = "Environment variables to set when running this target.",
+        ),
         "include_images": attr.bool(
             doc = "If True, images depended on by `package` will be pushed as well.",
             default = False,
+        ),
+        "login_url": attr.string(
+            doc = "The URL of the registry to use for `helm login`. E.g. `my.registry.io`",
         ),
         "package": attr.label(
             doc = "The helm package to push to the registry.",
@@ -75,13 +104,14 @@ helm_push = rule(
             mandatory = True,
         ),
         "registry_url": attr.string(
-            doc = "The URL of the registry.",
+            doc = "The registry URL at which to push the helm chart to. E.g. `oci://my.registry.io/chart-name`",
             mandatory = True,
         ),
         "_registrar": attr.label(
             doc = "A process wrapper to use for performing `helm registry and helm push`.",
-            allow_single_file = True,
-            default = Label("//helm/private/registrar:template"),
+            executable = True,
+            cfg = "exec",
+            default = Label("//helm/private/registrar"),
         ),
     },
     toolchains = [
@@ -99,10 +129,12 @@ def _helm_push_images_impl(ctx):
 
     pkg_info = ctx.attr.package[HelmPackageInfo]
 
-    image_commands, image_runfiles = _get_image_push_commands(
+    image_pushers, image_runfiles = _get_image_push_commands(
         ctx = ctx,
         pkg_info = pkg_info,
     )
+
+    image_commands = "\n".join([file.short_path for file in image_pushers])
 
     ctx.actions.expand_template(
         template = ctx.file._pusher,
@@ -121,6 +153,9 @@ def _helm_push_images_impl(ctx):
             runfiles = runfiles,
             executable = pusher,
         ),
+        RunEnvironmentInfo(
+            environment = ctx.attr.env,
+        ),
     ]
 
 helm_push_images = rule(
@@ -128,6 +163,9 @@ helm_push_images = rule(
     implementation = _helm_push_images_impl,
     executable = True,
     attrs = {
+        "env": attr.string_dict(
+            doc = "Environment variables to set when running this target.",
+        ),
         "package": attr.label(
             doc = "The helm package to upload images from.",
             providers = [HelmPackageInfo],
