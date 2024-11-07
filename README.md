@@ -283,6 +283,26 @@ if the following environment variables are defined:
 | <a id="helm_push_registry-registry_url"></a>registry_url |  The registry URL at which to push the helm chart to. E.g. `oci://my.registry.io/chart-name`   | String | required |  |
 
 
+<a id="helm_template_test"></a>
+
+## helm_template_test
+
+<pre>
+helm_template_test(<a href="#helm_template_test-name">name</a>, <a href="#helm_template_test-chart">chart</a>, <a href="#helm_template_test-installer">installer</a>)
+</pre>
+
+A test rule for rendering helm chart templates.
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="helm_template_test-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="helm_template_test-chart"></a>chart |  The helm package to resolve templates for. Mutually exclusive with `installer`.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="helm_template_test-installer"></a>installer |  The `helm_install`/`helm_upgrade` target to resolve templates for. Mutually exclusive with `chart`.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
+
+
 <a id="helm_toolchain"></a>
 
 ## helm_toolchain

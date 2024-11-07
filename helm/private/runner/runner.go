@@ -64,8 +64,17 @@ func main() {
 	helmPluginsPath := helm_utils.GetRunfile(*rawHelmPluginsPath)
 	chartPath := helm_utils.GetRunfile(*rawChartPath)
 
+	_, is_test := os.LookupEnv("RULES_HELM_HELM_TEMPLATE_TEST")
+	_, is_debug := os.LookupEnv("RULES_HELM_DEBUG")
+
 	// Update the chart path whenever it's found.
 	for i, item := range helmArgs {
+		if is_test {
+			if item == "install" || item == "upgrade" {
+				item = "template"
+			}
+		}
+
 		helmArgs[i] = strings.ReplaceAll(item, *rawChartPath, chartPath)
 	}
 
@@ -76,20 +85,16 @@ func main() {
 		}
 	}
 
-	_, is_debug := os.LookupEnv("RULES_HELM_DEBUG")
-
 	// Subprocess image pushers
-	for _, pusher := range imagePushers {
-		cmd := exec.Command(pusher)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
+	if !is_test {
+		for _, pusher := range imagePushers {
+			cmd := exec.Command(pusher)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
 
-		if is_debug {
-			log.Println(strings.Join(cmd.Args, " "))
-		}
-
-		if err := cmd.Run(); err != nil {
-			log.Fatalf("Failed to run image pusher %s: %v", pusher, err)
+			if err := cmd.Run(); err != nil {
+				log.Fatalf("Failed to run image pusher %s: %v", pusher, err)
+			}
 		}
 	}
 
@@ -98,7 +103,23 @@ func main() {
 		log.Fatal(err)
 	}
 
-	cmd.Env = helm_utils.SandboxFreeEnv(cmd.Env)
+	if is_test {
+		var cleanArgs []string
+		dir, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, arg := range cmd.Args {
+			if arg == "install" || arg == "upgrade" {
+				cleanArgs = append(cleanArgs, "template")
+			} else {
+				cleanArgs = append(cleanArgs, strings.ReplaceAll(arg, dir, ""))
+			}
+		}
+		log.Println(strings.Join(cleanArgs, " "))
+	} else {
+		cmd.Env = helm_utils.SandboxFreeEnv(cmd.Env)
+	}
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
