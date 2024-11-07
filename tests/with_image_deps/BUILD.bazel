@@ -1,6 +1,6 @@
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push")
-load("//helm:defs.bzl", "helm_chart", "helm_lint_test")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
 load("//tests:test_defs.bzl", "helm_package_regex_test")
 
 exports_files(["Chart.lock"])
@@ -25,7 +25,13 @@ helm_chart(
 )
 
 helm_lint_test(
-    name = "with_image_deps_test",
+    name = "with_image_deps_lint_test",
+    chart = ":with_image_deps",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_template_test(
+    name = "with_image_deps_template_test",
     chart = ":with_image_deps",
     target_compatible_with = EXCLUDE_WINDOWS,
 )
