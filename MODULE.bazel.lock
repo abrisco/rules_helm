@@ -1883,7 +1883,7 @@
     },
     "//tests:test_extensions.bzl%helm_test": {
       "general": {
-        "bzlTransitiveDigest": "1tWldiuOjZhyVE4Y1b297tdf7pIsHDgKx7xTTCrHt2g=",
+        "bzlTransitiveDigest": "xbrwARTU1gm2SQ/eUqqUiTK/JADoPRVh0yT8qEDh5eo=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {

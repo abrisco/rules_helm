@@ -14,7 +14,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/abrisco/rules_helm/helm/private/helm_cmd"
+	"github.com/abrisco/rules_helm/helm/private/helm_utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -807,7 +807,7 @@ func main() {
 	}
 
 	// Build the helm package
-	cmd, err := helm_cmd.BuildHelmCommand(filepath.Join(cwd, args.Helm), []string{"package", "."}, filepath.Join(cwd, args.HelmPlugins))
+	cmd, err := helm_utils.BuildHelmCommand(filepath.Join(cwd, args.Helm), []string{"package", "."}, filepath.Join(cwd, args.HelmPlugins))
 	if err != nil {
 		log.Fatal(err)
 	}

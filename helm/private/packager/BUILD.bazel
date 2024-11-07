@@ -5,7 +5,7 @@ go_binary(
     srcs = ["packager.go"],
     visibility = ["//visibility:public"],
     deps = [
-        "//helm/private/helm_cmd",
+        "//helm/private/helm_utils",
         "@go_yaml_yaml",
     ],
 )

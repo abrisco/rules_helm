@@ -12,12 +12,3 @@ alias(
         "//conditions:default": ":helm_push.sh.template",
     }),
 )
-
-filegroup(
-    name = "bzl_srcs",
-    srcs = glob(
-        ["**/*.bzl"],
-        allow_empty = True,
-    ),
-    visibility = ["//:__subpackages__"],
-)

@@ -1,5 +1,0 @@
-ECHO OFF
-
-{EXTRA_CMDS}
-
-{RUNNER} {HELM_OPTS} %@%

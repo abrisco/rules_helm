@@ -13,8 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/abrisco/rules_helm/helm/private/helm_cmd"
-	"github.com/bazelbuild/rules_go/go/runfiles"
+	"github.com/abrisco/rules_helm/helm/private/helm_utils"
 )
 
 type Arguments struct {
@@ -22,27 +21,6 @@ type Arguments struct {
 	helmPlugins string
 	pkg         string
 	output      string
-}
-
-func get_runfile(runfile_path string) string {
-
-	runfiles, err := runfiles.New()
-	if err != nil {
-		log.Fatalf("Failed to load runfiles: ", err)
-	}
-
-	// Use the runfiles library to locate files
-	runfile, err := runfiles.Rlocation(runfile_path)
-	if err != nil {
-		log.Fatal("When reading file ", runfile_path, " got error ", err)
-	}
-
-	// Check that the file actually exist
-	if _, err := os.Stat(runfile); err != nil {
-		log.Fatal("File found by runfile doesn't exist")
-	}
-
-	return runfile
 }
 
 func makeAbsolutePath(path string) string {
@@ -66,7 +44,7 @@ func parse_args() Arguments {
 
 	args_file, found := os.LookupEnv("RULES_HELM_HELM_LINT_TEST_ARGS_PATH")
 	if found {
-		content, err := os.ReadFile(get_runfile(args_file))
+		content, err := os.ReadFile(helm_utils.GetRunfile(args_file))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -168,7 +146,7 @@ func find_package_root(extract_dir string) string {
 }
 
 func lint(directory string, package_name string, helm string, helmPluginsDir string, output string) {
-	cmd, err := helm_cmd.BuildHelmCommand(helm, []string{"lint", package_name}, helmPluginsDir)
+	cmd, err := helm_utils.BuildHelmCommand(helm, []string{"lint", package_name}, helmPluginsDir)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -248,9 +226,9 @@ func main() {
 	var helm = args.helm
 	var helmPlugins = args.helmPlugins
 	if is_test {
-		pkg = get_runfile(pkg)
-		helm = get_runfile(helm)
-		helmPlugins = get_runfile(helmPlugins)
+		pkg = helm_utils.GetRunfile(pkg)
+		helm = helm_utils.GetRunfile(helm)
+		helmPlugins = helm_utils.GetRunfile(helmPlugins)
 	} else {
 		pkg = makeAbsolutePath(pkg)
 		helm = makeAbsolutePath(helm)
