@@ -49,7 +49,7 @@ def _helm_push_impl(ctx):
         )
 
         if image_pushers:
-            args.add("-image_pusher", ",".join([rlocationpath(p, ctx.workspace_name) for p in image_pushers]))
+            args.add("-image_pushers", ",".join([rlocationpath(p, ctx.workspace_name) for p in image_pushers]))
 
     args_file = ctx.actions.declare_file("{}.args.txt".format(ctx.label.name))
     ctx.actions.write(
