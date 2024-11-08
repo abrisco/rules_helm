@@ -1,7 +1,7 @@
 """Helm rules"""
 
 load("//helm:providers.bzl", "HelmPackageInfo")
-load(":helm_utils.bzl", "rlocationpath")
+load(":helm_utils.bzl", "rlocationpath", "symlink")
 
 def _helm_lint_aspect_impl(target, ctx):
     if HelmPackageInfo not in target:
@@ -71,7 +71,8 @@ def _helm_lint_test_impl(ctx):
     else:
         test_runner = ctx.actions.declare_file(ctx.label.name)
 
-    ctx.actions.symlink(
+    symlink(
+        ctx = ctx,
         output = test_runner,
         target_file = ctx.executable._linter,
         is_executable = True,
@@ -98,6 +99,11 @@ helm_lint_test = rule(
             doc = "The helm package to run linting on.",
             mandatory = True,
             providers = [HelmPackageInfo],
+        ),
+        "_copier": attr.label(
+            cfg = "exec",
+            executable = True,
+            default = Label("//helm/private/copier"),
         ),
         "_linter": attr.label(
             doc = "A process wrapper for performing the linting.",

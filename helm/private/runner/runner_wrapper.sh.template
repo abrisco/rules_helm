@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-{EXTRA_CMDS}
-
-eval exec {RUNNER} {HELM_OPTS} "$@"

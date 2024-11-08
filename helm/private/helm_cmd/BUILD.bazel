@@ -1,8 +1,0 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
-
-go_library(
-    name = "helm_cmd",
-    srcs = ["helm_cmd.go"],
-    importpath = "github.com/abrisco/rules_helm/helm/private/helm_cmd",
-    visibility = ["//helm:__subpackages__"],
-)

@@ -1,0 +1,11 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "helm_utils",
+    srcs = ["helm_utils.go"],
+    importpath = "github.com/abrisco/rules_helm/helm/private/helm_utils",
+    visibility = ["//helm:__subpackages__"],
+    deps = [
+        "@io_bazel_rules_go//go/runfiles",
+    ],
+)

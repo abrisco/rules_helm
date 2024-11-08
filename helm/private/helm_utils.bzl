@@ -1,5 +1,31 @@
 """rules_helm utility helpers"""
 
+def symlink(*, ctx, output, target_file, is_executable = True):
+    """A utility function for avoiding https://github.com/bazelbuild/bazel/issues/21747
+
+    Args:
+        ctx (ctx): The rule's context object.
+        output (File): The output file.
+        target_file (File): The file to target.
+        is_executable (bool): Whether or not the symlink should be executable.
+    """
+    if target_file.basename.endswith(".exe"):
+        args = ctx.actions.args()
+        args.add(target_file)
+        args.add(output)
+        ctx.actions.run(
+            executable = ctx.executable._copier,
+            arguments = [args],
+            inputs = [target_file],
+            outputs = [output],
+        )
+    else:
+        ctx.actions.symlink(
+            output = output,
+            target_file = target_file,
+            is_executable = is_executable,
+        )
+
 def rlocationpath(file, workspace_name):
     """Generate the Runfiles location path for a given file.
 

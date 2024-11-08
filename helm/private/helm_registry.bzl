@@ -1,7 +1,7 @@
 """Helm rules"""
 
 load("//helm:providers.bzl", "HelmPackageInfo")
-load(":helm_utils.bzl", "rlocationpath")
+load(":helm_utils.bzl", "rlocationpath", "symlink")
 
 def _get_image_push_commands(ctx, pkg_info):
     image_pushers = []
@@ -23,7 +23,8 @@ def _helm_push_impl(ctx):
     else:
         registrar = ctx.actions.declare_file(ctx.label.name)
 
-    ctx.actions.symlink(
+    symlink(
+        ctx = ctx,
         target_file = ctx.executable._registrar,
         output = registrar,
         is_executable = True,
@@ -73,7 +74,7 @@ def _helm_push_impl(ctx):
         ),
         RunEnvironmentInfo(
             environment = ctx.attr.env | {
-                "HELM_PUSH_ARGS_FILE": rlocationpath(args_file, ctx.workspace_name),
+                "RULES_HELM_HELM_PUSH_ARGS_FILE": rlocationpath(args_file, ctx.workspace_name),
             },
         ),
     ]
@@ -108,6 +109,11 @@ if the following environment variables are defined:
         "registry_url": attr.string(
             doc = "The registry URL at which to push the helm chart to. E.g. `oci://my.registry.io/chart-name`",
             mandatory = True,
+        ),
+        "_copier": attr.label(
+            cfg = "exec",
+            executable = True,
+            default = Label("//helm/private/copier"),
         ),
         "_registrar": attr.label(
             doc = "A process wrapper to use for performing `helm registry and helm push`.",
