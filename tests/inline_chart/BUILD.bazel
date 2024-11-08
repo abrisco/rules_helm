@@ -1,4 +1,4 @@
-load("//helm:defs.bzl", "chart_file", "helm_lint_test", "helm_package")
+load("//helm:defs.bzl", "chart_file", "helm_lint_test", "helm_package", "helm_template_test")
 
 chart_file(
     name = "chart_file",
@@ -13,6 +13,11 @@ helm_package(
 )
 
 helm_lint_test(
-    name = "inline_chart_test",
+    name = "inline_chart_lint_test",
+    chart = ":inline_chart",
+)
+
+helm_template_test(
+    name = "inline_chart_template_test",
     chart = ":inline_chart",
 )
