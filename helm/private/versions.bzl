@@ -1,6 +1,6 @@
 """Constants for accessing helm binaries"""
 
-DEFAULT_HELM_VERSION = "3.16.1"
+DEFAULT_HELM_VERSION = "3.16.3"
 
 DEFAULT_HELM_URL_TEMPLATES = [
     "https://get.helm.sh/helm-v{version}-{platform}.{compression}",
@@ -305,6 +305,26 @@ HELM_VERSIONS = {
         "linux-i386": "sha256-ktekepBzS1BSj//8mc0bLUufwPQpG6ySyH7wNAalp7I=",
         "linux-ppc64le": "sha256-nwF4lXyUUW7/mjiXd47bk9ePqx92dRvSgog/WE6oHCM=",
         "windows-amd64": "sha256-iZUuobrOCpSYBTYGKW6gPPdDxIKUlp38cx5/eNHcgJo=",
+    },
+    "3.16.2": {
+        "darwin-amd64": "sha256-M+/UhJLyNYpJojGHPouvQfcCtasFkzOunDHlUXYzwW4=",
+        "darwin-arm64": "sha256-VkE8f7tJbSeJiBA5yrYdhJcnx7NdsAgm+ueiaFpAM0Q=",
+        "linux-amd64": "sha256-kxg3m4R+MzRg0z0pHUwIgVYpmibNk9Vwp/XQw25Qtbs=",
+        "linux-arm": "sha256-8PYG0IBqUYt0m9gujb/mqAOqMzQCFVkO85d8YONmuoI=",
+        "linux-arm64": "sha256-GIgwGut9CKA7bZ9NK3Pc0JuJxBV36A40VcETYp/GV6Q=",
+        "linux-i386": "sha256-T7DN90qKI2IqrFmA+7yRzZWwjeViSsC+uicdezsaEo0=",
+        "linux-ppc64le": "sha256-MqG2BzBkpKhtKmhBgLZmLqIC0SlLCcpSprqdTPBx/sc=",
+        "windows-amd64": "sha256-V4Id1H1XKJEuFAAO5iJiaA6QOejQXhg0LMAQ1ax5CNc=",
+    },
+    "3.16.3": {
+        "darwin-amd64": "sha256-SV11tASpb7Zk8co/jLAdsiEKrMYtv6G7qzCRaruyClc=",
+        "darwin-arm64": "sha256-Ojn2kBcwhubuoXZ0dR6zyLlwwCaX5Jzs1Ak+qjz4nc0=",
+        "linux-amd64": "sha256-9TVceRkJUe7SPFQyo7kg4HH0wApk914HfeDdTLeylOo=",
+        "linux-arm": "sha256-ArovOxUkET9Jvm3yWgtLMZABDW4hjI4rL95FeKhDmpw=",
+        "linux-arm64": "sha256-W9NO13TfaRSzI/+EoKFW6m/yuh6vAROWL6dz8/ne95g=",
+        "linux-i386": "sha256-cDGPYP7DIZaA//hskpPiqS+4uaaR1BeRZhB0WI8ido4=",
+        "linux-ppc64le": "sha256-Jm92mMVqck/d06LyuGKtSWxDONznnwKC/bxuI+Fzhgg=",
+        "windows-amd64": "sha256-GlKqVuVRaMPT0uRfqDOjIpDk43kFWYUdzh5wfrdyi4E=",
     },
     "3.4.2": {
         "darwin-amd64": "sha256-wzt+5ysABvI7M/UDK1Md1gn/97CKQyT5ugdyKk8/7Jo=",
