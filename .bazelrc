@@ -11,15 +11,17 @@ build:linux --workspace_status_command=tools/workspace_status.sh
 build:macos --workspace_status_command=tools/workspace_status.sh
 build:windows --workspace_status_command=tools/workspace_status.bat
 
-# These settings make the windows workers behave similarly to unix workers
-startup --windows_enable_symlinks
-build --enable_runfiles
-
 # https://github.com/bazelbuild/bazel/issues/8195
 build --incompatible_disallow_empty_glob=true
 
 # https://github.com/bazelbuild/bazel/issues/12821
 build --nolegacy_external_runfiles
+
+# A configuration for disabling bzlmod.
+common:no-bzlmod --noenable_bzlmod --enable_workspace
+
+# Disable the bzlmod lockfile, so we don't accidentally commit MODULE.bazel.lock
+common --lockfile_mode=off
 
 # This flag should always go last
 try-import %workspace%/user.bazelrc
