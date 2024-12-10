@@ -3,6 +3,13 @@
 load("//helm:providers.bzl", "HelmPackageInfo")
 load(":helm_utils.bzl", "is_stamping_enabled", "rlocationpath", "symlink")
 
+HelmInstallInfo = provider(
+    doc = "Info about a helm installer.",
+    fields = {
+        "args_file": "File: The arguments file generated for the install command.",
+    },
+)
+
 def _stamp_args_file(
         *,
         ctx,
@@ -112,6 +119,9 @@ def _helm_install_impl(ctx, subcommand = "install"):
             environment = {
                 "RULES_HELM_HELM_RUNNER_ARGS_FILE": rlocationpath(args_file, ctx.workspace_name),
             },
+        ),
+        HelmInstallInfo(
+            args_file = args_file,
         ),
     ]
 

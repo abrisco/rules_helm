@@ -1,5 +1,5 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
-load("//helm:defs.bzl", "helm_chart", "helm_lint_test")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
 
 exports_files(["Chart.lock"])
 
@@ -15,6 +15,11 @@ helm_chart(
 
 helm_lint_test(
     name = "with_chart_deps_lint_test",
+    chart = ":with_chart_deps",
+)
+
+helm_template_test(
+    name = "with_chart_deps_template_test",
     chart = ":with_chart_deps",
 )
 

@@ -1,5 +1,5 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
-load("//helm:defs.bzl", "helm_chart", "helm_lint_test")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
 load(":with_multiple_templates_utils.bzl", "copy_to_directory")
 
 go_binary(
@@ -27,6 +27,11 @@ helm_chart(
 )
 
 helm_lint_test(
-    name = "multiple_test",
+    name = "multiple_lint_test",
+    chart = ":multiple",
+)
+
+helm_template_test(
+    name = "multiple_template_test",
     chart = ":multiple",
 )

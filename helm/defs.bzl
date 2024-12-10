@@ -106,6 +106,10 @@ load(
     _helm_push_images = "helm_push_images",
 )
 load(
+    "//helm/private:helm_template.bzl",
+    _helm_template_test = "helm_template_test",
+)
+load(
     "//helm/private:helm_toolchain.bzl",
     _helm_plugin = "helm_plugin",
     _helm_toolchain = "helm_toolchain",
@@ -132,6 +136,7 @@ helm_push = _helm_push
 helm_push_images = _helm_push_images
 helm_push_registry = _helm_push
 helm_register_toolchains = _helm_register_toolchains
+helm_template_test = _helm_template_test
 helm_toolchain = _helm_toolchain
 helm_uninstall = _helm_uninstall
 helm_upgrade = _helm_upgrade
