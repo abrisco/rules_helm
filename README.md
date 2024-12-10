@@ -76,6 +76,8 @@ genrule(
 ## chart_file
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "chart_file")
+
 chart_file(<a href="#chart_file-name">name</a>, <a href="#chart_file-api_version">api_version</a>, <a href="#chart_file-app_version">app_version</a>, <a href="#chart_file-chart_name">chart_name</a>, <a href="#chart_file-description">description</a>, <a href="#chart_file-type">type</a>, <a href="#chart_file-version">version</a>)
 </pre>
 
@@ -100,6 +102,8 @@ Create a Helm chart file.
 ## helm_import
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_import")
+
 helm_import(<a href="#helm_import-name">name</a>, <a href="#helm_import-chart">chart</a>, <a href="#helm_import-version">version</a>)
 </pre>
 
@@ -120,6 +124,8 @@ A rule that allows pre-packaged Helm charts to be used within Bazel.
 ## helm_install
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_install")
+
 helm_install(<a href="#helm_install-name">name</a>, <a href="#helm_install-data">data</a>, <a href="#helm_install-helm_opts">helm_opts</a>, <a href="#helm_install-install_name">install_name</a>, <a href="#helm_install-opts">opts</a>, <a href="#helm_install-package">package</a>)
 </pre>
 
@@ -143,6 +149,8 @@ Produce an executable for performing a `helm install` operation.
 ## helm_lint_test
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_lint_test")
+
 helm_lint_test(<a href="#helm_lint_test-name">name</a>, <a href="#helm_lint_test-chart">chart</a>)
 </pre>
 
@@ -162,6 +170,8 @@ A rule for performing `helm lint` on a helm package
 ## helm_package
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_package")
+
 helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-deps">deps</a>, <a href="#helm_package-chart">chart</a>, <a href="#helm_package-chart_json">chart_json</a>, <a href="#helm_package-crds">crds</a>, <a href="#helm_package-images">images</a>, <a href="#helm_package-stamp">stamp</a>, <a href="#helm_package-substitutions">substitutions</a>, <a href="#helm_package-templates">templates</a>, <a href="#helm_package-values">values</a>,
              <a href="#helm_package-values_json">values_json</a>)
 </pre>
@@ -191,6 +201,8 @@ Rules for creating Helm chart packages.
 ## helm_plugin
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_plugin")
+
 helm_plugin(<a href="#helm_plugin-name">name</a>, <a href="#helm_plugin-data">data</a>, <a href="#helm_plugin-plugin_name">plugin_name</a>, <a href="#helm_plugin-yaml">yaml</a>)
 </pre>
 
@@ -212,6 +224,8 @@ Define a [helm plugin](https://helm.sh/docs/topics/plugins/).
 ## helm_push
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_push")
+
 helm_push(<a href="#helm_push-name">name</a>, <a href="#helm_push-env">env</a>, <a href="#helm_push-include_images">include_images</a>, <a href="#helm_push-login_url">login_url</a>, <a href="#helm_push-package">package</a>, <a href="#helm_push-registry_url">registry_url</a>)
 </pre>
 
@@ -240,6 +254,8 @@ if the following environment variables are defined:
 ## helm_push_images
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_push_images")
+
 helm_push_images(<a href="#helm_push_images-name">name</a>, <a href="#helm_push_images-env">env</a>, <a href="#helm_push_images-package">package</a>)
 </pre>
 
@@ -260,6 +276,8 @@ Produce an executable for pushing all oci images used by a helm chart.
 ## helm_push_registry
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_push_registry")
+
 helm_push_registry(<a href="#helm_push_registry-name">name</a>, <a href="#helm_push_registry-env">env</a>, <a href="#helm_push_registry-include_images">include_images</a>, <a href="#helm_push_registry-login_url">login_url</a>, <a href="#helm_push_registry-package">package</a>, <a href="#helm_push_registry-registry_url">registry_url</a>)
 </pre>
 
@@ -288,6 +306,8 @@ if the following environment variables are defined:
 ## helm_template_test
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_template_test")
+
 helm_template_test(<a href="#helm_template_test-name">name</a>, <a href="#helm_template_test-chart">chart</a>, <a href="#helm_template_test-installer">installer</a>)
 </pre>
 
@@ -308,6 +328,8 @@ A test rule for rendering helm chart templates.
 ## helm_toolchain
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_toolchain")
+
 helm_toolchain(<a href="#helm_toolchain-name">name</a>, <a href="#helm_toolchain-helm">helm</a>, <a href="#helm_toolchain-plugins">plugins</a>)
 </pre>
 
@@ -328,6 +350,8 @@ A helm toolchain.
 ## helm_uninstall
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_uninstall")
+
 helm_uninstall(<a href="#helm_uninstall-name">name</a>, <a href="#helm_uninstall-data">data</a>, <a href="#helm_uninstall-helm_opts">helm_opts</a>, <a href="#helm_uninstall-install_name">install_name</a>, <a href="#helm_uninstall-opts">opts</a>)
 </pre>
 
@@ -350,6 +374,8 @@ Produce an executable for performing a `helm uninstall` operation.
 ## helm_upgrade
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_upgrade")
+
 helm_upgrade(<a href="#helm_upgrade-name">name</a>, <a href="#helm_upgrade-data">data</a>, <a href="#helm_upgrade-helm_opts">helm_opts</a>, <a href="#helm_upgrade-install_name">install_name</a>, <a href="#helm_upgrade-opts">opts</a>, <a href="#helm_upgrade-package">package</a>)
 </pre>
 
@@ -373,13 +399,14 @@ Produce an executable for performing a `helm upgrade` operation.
 ## HelmPackageInfo
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "HelmPackageInfo")
+
 HelmPackageInfo(<a href="#HelmPackageInfo-chart">chart</a>, <a href="#HelmPackageInfo-images">images</a>, <a href="#HelmPackageInfo-metadata">metadata</a>)
 </pre>
 
 A provider for helm packages
 
 **FIELDS**
-
 
 | Name  | Description |
 | :------------- | :------------- |
@@ -393,6 +420,8 @@ A provider for helm packages
 ## chart_content
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "chart_content")
+
 chart_content(<a href="#chart_content-name">name</a>, <a href="#chart_content-api_version">api_version</a>, <a href="#chart_content-description">description</a>, <a href="#chart_content-type">type</a>, <a href="#chart_content-version">version</a>, <a href="#chart_content-app_version">app_version</a>)
 </pre>
 
@@ -420,9 +449,11 @@ str: A json encoded string which represents `Chart.yaml` contents.
 ## helm_chart
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_chart")
+
 helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">chart</a>, <a href="#helm_chart-chart_json">chart_json</a>, <a href="#helm_chart-crds">crds</a>, <a href="#helm_chart-values">values</a>, <a href="#helm_chart-values_json">values_json</a>, <a href="#helm_chart-substitutions">substitutions</a>, <a href="#helm_chart-templates">templates</a>, <a href="#helm_chart-images">images</a>,
            <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-login_url">login_url</a>, <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-install_opts">install_opts</a>, <a href="#helm_chart-upgrade_opts">upgrade_opts</a>,
-           <a href="#helm_chart-uninstall_opts">uninstall_opts</a>, <a href="#helm_chart-data">data</a>, <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">kwargs</a>)
+           <a href="#helm_chart-uninstall_opts">uninstall_opts</a>, <a href="#helm_chart-data">data</a>, <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">**kwargs</a>)
 </pre>
 
 Rules for producing a helm package and some convenience targets.
@@ -470,6 +501,8 @@ Rules for producing a helm package and some convenience targets.
 ## helm_register_toolchains
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_register_toolchains")
+
 helm_register_toolchains(<a href="#helm_register_toolchains-version">version</a>, <a href="#helm_register_toolchains-helm_url_templates">helm_url_templates</a>, <a href="#helm_register_toolchains-plugins">plugins</a>)
 </pre>
 
@@ -490,6 +523,8 @@ Register helm toolchains.
 ## rules_helm_dependencies
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "rules_helm_dependencies")
+
 rules_helm_dependencies()
 </pre>
 
@@ -502,6 +537,8 @@ Defines helm dependencies
 ## helm_lint_aspect
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_lint_aspect")
+
 helm_lint_aspect(<a href="#helm_lint_aspect-name">name</a>)
 </pre>
 
@@ -524,6 +561,8 @@ An aspect for running `helm lint` on helm package targets
 ## helm_import_repository
 
 <pre>
+load("@rules_helm//helm:defs.bzl", "helm_import_repository")
+
 helm_import_repository(<a href="#helm_import_repository-name">name</a>, <a href="#helm_import_repository-chart_name">chart_name</a>, <a href="#helm_import_repository-repo_mapping">repo_mapping</a>, <a href="#helm_import_repository-repository">repository</a>, <a href="#helm_import_repository-sha256">sha256</a>, <a href="#helm_import_repository-url">url</a>, <a href="#helm_import_repository-version">version</a>)
 </pre>
 

@@ -63,7 +63,6 @@ jobs:
         if: startswith(runner.os, 'Windows')
       - name: Setup Bazelrc
         run: |
-          echo "common --noenable_bzlmod" >> ./user.bazelrc
           echo "common --keep_going" >> ./user.bazelrc
 
       # Build and Test the code
@@ -125,68 +124,6 @@ jobs:
       - name: Setup Bazelrc
         run: |
           echo "common --config=strict" >> ./user.bazelrc
-          echo "common --noenable_bzlmod" >> ./user.bazelrc
-          echo "common --keep_going" >> ./user.bazelrc
-
-      # Build and Test the code
-      - name: Test (Unix)
-        run: bazel ${BAZEL_STARTUP_FLAGS[@]} test //...
-        if: startswith(runner.os, 'Windows') != true
-      - name: Test (Windows)
-        run: bazel $env:BAZEL_STARTUP_FLAGS test //...
-        if: startswith(runner.os, 'Windows')
-
-  ci-bzlmod:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-          - os: macos-14
-          - os: ubuntu-20.04
-          - os: windows-2019
-    steps:
-      # Checkout the code
-      - uses: actions/checkout@v2
-
-      # Caches and restores the Bazel outputs.
-      - name: Retain Bazel cache (linux)
-        uses: actions/cache@v2
-        env:
-          cache-name: bazel-cache
-        with:
-          path: |
-            ~/.cache/bazelisk
-            ~/.cache/bazel
-          key: ${{ runner.os }}-${{ env.cache-name }}
-        if: startswith(runner.os, 'Linux')
-      - name: Retain Bazel cache (MacOS)
-        uses: actions/cache@v2
-        env:
-          cache-name: bazel-cache
-        with:
-          path: |
-            ~/.cache/bazelisk
-            /private/var/tmp/_bazel_runner
-          key: ${{ runner.os }}-${{ env.cache-name }}
-        if: startswith(runner.os, 'MacOS')
-      - name: Retain Bazel cache (Windows)
-        uses: actions/cache@v2
-        env:
-          cache-name: bazel-cache
-        with:
-          path: |
-            ~/.cache/bazelisk
-            C:/bzl
-          key: ${{ runner.os }}-${{ env.cache-name }}
-        if: startswith(runner.os, 'Windows')
-
-      - name: Setup Bazelrc (Windows)
-        run: echo "startup --output_user_root=C:/bzl" > ./user.bazelrc
-        if: startswith(runner.os, 'Windows')
-      - name: Setup Bazelrc
-        run: |
-          echo "common --config=strict" >> ./user.bazelrc
-          echo "common --enable_bzlmod" >> ./user.bazelrc
           echo "common --keep_going" >> ./user.bazelrc
 
       # Build and Test the code
@@ -198,19 +135,19 @@ jobs:
         if: startswith(runner.os, 'Windows')
 
   ci-buildifier:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       # Checkout the code
       - uses: actions/checkout@v2
       - name: Download Buildifier
         run: |
-          wget "https://github.com/bazelbuild/buildtools/releases/download/v6.3.3/buildifier-linux-amd64" -O buildifier
+          wget "https://github.com/bazelbuild/buildtools/releases/download/v7.3.1/buildifier-linux-amd64" -O buildifier
           chmod +x buildifier
       - name: Buildifier
         run: ./buildifier -lint=warn -mode=check -warnings=all -r ${{ github.workspace }}
 
   ci-gofmt:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: Jerome1337/gofmt-action@v1.0.5
