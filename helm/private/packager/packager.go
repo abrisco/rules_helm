@@ -69,6 +69,35 @@ type HelmDependency struct {
 	Alias        string   `yaml:"alias,omitempty"`
 }
 
+type addFile struct {
+	src string
+	dst string
+}
+
+func (r addFile) String() string {
+	return fmt.Sprintf("%s=%s", r.src, r.dst)
+}
+
+type addFiles []addFile
+
+func (c *addFiles) String() string {
+	return fmt.Sprintf("%v", *c)
+}
+
+func (c *addFiles) Set(s string) error {
+	split := strings.SplitN(s, "=", 2)
+	if len(split) != 2 {
+		return fmt.Errorf("parse addFile from %q", s)
+	}
+	src := split[0]
+	if len(src) == 0 {
+		return fmt.Errorf("empty src in %q", s)
+	}
+	dst := split[1]
+	*c = append(*c, addFile{src: src, dst: dst})
+	return nil
+}
+
 type HelmChart struct {
 	ApiVersion   string            `yaml:"apiVersion"`
 	Name         string            `yaml:"name"`
@@ -89,6 +118,7 @@ type HelmChart struct {
 
 type Arguments struct {
 	TemplatesManifest  string
+	AddFiles           addFiles
 	CrdsManifest       string
 	Chart              string
 	Values             string
@@ -108,6 +138,7 @@ func parseArgs() Arguments {
 	var args Arguments
 
 	flag.StringVar(&args.TemplatesManifest, "templates_manifest", "", "A helm file containing a list of all helm template files.")
+	flag.Var(&args.AddFiles, "add_files", "Additional files to be added to the chart")
 	flag.StringVar(&args.CrdsManifest, "crds_manifest", "", "A helm file containing a list of all helm crd files.")
 	flag.StringVar(&args.Chart, "chart", "", "The helm `chart.yaml` file.")
 	flag.StringVar(&args.Values, "values", "", "The helm `values.yaml` file.")
@@ -428,7 +459,67 @@ func copyFile(source string, dest string) error {
 	return nil
 }
 
-func installHelmContent(workingDir string, stampedChartContent string, stampedValuesContent string, templatesManifest string, crdsManifest string, depsManifest string) error {
+func copyFileToDir(src string, dir string) error {
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("open %s: %w", src, err)
+	}
+	defer srcFile.Close()
+
+	err = os.MkdirAll(dir, 0700)
+	if err != nil && !os.IsExist(err) {
+		return fmt.Errorf("make dirs %s: %w", dir, err)
+	}
+
+	dst := filepath.Join(dir, filepath.Base(src))
+
+	dstFile, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("create %s: %w", dst, err)
+	}
+
+	_, err = io.Copy(dstFile, srcFile)
+	if errClose := dstFile.Close(); errClose != nil && err == nil {
+		err = errClose
+	}
+	return err
+}
+
+func copyDir(src string, dst string) error {
+	var err error
+	var fds []os.DirEntry
+
+	if _, err = os.Stat(src); err != nil {
+		return fmt.Errorf("file stat: %w", err)
+	}
+
+	if err = os.MkdirAll(dst, 0700); err != nil {
+		if !os.IsExist(err) {
+			return fmt.Errorf("make dirs: %w", err)
+		}
+	}
+
+	if fds, err = os.ReadDir(src); err != nil {
+		return fmt.Errorf("read dir: %w", err)
+	}
+	for _, fd := range fds {
+		srcfp := filepath.Join(src, fd.Name())
+		dstfp := filepath.Join(dst, fd.Name())
+
+		if fd.IsDir() {
+			if err = copyDir(srcfp, dstfp); err != nil {
+				return fmt.Errorf("copy dir: %w", err)
+			}
+		} else {
+			if err = copyFile(srcfp, dstfp); err != nil {
+				return fmt.Errorf("copy file: %w", err)
+			}
+		}
+	}
+	return nil
+}
+
+func installHelmContent(workingDir string, stampedChartContent string, stampedValuesContent string, templatesManifest string, addFiles addFiles, crdsManifest string, depsManifest string) error {
 	err := os.MkdirAll(workingDir, 0700)
 	if err != nil {
 		return fmt.Errorf("Error creating working directory %s: %w", workingDir, err)
@@ -635,6 +726,23 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 		}
 	}
 
+	// Copy all additional files
+	for _, addFile := range addFiles {
+		dst := filepath.Join(workingDir, addFile.dst)
+		srcStat, err := os.Stat(addFile.src)
+		if err != nil {
+			return fmt.Errorf("stat: %w", err)
+		}
+		if srcStat.IsDir() {
+			err = copyDir(addFile.src, dst)
+		} else {
+			err = copyFileToDir(addFile.src, dst)
+		}
+		if err != nil {
+			return fmt.Errorf("copy %s to %s: %w", addFile.src, dst, err)
+		}
+	}
+
 	// Copy over any dependency chart files
 	if len(depsManifest) > 0 {
 		manifestContent, err := os.ReadFile(depsManifest)
@@ -801,7 +909,7 @@ func main() {
 
 	// Create a directory in which to run helm package
 	tmpPath := filepath.Join(dir, chart.Name)
-	err = installHelmContent(tmpPath, stampedChartContent, stampedValuesContent, args.TemplatesManifest, args.CrdsManifest, args.DepsManifest)
+	err = installHelmContent(tmpPath, stampedChartContent, stampedValuesContent, args.TemplatesManifest, args.AddFiles, args.CrdsManifest, args.DepsManifest)
 	if err != nil {
 		log.Fatal(err)
 	}

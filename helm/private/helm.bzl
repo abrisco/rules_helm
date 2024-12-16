@@ -13,6 +13,7 @@ def helm_chart(
         values_json = None,
         substitutions = {},
         templates = None,
+        files = {},
         images = [],
         deps = None,
         install_name = None,
@@ -46,6 +47,7 @@ def helm_chart(
         values_json (str, optional): The json encoded contents of `values.yaml`.
         substitutions (dict, optional): A dictionary of substitutions to apply to `values.yaml`.
         templates (list, optional): A list of template files to include in the package.
+        files (map[string, list[label]], optional): A a map with lists of files to be copied to their respective folders within the helm chart.
         images (list, optional): A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets
         deps (list, optional): A list of helm package dependencies.
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
@@ -74,6 +76,7 @@ def helm_chart(
         deps = deps,
         images = images,
         templates = templates,
+        files = files,
         values = values,
         values_json = values_json,
         substitutions = substitutions,
