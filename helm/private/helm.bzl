@@ -13,6 +13,7 @@ def helm_chart(
         values_json = None,
         substitutions = {},
         templates = None,
+        files = {},
         images = [],
         deps = None,
         install_name = None,
@@ -46,6 +47,7 @@ def helm_chart(
         values_json (str, optional): The json encoded contents of `values.yaml`.
         substitutions (dict, optional): A dictionary of substitutions to apply to `values.yaml`.
         templates (list, optional): A list of template files to include in the package.
+        files (map[string, list[label]], optional): A a map with lists of files to be copied to their respective folders within the helm chart.
         images (list, optional): A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets
         deps (list, optional): A list of helm package dependencies.
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
@@ -61,10 +63,12 @@ def helm_chart(
         **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
     if templates == None:
-        templates = native.glob(["templates/**"])
+        # Set exclude_directories to 0 so that the folder structure is preserved
+        templates = native.glob(["templates/*"], allow_empty = True, exclude_directories = 0)
 
     if crds == None:
-        crds = native.glob(["crds/**"], allow_empty = True)
+        # Set exclude_directories to 0 so that the folder structure is preserved
+        crds = native.glob(["crds/*"], allow_empty = True, exclude_directories = 0)
 
     helm_package(
         name = name,
@@ -74,6 +78,7 @@ def helm_chart(
         deps = deps,
         images = images,
         templates = templates,
+        files = files,
         values = values,
         values_json = values_json,
         substitutions = substitutions,

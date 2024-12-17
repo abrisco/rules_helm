@@ -109,6 +109,10 @@ def _helm_package_impl(ctx):
     )
     args.add("-templates_manifest", templates_manifest)
 
+    for ln in ctx.attr.files:
+        fmt = "%s=" + ctx.attr.files[ln]
+        args.add_all(ln.files, before_each = "-add_files", format_each = fmt, uniquify = True)
+
     crds_manifest = ctx.actions.declare_file("{}/crds_manifest.json".format(ctx.label.name))
     ctx.actions.write(
         output = crds_manifest,
@@ -180,7 +184,7 @@ def _helm_package_impl(ctx):
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
         inputs = depset(
-            ctx.files.templates + ctx.files.crds + stamps + image_inputs + deps + [
+            ctx.files.templates + ctx.files.files + ctx.files.crds + stamps + image_inputs + deps + [
                 chart_yaml,
                 values_yaml,
                 templates_manifest,
@@ -208,7 +212,77 @@ def _helm_package_impl(ctx):
         ),
     ]
 
-helm_package = rule(
+def helm_package(
+        name,
+        chart = None,
+        chart_json = None,
+        crds = None,
+        values = None,
+        values_json = None,
+        substitutions = {},
+        templates = None,
+        files = {},
+        images = [],
+        deps = None,
+        stamp = None,
+        **kwargs):
+    """Rules for creating Helm chart packages.
+
+    Args:
+        name: The name of the target
+        chart: "The `Chart.yaml` file of the helm chart"
+        chart_json: "The `Chart.yaml` file of the helm chart as a json object"
+        crds: All crds associated with the current helm chart. E.g., the `./crds` directory
+        values (str, optional): The `values.yaml` file for the current package.
+        values_json: The `values.yaml` file for the current package as a json object.
+        substitutions: A dictionary of substitutions to apply to the `values.yaml` file.
+        templates: All templates associated with the current helm chart. E.g., the `./templates` directory
+        files: Additional files to be added to the chart specified as a map from string to list of labels.
+        images: A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets
+        deps: Other helm packages this package depends on.
+        stamp: Whether to encode build information into the helm actions. Possible values:
+
+            - `stamp = 1`: Always stamp the build information into the helm actions, even in \
+            [--nostamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) builds. \
+            This setting should be avoided, since it potentially kills remote caching for the target and \
+            any downstream actions that depend on it.
+
+            - `stamp = 0`: Always replace build information by constant values. This gives good build result caching.
+
+            - `stamp = -1`: Embedding of build information is controlled by the \
+            [--[no]stamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) flag.
+
+            Stamped targets are not rebuilt unless their dependencies change.
+        **kwargs (dict): Additional keyword arguments.
+    """
+
+    # We wrap this in a macro so that we can provide a better API for the `files` attribute
+    # If https://github.com/bazelbuild/bazel/issues/7989 ever gets implemented we can remove the macro
+    filegroups = {}
+    for folder, folder_files in files.items():
+        native.filegroup(
+            name = "{}_filegroup".format(folder),
+            srcs = folder_files,
+        )
+        filegroups[":{}_filegroup".format(folder)] = folder
+
+    _helm_package(
+        name = name,
+        chart = chart,
+        chart_json = chart_json,
+        crds = crds,
+        deps = deps,
+        images = images,
+        templates = templates,
+        files = filegroups,
+        values = values,
+        values_json = values_json,
+        substitutions = substitutions,
+        stamp = stamp,
+        **kwargs
+    )
+
+_helm_package = rule(
     implementation = _helm_package_impl,
     doc = "Rules for creating Helm chart packages.",
     attrs = {
@@ -227,6 +301,11 @@ helm_package = rule(
         "deps": attr.label_list(
             doc = "Other helm packages this package depends on.",
             providers = [HelmPackageInfo],
+        ),
+        "files": attr.label_keyed_string_dict(
+            doc = "Additional files to be added to the chart specified as a map from string to list of labels.",
+            allow_empty = True,
+            allow_files = True,
         ),
         "images": attr.label_list(
             doc = """\
