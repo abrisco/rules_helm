@@ -1,26 +1,8 @@
 load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
 
-genrule(
-    name = "generated",
-    outs = ["generated_file"],
-    cmd = "echo 'generated file' > $@",
-)
-
 helm_chart(
     name = "simple",
     chart = "Chart.yaml",
-    files = {
-        "": [
-            "other_files/file1",
-            "other_files/file2",
-            ":generated",
-        ],
-        "folder1": [
-            "other_files/file1",
-            "other_files/file2",
-            ":generated",
-        ],
-    },
     registry_url = "oci://localhost/helm-registry",
     values = "values.yaml",
 )

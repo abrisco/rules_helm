@@ -63,10 +63,12 @@ def helm_chart(
         **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
     if templates == None:
-        templates = native.glob(["templates/**"])
+        # Set exclude_directories to 0 so that the folder structure is preserved
+        templates = native.glob(["templates/*"], allow_empty = True, exclude_directories = 0)
 
     if crds == None:
-        crds = native.glob(["crds/**"], allow_empty = True)
+        # Set exclude_directories to 0 so that the folder structure is preserved
+        crds = native.glob(["crds/*"], allow_empty = True, exclude_directories = 0)
 
     helm_package(
         name = name,
