@@ -21,6 +21,7 @@ def _helm_import_impl(ctx):
             chart = ctx.file.chart,
             images = [],
             metadata = metadata_output,
+            deps = depset([]),
         ),
     ]
 

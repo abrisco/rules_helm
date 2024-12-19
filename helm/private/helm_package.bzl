@@ -120,16 +120,17 @@ def _helm_package_impl(ctx):
     )
     args.add("-crds_manifest", crds_manifest)
 
-    deps = []
+    deps_depset = depset([dep[HelmPackageInfo] for dep in ctx.attr.deps], transitive = [dep[HelmPackageInfo].deps for dep in ctx.attr.deps]) if ctx.attr.deps else depset([])
+    deps_inputs = []
     if ctx.attr.deps:
-        deps.extend([dep[HelmPackageInfo].chart for dep in ctx.attr.deps])
+        deps_inputs.extend([dep.chart for dep in deps_depset.to_list()])
         deps_manifest = ctx.actions.declare_file("{}/deps_manifest.json".format(ctx.label.name))
         ctx.actions.write(
             output = deps_manifest,
-            content = json.encode_indent([dep.path for dep in deps], indent = " " * 4),
+            content = json.encode_indent([dep.path for dep in deps_inputs], indent = " " * 4),
         )
         args.add("-deps_manifest", deps_manifest)
-        deps.append(deps_manifest)
+        deps_inputs.append(deps_manifest)
 
     # Create documents for each image the package depends on
     image_inputs = []
@@ -184,7 +185,7 @@ def _helm_package_impl(ctx):
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
         inputs = depset(
-            ctx.files.templates + ctx.files.files + ctx.files.crds + stamps + image_inputs + deps + [
+            ctx.files.templates + ctx.files.files + ctx.files.crds + stamps + image_inputs + deps_inputs + [
                 chart_yaml,
                 values_yaml,
                 templates_manifest,
@@ -209,6 +210,7 @@ def _helm_package_impl(ctx):
             chart = output,
             metadata = metadata_output,
             images = ctx.attr.images,
+            deps = deps_depset,
         ),
     ]
 
