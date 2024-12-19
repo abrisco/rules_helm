@@ -1,0 +1,98 @@
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+
+genrule(
+    name = "generated",
+    outs = ["generated_file"],
+    cmd = "echo 'generated file' > $@",
+)
+
+genrule(
+    name = "generated_template",
+    outs = ["_generated.tpl"],
+    cmd = """
+    cat <<EOF > $@
+    {{- define "my-template" -}}
+    {{- .Files.Get "other_files/file1" -}}
+    {{- end -}}
+    EOF
+    """,
+)
+
+genrule(
+    name = "generated_crd",
+    outs = ["generated-crd.yaml"],
+    cmd = """
+    cat <<EOF > $@
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: generated-crd
+    spec:
+        group: example.com
+        names:
+            kind: MyCRD
+            listKind: MyCRDList
+            plural: mycrds
+            singular: mycrd
+        scope: Namespaced
+        versions:
+        - name: v1
+            served: true
+            storage: true
+            schema:
+                openAPIV3Schema:
+                    type: object
+    EOF
+    """,
+)
+
+helm_chart(
+    name = "kitchen_sink",
+    chart = "Chart.yaml",
+    crds = glob(
+        ["crds/**"],
+    ) + [
+        # Make sure that generated crds are included
+        ":generated_crd",
+        # Make sure that crds outside of the chart folder can be copied into crds
+        "//tests/kitchen_sink/other_crds:other.crd.yaml",
+    ],
+    files = {
+        "": [
+            "other_files/file1",
+            "other_files/file2",
+            ":generated",
+        ],
+        "folder1": [
+            "other_files/file1",
+            "other_files/file2",
+            ":generated",
+        ],
+    },
+    registry_url = "oci://localhost/helm-registry",
+    templates =
+        # Glob the top level templates
+        glob(
+            [
+                "templates/*.*",
+            ],
+        ) + [
+            # Copy the tests directory as a directory
+            "templates/tests",
+            # Make sure that files outside of the chart folder can be copied into templates
+            "//tests/kitchen_sink/other_templates:service.yaml",
+            # Make sure that generated files work are copied
+            ":generated_template",
+        ],
+    values = "values.yaml",
+)
+
+helm_lint_test(
+    name = "kitchen_sink_lint_test",
+    chart = ":kitchen_sink",
+)
+
+helm_template_test(
+    name = "kitchen_sink_template_test",
+    chart = ":kitchen_sink",
+)
