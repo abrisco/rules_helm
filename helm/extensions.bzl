@@ -14,6 +14,10 @@ load(
     "DEFAULT_HELM_VERSION",
     "HELM_VERSIONS",
 )
+load(
+    "//helm:defs.bzl",
+    "helm_import_repository",
+)
 
 _HELM_TAR_BUILD_CONTENT = """\
 package(default_visibility = ["//visibility:public"])
@@ -138,4 +142,41 @@ helm = module_extension(
         "options": _toolchain,  # deprecated: use toolchain instead and remove in next major version
         "toolchain": _toolchain,
     },
+)
+
+def _helm_import_impl(module_ctx):
+    for mod in module_ctx.modules:
+        for repository in mod.tags.repository:
+            helm_import_repository(
+                name = repository.name,
+                chart_name = repository.chart_name,
+                repository = repository.repository,
+                sha256 = repository.sha256,
+                url = repository.url,
+                version = repository.version,
+            )
+
+helm_import = module_extension(
+    implementation = _helm_import_impl,
+    tag_classes = {"repository": tag_class(attrs = {
+        "name": attr.string(
+            doc = "Name for the import dependency",
+        ),
+        "chart_name": attr.string(
+            doc = "Chart name to import.",
+        ),
+        "repository": attr.string(
+            doc = "Chart repository url where to locate the requested chart.",
+            mandatory = True,
+        ),
+        "sha256": attr.string(
+            doc = "The expected SHA-256 hash of the chart imported.",
+        ),
+        "url": attr.string(
+            doc = "The url where the chart can be directly downloaded.",
+        ),
+        "version": attr.string(
+            doc = "Specify a version constraint for the chart version to use.",
+        ),
+    })},
 )
