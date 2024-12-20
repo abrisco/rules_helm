@@ -1,6 +1,8 @@
 package main
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -379,6 +381,101 @@ func applySubstitutions(content string, substitutions_file string) (string, erro
 	return content, nil
 }
 
+func readChartYamlFromTarball(tarballPath string) (HelmChart, error) {
+	file, err := os.Open(tarballPath)
+	if err != nil {
+		return HelmChart{}, fmt.Errorf("Error opening tarball %s: %w", tarballPath, err)
+	}
+	defer file.Close()
+
+	archive, err := gzip.NewReader(file)
+	if err != nil {
+		return HelmChart{}, fmt.Errorf("Error creating Gzip reader: %w", err)
+	}
+	defer archive.Close()
+
+	tarReader := tar.NewReader(archive)
+
+	var chartBytes []byte
+	for {
+		header, err := tarReader.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return HelmChart{}, fmt.Errorf("Error reading tar archive: %w", err)
+		}
+
+		// The folder structure is <chart name>/Chart.yaml
+		parts := strings.Split(header.Name, string(os.PathSeparator))
+		if len(parts) > 1 {
+			if parts[1] == "Chart.yaml" {
+				chartContentBytes, err := io.ReadAll(tarReader)
+				if err != nil {
+					return HelmChart{}, fmt.Errorf("Error reading Chart.yaml: %w", err)
+				}
+
+				chartBytes = chartContentBytes
+				break
+			}
+		}
+	}
+
+	if chartBytes == nil {
+		return HelmChart{}, errors.New("Chart.yaml not found in tarball")
+	}
+
+	var chart HelmChart
+	err = yaml.Unmarshal(chartBytes, &chart)
+	if err != nil {
+		return HelmChart{}, fmt.Errorf("Error unmarshalling Chart.yaml: %w", err)
+	}
+
+	return chart, nil
+}
+
+func addDependencyToChart(workingDir, chartContent string, dep string) (string, error) {
+	parentChart, err := loadChart(chartContent)
+	if err != nil {
+		return chartContent, fmt.Errorf("Error loading chart content: %w", err)
+	}
+
+	depChart, err := readChartYamlFromTarball(dep)
+	if err != nil {
+		return chartContent, fmt.Errorf("Error reading dependency %s: %w", dep, err)
+	}
+
+	// Only add the dependency if the chart.yaml does not already have it
+	// since the end user can manually add it to their Chart.yaml
+	alreadyExists := false
+	for _, existingDep := range parentChart.Dependencies {
+		if existingDep.Name == depChart.Name {
+			alreadyExists = true
+			break
+		}
+	}
+
+	if !alreadyExists {
+		parentChart.Dependencies = append(parentChart.Dependencies, HelmDependency{
+			Name:    depChart.Name,
+			Version: depChart.Version,
+		})
+	}
+
+	err = copyFile(dep, filepath.Join(workingDir, "charts", fmt.Sprintf("%s-%s.tgz", depChart.Name, depChart.Version)))
+	if err != nil {
+		return chartContent, fmt.Errorf("Error copying dependency %s: %w", dep, err)
+	}
+
+	chartContentBytes, err := yaml.Marshal(parentChart)
+	if err != nil {
+		return chartContent, fmt.Errorf("Error marshalling chart content: %w", err)
+	}
+	chartContent = string(chartContentBytes)
+
+	return chartContent, nil
+}
+
 func applyStamping(content string, stamps []ReplacementGroup, imageStamps []ReplacementGroup, requireImageStamps bool) (string, error) {
 	content, err := replaceKeyValues(content, stamps, false)
 	if err != nil {
@@ -471,12 +568,6 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 	err := os.MkdirAll(workingDir, 0700)
 	if err != nil {
 		return fmt.Errorf("Error creating working directory %s: %w", workingDir, err)
-	}
-
-	chartYaml := filepath.Join(workingDir, "Chart.yaml")
-	err = os.WriteFile(chartYaml, []byte(stampedChartContent), 0644)
-	if err != nil {
-		return fmt.Errorf("Error writing chart file %s: %w", chartYaml, err)
 	}
 
 	valuesYaml := filepath.Join(workingDir, "values.yaml")
@@ -590,11 +681,19 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 		}
 
 		for _, dep := range deps {
-			err = copyFile(dep, filepath.Join(workingDir, "charts", filepath.Base(dep)))
+			stampedChartContent, err = addDependencyToChart(workingDir, stampedChartContent, dep)
+
 			if err != nil {
 				return fmt.Errorf("Error copying dep %s: %w", dep, err)
 			}
 		}
+	}
+
+	// Write the Chart.yaml last because it may have been modified by the above steps
+	chartYaml := filepath.Join(workingDir, "Chart.yaml")
+	err = os.WriteFile(chartYaml, []byte(stampedChartContent), 0644)
+	if err != nil {
+		return fmt.Errorf("Error writing chart file %s: %w", chartYaml, err)
 	}
 
 	return nil
@@ -726,6 +825,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	stampedChartContent, err := applyStamping(string(chartContent), stamps, imageStamps, false)
 	if err != nil {
 		log.Fatal(err)
