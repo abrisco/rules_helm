@@ -1,0 +1,18 @@
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+
+helm_chart(
+    name = "with_crds",
+    chart = "Chart.yaml",
+    registry_url = "oci://localhost/helm-registry",
+    values = "values.yaml",
+)
+
+helm_lint_test(
+    name = "with_crds_lint_test",
+    chart = ":with_crds",
+)
+
+helm_template_test(
+    name = "with_crds_template_test",
+    chart = ":with_crds",
+)
