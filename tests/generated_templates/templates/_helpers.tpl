@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "with_crds.name" -}}
+{{- define "generated_templates.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "with_crds.fullname" -}}
+{{- define "generated_templates.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "with_crds.chart" -}}
+{{- define "generated_templates.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "with_crds.labels" -}}
-helm.sh/chart: {{ include "with_crds.chart" . }}
-{{ include "with_crds.selectorLabels" . }}
+{{- define "generated_templates.labels" -}}
+helm.sh/chart: {{ include "generated_templates.chart" . }}
+{{ include "generated_templates.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "with_crds.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "with_crds.name" . }}
+{{- define "generated_templates.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "generated_templates.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "with_crds.serviceAccountName" -}}
+{{- define "generated_templates.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "with_crds.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "generated_templates.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
