@@ -4,4 +4,7 @@ go_binary(
     name = "package_regex_tester",
     srcs = ["package_regex_tester.go"],
     visibility = ["//visibility:public"],
+    deps = [
+        "@io_bazel_rules_go//go/runfiles",
+    ],
 )
