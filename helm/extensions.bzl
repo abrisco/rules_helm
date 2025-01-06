@@ -93,26 +93,31 @@ def _register_go_yaml():
         build_file = Label("//3rdparty/yaml:BUILD.yaml.bazel"),
     )
 
-options = tag_class(attrs = {
-    "helm_url_templates": attr.string_list(
-        doc = (
-            "A url template used to download helm. The template can contain the following " +
-            "format strings `{platform}` for the helm platform, `{version}` for the helm " +
-            "version, and `{compression}` for the archive type containing the helm binary."
+options = tag_class(
+    doc = "Options used to configure helm toolchains.",
+    attrs = {
+        "helm_url_templates": attr.string_list(
+            doc = (
+                "A url template used to download helm. The template can contain the following " +
+                "format strings `{platform}` for the helm platform, `{version}` for the helm " +
+                "version, and `{compression}` for the archive type containing the helm binary."
+            ),
+            default = DEFAULT_HELM_URL_TEMPLATES,
         ),
-        default = DEFAULT_HELM_URL_TEMPLATES,
-    ),
-    "plugins": attr.string_list(
-        doc = "A list of plugins to add to the generated toolchain.",
-        default = [],
-    ),
-    "version": attr.string(
-        doc = "The version of helm to download for the toolchain.",
-        default = DEFAULT_HELM_VERSION,
-    ),
-})
+        "plugins": attr.string_list(
+            doc = "A list of plugins to add to the generated toolchain.",
+            default = [],
+        ),
+        "version": attr.string(
+            doc = "The version of helm to download for the toolchain.",
+            default = DEFAULT_HELM_VERSION,
+        ),
+    },
+)
 
 helm = module_extension(
     implementation = _helm_impl,
-    tag_classes = {"options": options},
+    tag_classes = {
+        "options": options,
+    },
 )
