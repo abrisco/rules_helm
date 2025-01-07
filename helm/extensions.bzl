@@ -102,7 +102,7 @@ def _register_go_yaml():
         build_file = Label("//3rdparty/yaml:BUILD.yaml.bazel"),
     )
 
-toolchain = tag_class(
+_toolchain = tag_class(
     doc = "Configure a helm toolchain.",
     attrs = {
         "helm_url_templates": attr.string_list(
@@ -127,7 +127,7 @@ toolchain = tag_class(
 helm = module_extension(
     implementation = _helm_impl,
     tag_classes = {
-        "options": toolchain,  # deprecated: use toolchain instead and remove in next major version
-        "toolchain": toolchain,
+        "options": _toolchain,  # deprecated: use toolchain instead and remove in next major version
+        "toolchain": _toolchain,
     },
 )
