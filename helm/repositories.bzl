@@ -44,15 +44,6 @@ def rules_helm_dependencies():
         urls = ["https://github.com/bazel-contrib/bazel-gazelle/releases/download/v0.39.1/bazel-gazelle-v0.39.1.tar.gz"],
     )
 
-    maybe(
-        http_archive,
-        name = "go_yaml_yaml",
-        urls = ["https://github.com/go-yaml/yaml/archive/refs/tags/v3.0.1.tar.gz"],
-        strip_prefix = "yaml-3.0.1",
-        sha256 = "cf05411540d3e6ef8f1fd88434b34f94cedaceb540329031d80e23b74540c4e5",
-        build_file = Label("//3rdparty/yaml:BUILD.yaml.bazel"),
-    )
-
 _HELM_TOOLCHAIN_BUILD_CONTENT = """\
 load("@rules_helm//helm:toolchain.bzl", "helm_toolchain")
 
