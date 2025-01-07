@@ -45,7 +45,6 @@ def _helm_impl(ctx):
             toolchain_config["plugins"] = toolchain_option.plugins
 
     _register_toolchains(**toolchain_config)
-    _register_go_yaml()
 
 def _register_toolchains(version, helm_url_templates, plugins):
     if not version in HELM_VERSIONS:
@@ -98,16 +97,6 @@ def _register_toolchains(version, helm_url_templates, plugins):
     maybe(
         helm_host_alias_repository,
         name = "helm",
-    )
-
-def _register_go_yaml():
-    maybe(
-        http_archive,
-        name = "go_yaml_yaml",
-        urls = ["https://github.com/go-yaml/yaml/archive/refs/tags/v3.0.1.tar.gz"],
-        strip_prefix = "yaml-3.0.1",
-        sha256 = "cf05411540d3e6ef8f1fd88434b34f94cedaceb540329031d80e23b74540c4e5",
-        build_file = Label("//3rdparty/yaml:BUILD.yaml.bazel"),
     )
 
 _toolchain = tag_class(

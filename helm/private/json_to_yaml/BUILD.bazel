@@ -4,5 +4,5 @@ go_binary(
     name = "json_to_yaml",
     srcs = ["json_to_yaml.go"],
     visibility = ["//visibility:public"],
-    deps = ["@go_yaml_yaml"],
+    deps = ["@in_gopkg_yaml_v3//:yaml_v3"],
 )

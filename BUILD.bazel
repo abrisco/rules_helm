@@ -1,3 +1,5 @@
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
 exports_files(
     [
         "README.md",
@@ -15,4 +17,16 @@ filegroup(
         "//helm:bzl_srcs",
     ],
     visibility = ["//visibility:public"],
+)
+
+# This is only needed for WORKSPACE support
+# "bazel run" this target after changing go.mod
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "-from_file=go.mod",
+        "-to_macro=helm/go_repositories.bzl%go_dependencies",
+        "-prune",
+    ],
+    command = "update-repos",
 )
