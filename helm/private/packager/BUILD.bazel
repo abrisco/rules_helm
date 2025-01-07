@@ -6,6 +6,6 @@ go_binary(
     visibility = ["//visibility:public"],
     deps = [
         "//helm/private/helm_utils",
-        "@go_yaml_yaml",
+        "@in_gopkg_yaml_v3//:yaml_v3",
     ],
 )
