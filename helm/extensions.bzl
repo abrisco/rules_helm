@@ -22,10 +22,15 @@ exports_files(glob(["**"]))
 
 def _helm_impl(ctx):
     module = ctx.modules[0]
-    options = module.tags.options
-    version = options[0].version
-    helm_url_templates = options[0].helm_url_templates
-    plugins = options[0].plugins
+    toolchain_options = module.tags.toolchain
+    if len(module.tags.options) > 0:
+        if module.is_root:
+            # TODO Use deprecation tag when available: https://github.com/bazelbuild/bazel/issues/24843
+            print("helm.options() is deprecated. Use helm.toolchain() instead.")  # buildifier: disable=print
+        toolchain_options += module.tags.options
+    version = toolchain_options[0].version
+    helm_url_templates = toolchain_options[0].helm_url_templates
+    plugins = toolchain_options[0].plugins
 
     _register_toolchains(version, helm_url_templates, plugins)
     _register_go_yaml()
@@ -93,8 +98,8 @@ def _register_go_yaml():
         build_file = Label("//3rdparty/yaml:BUILD.yaml.bazel"),
     )
 
-options = tag_class(
-    doc = "Options used to configure helm toolchains.",
+toolchain = tag_class(
+    doc = "Configure a helm toolchain.",
     attrs = {
         "helm_url_templates": attr.string_list(
             doc = (
@@ -118,6 +123,7 @@ options = tag_class(
 helm = module_extension(
     implementation = _helm_impl,
     tag_classes = {
-        "options": options,
+        "options": toolchain,  # deprecated: use toolchain instead and remove in next major version
+        "toolchain": toolchain,
     },
 )
