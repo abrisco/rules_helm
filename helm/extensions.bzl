@@ -54,6 +54,7 @@ def _helm_impl(ctx):
         for repository in module.tags.import_repository:
             if not module.is_root:
                 print("Ignoring import_repository of", repository.name, "from", repository.repository, "because it's not in the root module")  # buildifier: disable=print
+                continue
             helm_import_repository(
                 name = repository.name,
                 chart_name = repository.chart_name,
