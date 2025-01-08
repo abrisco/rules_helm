@@ -21,23 +21,31 @@ exports_files(glob(["**"]))
 """
 
 def _helm_impl(ctx):
+    toolchain_config = {
+        "helm_url_templates": DEFAULT_HELM_URL_TEMPLATES,
+        "plugins": [],
+        "version": DEFAULT_HELM_VERSION,
+    }
     for module in ctx.modules:
         if not module.is_root:
+            # TODO support toolchain generation from non-root modules. This requires encoding all options into the repo name and adding deduplication.
+            print("Ignoring call to helm module extension in non-root module.")  # buildifier: disable=print
             continue
-        if module.is_root and len(module.tags.options) > 0:
+        if len(module.tags.options) > 0:
             # TODO Use deprecation tag when available: https://github.com/bazelbuild/bazel/issues/24843
+            # TODO remove deprecated tag in next major release
             print("helm.options() is deprecated. Use helm.toolchain() instead.")  # buildifier: disable=print
         toolchain_options = module.tags.toolchain + module.tags.options
         if len(toolchain_options) > 1:
-            fail("Only a single helm toolchain is supported for now.")
-        if len(toolchain_options) == 1:
-            toolchain_option = toolchain_options[0]
-            version = toolchain_option.version
-            helm_url_templates = toolchain_option.helm_url_templates
-            plugins = toolchain_option.plugins
+            # TODO support generating multiple toolchains. This requires encoding all options into the repo name and adding deduplication.
+            fail("Only a single call to helm.toolchain() is taken into account. Please remove the other ones.")
+        for toolchain_option in toolchain_options:
+            toolchain_config["version"] = toolchain_option.version
+            toolchain_config["helm_url_templates"] = toolchain_option.helm_url_templates
+            toolchain_config["plugins"] = toolchain_option.plugins
 
-            _register_toolchains(version, helm_url_templates, plugins)
-            _register_go_yaml()
+    _register_toolchains(**toolchain_config)
+    _register_go_yaml()
 
 def _register_toolchains(version, helm_url_templates, plugins):
     if not version in HELM_VERSIONS:

@@ -20,7 +20,6 @@ go_sdk = use_extension("@io_bazel_rules_go//go:extensions.bzl", "go_sdk")
 go_sdk.download(version = "1.23.0")
 
 helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
-helm.options()
 use_repo(
     helm,
     "helm",
