@@ -146,31 +146,33 @@ _toolchain = tag_class(
     },
 )
 
+_import_repository = tag_class(attrs = {
+    "name": attr.string(
+        doc = "Name for the import dependency",
+    ),
+    "chart_name": attr.string(
+        doc = "Chart name to import.",
+    ),
+    "repository": attr.string(
+        doc = "Chart repository url where to locate the requested chart.",
+        mandatory = True,
+    ),
+    "sha256": attr.string(
+        doc = "The expected SHA-256 hash of the chart imported.",
+    ),
+    "url": attr.string(
+        doc = "The url where the chart can be directly downloaded.",
+    ),
+    "version": attr.string(
+        doc = "Specify a version constraint for the chart version to use.",
+    ),
+})
+
 helm = module_extension(
     implementation = _helm_impl,
     tag_classes = {
         "options": _toolchain,  # deprecated: use toolchain instead and remove in next major version
         "toolchain": _toolchain,
-        "import_repository": tag_class(attrs = {
-            "name": attr.string(
-                doc = "Name for the import dependency",
-            ),
-            "chart_name": attr.string(
-                doc = "Chart name to import.",
-            ),
-            "repository": attr.string(
-                doc = "Chart repository url where to locate the requested chart.",
-                mandatory = True,
-            ),
-            "sha256": attr.string(
-                doc = "The expected SHA-256 hash of the chart imported.",
-            ),
-            "url": attr.string(
-                doc = "The url where the chart can be directly downloaded.",
-            ),
-            "version": attr.string(
-                doc = "Specify a version constraint for the chart version to use.",
-            ),
-        }),
+        "import_repository": _import_repository,
     },
 )
