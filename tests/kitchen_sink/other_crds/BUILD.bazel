@@ -1,4 +1,0 @@
-exports_files(
-    ["other.crd.yaml"],
-    visibility = ["//visibility:public"],
-)

@@ -557,10 +557,28 @@ func copyFile(source string, dest string) error {
 }
 
 func copyDirContents(src string, dst string) error {
-	err := os.CopyFS(dst, os.DirFS(src))
-	if err != nil {
-		return fmt.Errorf("Error copying directory contents from %s to %s: %w", src, dst, err)
-	}
+	filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return fmt.Errorf("Error during walking the directory %s: %w", path, err)
+		}
+
+		relPath, err := filepath.Rel(src, path)
+		if err != nil {
+			return fmt.Errorf("Error calculating relative path from %s to %s: %w", src, path, err)
+		}
+
+		targetPath := filepath.Join(dst, relPath)
+
+		if info.IsDir() {
+			return os.MkdirAll(targetPath, 0750)
+		} else {
+			if err := os.MkdirAll(filepath.Dir(targetPath), 0750); err != nil {
+				return fmt.Errorf("Error creating directory %s: %w", targetPath, err)
+			}
+			// Copy the file to the target path
+			return copyFile(path, targetPath)
+		}
+	})
 	return nil
 }
 
@@ -587,28 +605,25 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 		return fmt.Errorf("Error unmarshalling templates manifest %s: %w", templatesManifest, err)
 	}
 
-	templatesDir := filepath.Join(workingDir, "templates")
-	err = os.MkdirAll(templatesDir, 0700)
-	if err != nil {
-		return fmt.Errorf("Error creating templates directory %s: %w", templatesDir, err)
-	}
-
 	// Copy all templates
-	for templatePath := range templates {
-		fileInfo, err := os.Stat(templatePath)
+	for src, dst := range templates {
+		fileInfo, err := os.Stat(src)
 		if err != nil {
-			return fmt.Errorf("Error getting info for %s: %w", templatePath, err)
+			return fmt.Errorf("Error getting info for %s: %w", src, err)
 		}
 
 		if fileInfo.IsDir() {
-			destDirBasePath := filepath.Join(templatesDir)
-			copyDirContents(templatePath, filepath.Join(destDirBasePath, fileInfo.Name()))
-		} else {
-			templateDest := filepath.Join(templatesDir, fileInfo.Name())
-
-			err = copyFile(templatePath, templateDest)
+			destDirBasePath := filepath.Join(workingDir, dst)
+			err = copyDirContents(src, destDirBasePath)
 			if err != nil {
-				return fmt.Errorf("Error copying template %s: %w", templatePath, err)
+				return fmt.Errorf("Error copying directory contents from %s to %s: %w", src, destDirBasePath, err)
+			}
+		} else {
+			templateDest := filepath.Join(workingDir, dst)
+
+			err = copyFile(src, templateDest)
+			if err != nil {
+				return fmt.Errorf("Error copying template %s: %w", src, err)
 			}
 		}
 	}
@@ -624,43 +639,47 @@ func installHelmContent(workingDir string, stampedChartContent string, stampedVa
 		return fmt.Errorf("Error unmarshalling crds manifest %s: %w", crdsManifest, err)
 	}
 
-	crdsDir := filepath.Join(workingDir, "crds")
-	err = os.MkdirAll(crdsDir, 0700)
-	if err != nil {
-		return fmt.Errorf("Error creating crds directory %s: %w", templatesDir, err)
-	}
-
 	// Copy all crds
-	for crdPath := range crds {
-		fileInfo, err := os.Stat(crdPath)
+	for src, dst := range crds {
+		fileInfo, err := os.Stat(src)
 		if err != nil {
-			return fmt.Errorf("Error getting info for %s: %w", crdPath, err)
+			return fmt.Errorf("Error getting info for %s: %w", src, err)
 		}
 
 		if fileInfo.IsDir() {
-			destDirBasePath := filepath.Join(crdsDir)
-			copyDirContents(crdPath, filepath.Join(destDirBasePath, fileInfo.Name()))
-		} else {
-			crdDest := filepath.Join(crdsDir, fileInfo.Name())
-
-			err = copyFile(crdPath, crdDest)
+			dst = filepath.Join(workingDir, dst)
+			copyDirContents(src, filepath.Join(workingDir, dst))
 			if err != nil {
-				return fmt.Errorf("Error copying crd %s: %w", crdPath, err)
+				return fmt.Errorf("Error copying directory contents from %s to %s: %w", src, dst, err)
+			}
+		} else {
+			crdDest := filepath.Join(workingDir, dst)
+
+			err = copyFile(src, crdDest)
+			if err != nil {
+				return fmt.Errorf("Error copying crd %s: %w", src, err)
 			}
 		}
 	}
 
 	// Copy all additional files
 	for _, addFile := range addFiles {
-		dst := filepath.Join(workingDir, addFile.dst, filepath.Base(addFile.src))
+		dst := filepath.Join(workingDir, addFile.dst)
+
 		srcStat, err := os.Stat(addFile.src)
 		if err != nil {
 			return fmt.Errorf("stat: %w", err)
 		}
 		if srcStat.IsDir() {
 			err = copyDirContents(addFile.src, dst)
+			if err != nil {
+				return fmt.Errorf("Error copying directory contents from %s to %s: %w", addFile.src, dst, err)
+			}
 		} else {
 			err = copyFile(addFile.src, dst)
+			if err != nil {
+				return fmt.Errorf("copy %s to %s: %w", addFile.src, dst, err)
+			}
 		}
 		if err != nil {
 			return fmt.Errorf("copy %s to %s: %w", addFile.src, dst, err)

@@ -13,7 +13,7 @@ def helm_chart(
         values_json = None,
         substitutions = {},
         templates = None,
-        files = {},
+        files = [],
         images = [],
         deps = None,
         install_name = None,
@@ -42,12 +42,12 @@ def helm_chart(
         name (str): The name of the [helm_package](#helm_package) target.
         chart (str, optional): The path to the chart directory. Defaults to `Chart.yaml`.
         chart_json (str, optional): The json encoded contents of `Chart.yaml`.
-        crds (list, optional): A list of crd files to include in the package.
+        crds (list, optional): A list of crd files to include in the package. All files must either source files or generated files relative to the package
         values (str, optional): The path to the values file. Defaults to `values.yaml`.
         values_json (str, optional): The json encoded contents of `values.yaml`.
         substitutions (dict, optional): A dictionary of substitutions to apply to `values.yaml`.
-        templates (list, optional): A list of template files to include in the package.
-        files (map[string, list[label]], optional): A a map with lists of files to be copied to their respective folders within the helm chart.
+        templates (list, optional): A list of template files to include in the package. All files must either source files or generated files relative to the package
+        files (list, optional): Additional files to be added to the chart. All files must either source files or generated files relative to the package.
         images (list, optional): A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets
         deps (list, optional): A list of helm package dependencies.
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
@@ -63,12 +63,10 @@ def helm_chart(
         **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
     if templates == None:
-        # Set exclude_directories to 0 so that the folder structure is preserved
-        templates = native.glob(["templates/*"], allow_empty = True, exclude_directories = 0)
+        templates = native.glob(["templates/**"])
 
     if crds == None:
-        # Set exclude_directories to 0 so that the folder structure is preserved
-        crds = native.glob(["crds/*"], allow_empty = True, exclude_directories = 0)
+        crds = native.glob(["crds/**"], allow_empty = True)
 
     helm_package(
         name = name,

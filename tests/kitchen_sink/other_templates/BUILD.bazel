@@ -1,4 +1,0 @@
-exports_files(
-    ["service.yaml"],
-    visibility = ["//visibility:public"],
-)

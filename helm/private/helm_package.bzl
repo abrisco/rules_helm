@@ -52,6 +52,18 @@ _oci_push_repository_aspect = aspect(
     implementation = _oci_push_repository_aspect_impl,
 )
 
+def _get_chart_relative_path(ctx, file):
+    # We remove the genfiles_dir in case the file is a generated file
+    path = file.short_path.removeprefix(ctx.genfiles_dir.path).removeprefix("/")
+
+    if path.startswith(ctx.label.package):
+        return path.removeprefix(ctx.label.package).removeprefix("/")
+    else:
+        fail("File {} is not relative to {}. You can either copy the files to so that they are relative to the package or use a Bazel rule to copy the files in a target that is relative to the package.".format(
+            file.short_path,
+            ctx.label.package,
+        ))
+
 def _helm_package_impl(ctx):
     if (ctx.attr.chart and ctx.attr.chart_json) or (not ctx.attr.chart and not ctx.attr.chart_json):
         fail("Helm package {} must have either a `chart` or `chart_json` attribute".format(
@@ -105,18 +117,18 @@ def _helm_package_impl(ctx):
     templates_manifest = ctx.actions.declare_file("{}/templates_manifest.json".format(ctx.label.name))
     ctx.actions.write(
         output = templates_manifest,
-        content = json.encode_indent({file.path: file.short_path for file in ctx.files.templates}, indent = " " * 4),
+        content = json.encode_indent({file.path: _get_chart_relative_path(ctx, file) for file in ctx.files.templates}, indent = " " * 4),
     )
     args.add("-templates_manifest", templates_manifest)
 
-    for ln in ctx.attr.files:
-        fmt = "%s=" + ctx.attr.files[ln]
-        args.add_all(ln.files, before_each = "-add_files", format_each = fmt, uniquify = True)
+    for f in ctx.files.files:
+        fmt = "%s=" + _get_chart_relative_path(ctx, f)
+        args.add("-add_files", f, format = fmt)
 
     crds_manifest = ctx.actions.declare_file("{}/crds_manifest.json".format(ctx.label.name))
     ctx.actions.write(
         output = crds_manifest,
-        content = json.encode_indent({file.path: file.short_path for file in ctx.files.crds}, indent = " " * 4),
+        content = json.encode_indent({file.path: _get_chart_relative_path(ctx, file) for file in ctx.files.crds}, indent = " " * 4),
     )
     args.add("-crds_manifest", crds_manifest)
 
@@ -212,77 +224,7 @@ def _helm_package_impl(ctx):
         ),
     ]
 
-def helm_package(
-        name,
-        chart = None,
-        chart_json = None,
-        crds = None,
-        values = None,
-        values_json = None,
-        substitutions = {},
-        templates = None,
-        files = {},
-        images = [],
-        deps = None,
-        stamp = None,
-        **kwargs):
-    """Rules for creating Helm chart packages.
-
-    Args:
-        name: The name of the target
-        chart: "The `Chart.yaml` file of the helm chart"
-        chart_json: "The `Chart.yaml` file of the helm chart as a json object"
-        crds: All crds associated with the current helm chart. E.g., the `./crds` directory
-        values (str, optional): The `values.yaml` file for the current package.
-        values_json: The `values.yaml` file for the current package as a json object.
-        substitutions: A dictionary of substitutions to apply to the `values.yaml` file.
-        templates: All templates associated with the current helm chart. E.g., the `./templates` directory
-        files: Additional files to be added to the chart specified as a map from string to list of labels.
-        images: A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets
-        deps: Other helm packages this package depends on.
-        stamp: Whether to encode build information into the helm actions. Possible values:
-
-            - `stamp = 1`: Always stamp the build information into the helm actions, even in \
-            [--nostamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) builds. \
-            This setting should be avoided, since it potentially kills remote caching for the target and \
-            any downstream actions that depend on it.
-
-            - `stamp = 0`: Always replace build information by constant values. This gives good build result caching.
-
-            - `stamp = -1`: Embedding of build information is controlled by the \
-            [--[no]stamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) flag.
-
-            Stamped targets are not rebuilt unless their dependencies change.
-        **kwargs (dict): Additional keyword arguments.
-    """
-
-    # We wrap this in a macro so that we can provide a better API for the `files` attribute
-    # If https://github.com/bazelbuild/bazel/issues/7989 ever gets implemented we can remove the macro
-    filegroups = {}
-    for folder, folder_files in files.items():
-        native.filegroup(
-            name = "{}_filegroup".format(folder),
-            srcs = folder_files,
-        )
-        filegroups[":{}_filegroup".format(folder)] = folder
-
-    _helm_package(
-        name = name,
-        chart = chart,
-        chart_json = chart_json,
-        crds = crds,
-        deps = deps,
-        images = images,
-        templates = templates,
-        files = filegroups,
-        values = values,
-        values_json = values_json,
-        substitutions = substitutions,
-        stamp = stamp,
-        **kwargs
-    )
-
-_helm_package = rule(
+helm_package = rule(
     implementation = _helm_package_impl,
     doc = "Rules for creating Helm chart packages.",
     attrs = {
@@ -302,8 +244,8 @@ _helm_package = rule(
             doc = "Other helm packages this package depends on.",
             providers = [HelmPackageInfo],
         ),
-        "files": attr.label_keyed_string_dict(
-            doc = "Additional files to be added to the chart specified as a map from string to list of labels.",
+        "files": attr.label_list(
+            doc = "Additional files to be added to the chart. All files must either source files or generated files relative to the package.",
             allow_empty = True,
             allow_files = True,
         ),
@@ -338,7 +280,7 @@ _helm_package = rule(
             default = {},
         ),
         "templates": attr.label_list(
-            doc = "All templates associated with the current helm chart. E.g., the `./templates` directory",
+            doc = "All templates associated with the current helm chart. E.g., the `./templates` directory. All files must either source files or generated files relative to the package.",
             allow_files = True,
         ),
         "values": attr.label(
