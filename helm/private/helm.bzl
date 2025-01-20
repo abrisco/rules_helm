@@ -73,6 +73,7 @@ def helm_chart(
         chart = chart,
         chart_json = chart_json,
         crds = crds,
+        data = data,
         deps = deps,
         images = images,
         templates = templates,

@@ -357,6 +357,21 @@ func replaceKeyValues(content string, replacementGroups []ReplacementGroup, must
 	return content, nil
 }
 
+func readFileIfExists(path string) (string, error) {
+	if strings.HasSuffix(path, "| readfile") {
+		path = strings.TrimSpace(strings.TrimSuffix(path, "| readfile"))
+
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return "", fmt.Errorf("Error reading file %s: %w", path, err)
+		}
+
+		return string(content), nil
+	} else {
+		return path, nil
+	}
+}
+
 func applySubstitutions(content string, substitutions_file string) (string, error) {
 	if len(substitutions_file) == 0 {
 		return content, nil
@@ -374,8 +389,11 @@ func applySubstitutions(content string, substitutions_file string) (string, erro
 	}
 
 	for key, val := range substitutions {
-		replaceKey := fmt.Sprintf("{%s}", key)
-		content = strings.ReplaceAll(content, replaceKey, val)
+		replacmentValue, err := readFileIfExists(val)
+		if err != nil {
+			return "", fmt.Errorf("Error reading file %s: %w", val, err)
+		}
+		content = strings.ReplaceAll(content, key, replacmentValue)
 	}
 
 	return content, nil

@@ -1,0 +1,51 @@
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+load("//tests:test_defs.bzl", "helm_package_regex_test")
+
+EXCLUDE_WINDOWS = select({
+    # TODO: rules_oci is broken on simple windows systems such as the windows github runners
+    # https://github.com/abrisco/rules_helm/issues/53
+    "@platforms//os:windows": ["@platforms//:incompatible"],
+    "//conditions:default": [],
+})
+
+oci_image(
+    name = "image",
+    base = "@rules_helm_test_container_base",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_chart(
+    name = "substitutions",
+    chart = "Chart.yaml",
+    data = [
+        ":image.digest",
+    ],
+    registry_url = "oci://localhost/helm-registry",
+    substitutions = {
+        "this_should_be_replaced": "replacement_value",
+        "image_sha256": "$(execpath :image.digest) | readfile",
+    },
+    values = "values.yaml",
+    visibility = ["//tests/with_chart_deps:__subpackages__"],
+)
+
+helm_lint_test(
+    name = "substitutions_lint_test",
+    chart = ":substitutions",
+)
+
+helm_template_test(
+    name = "substitutions_template_test",
+    chart = ":substitutions",
+)
+
+helm_package_regex_test(
+    name = "substitutions_regex_test",
+    package = ":substitutions",
+    target_compatible_with = EXCLUDE_WINDOWS,
+    values_patterns = [
+        r"replacement_value",
+        r"sha256:54bee42e3bf22cd1781f5cbc1e1cc9b5cff1d6766355148d66b90f09e9936db3",
+    ],
+)

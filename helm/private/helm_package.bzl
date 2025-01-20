@@ -1,5 +1,6 @@
 """Helm rules"""
 
+load("@aspect_bazel_lib//lib:expand_make_vars.bzl", "expand_locations", "expand_variables")
 load("//helm:providers.bzl", "HelmPackageInfo")
 load("//helm/private:helm_utils.bzl", "is_stamping_enabled")
 load("//helm/private:json_to_yaml.bzl", "json_to_yaml")
@@ -108,9 +109,10 @@ def _helm_package_impl(ctx):
     args.add("-values", values_yaml)
 
     substitutions_file = ctx.actions.declare_file("{}/substitutions.json".format(ctx.label.name))
+    expanded_substitutions = {k: expand_variables(ctx, expand_locations(ctx, v, ctx.attr.data)) for k, v in ctx.attr.substitutions.items()}
     ctx.actions.write(
         output = substitutions_file,
-        content = json.encode_indent(ctx.attr.substitutions, indent = " " * 4),
+        content = json.encode_indent(expanded_substitutions, indent = " " * 4),
     )
     args.add("-substitutions", substitutions_file)
 
@@ -196,7 +198,7 @@ def _helm_package_impl(ctx):
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
         inputs = depset(
-            ctx.files.templates + ctx.files.files + ctx.files.crds + stamps + image_inputs + deps + [
+            ctx.files.templates + ctx.files.data + ctx.files.files + ctx.files.crds + stamps + image_inputs + deps + [
                 chart_yaml,
                 values_yaml,
                 templates_manifest,
@@ -240,6 +242,11 @@ helm_package = rule(
             default = [],
             allow_files = True,
         ),
+        "data": attr.label_list(
+            doc = "Additional data files used for e.g. template substitutions. Note that these files are not included in the created helm chart but only used during the build process.",
+            default = [],
+            allow_files = True,
+        ),
         "deps": attr.label_list(
             doc = "Other helm packages this package depends on.",
             providers = [HelmPackageInfo],
@@ -276,7 +283,7 @@ helm_package = rule(
             values = [1, 0, -1],
         ),
         "substitutions": attr.string_dict(
-            doc = "A dictionary of substitutions to apply to the `values.yaml` file.",
+            doc = "A dictionary of substitutions to apply to the `values.yaml` file. Supports make variable expansion. You can append `| readfile` to read the content of the file",
             default = {},
         ),
         "templates": attr.label_list(
