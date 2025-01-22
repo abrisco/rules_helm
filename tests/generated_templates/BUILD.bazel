@@ -1,0 +1,129 @@
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+load("//tests:test_defs.bzl", "helm_package_regex_test")
+
+write_file(
+    name = "deployment_yaml",
+    out = "templates/deployment.yaml",
+    content = """\
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "generated_templates.fullname" . }}
+  labels:
+    {{- include "generated_templates.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "generated_templates.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "generated_templates.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "generated_templates.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+""".splitlines(),
+    newline = "unix",
+)
+
+write_file(
+    name = "service_yaml",
+    out = "templates/service.yaml",
+    content = """\
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "generated_templates.fullname" . }}
+  labels:
+    {{- include "generated_templates.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "generated_templates.selectorLabels" . | nindent 4 }}
+""".splitlines(),
+    newline = "unix",
+)
+
+helm_chart(
+    name = "generated_templates",
+    chart = "Chart.yaml",
+    registry_url = "oci://localhost/helm-registry",
+    templates = [
+        ":templates/deployment.yaml",
+        ":templates/service.yaml",
+    ] + glob([
+        "templates/**/*.yaml",
+        "templates/**/*.tpl",
+        "templates/**/*.txt",
+    ]),
+    values = "values.yaml",
+)
+
+helm_lint_test(
+    name = "generated_templates_lint_test",
+    chart = ":generated_templates",
+)
+
+helm_template_test(
+    name = "generated_templates_template_test",
+    chart = ":generated_templates",
+)
+
+helm_package_regex_test(
+    name = "regex_test",
+    package = ":generated_templates",
+    templates_patterns = {
+        "deployment.yaml": ["apiVersion: apps/v1"],
+        "service.yaml": ["apiVersion: v1"],
+    },
+)

@@ -11,101 +11,119 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
+func GetRunfile(runfile_path string) string {
+
+	runfiles, err := runfiles.New()
+	if err != nil {
+		log.Fatalf("Failed to load runfiles: %s", err)
+	}
+
+	// Use the runfiles library to locate files
+	runfile, err := runfiles.Rlocation(runfile_path)
+	if err != nil {
+		log.Fatal("When reading file ", runfile_path, " got error ", err)
+	}
+
+	// Check that the file actually exist
+	if _, err := os.Stat(runfile); err != nil {
+		log.Fatal("File found by runfile doesn't exist")
+	}
+
+	return runfile
+}
+
 type Arguments struct {
-	helm_package    string
-	chart_patterns  string
-	values_patterns string
+	helm_package       string
+	chart_patterns     string
+	values_patterns    string
+	templates_patterns string
 }
 
 func parse_args() Arguments {
 	helm_package, _ := os.LookupEnv("HELM_PACKAGE")
 	chart_patterns, _ := os.LookupEnv("CHART_PATTERNS")
 	values_patterns, _ := os.LookupEnv("VALUES_PATTERNS")
+	templates_patterns, _ := os.LookupEnv("TEMPLATES_PATTERNS")
 
 	var args Arguments
-	args.helm_package = helm_package
-	args.chart_patterns = chart_patterns
-	args.values_patterns = values_patterns
+	args.helm_package = GetRunfile(helm_package)
+	args.chart_patterns = GetRunfile(chart_patterns)
+	args.values_patterns = GetRunfile(values_patterns)
+	args.templates_patterns = GetRunfile(templates_patterns)
 
 	return args
 }
 
-func test_patterns(helm_file string, patterns_file string) {
-	helm_raw, err := os.ReadFile(helm_file)
+func test_patterns(file string, patterns []string) {
+	file_content_raw, err := os.ReadFile(file)
 	if err != nil {
-		log.Fatal("Error reading file ", helm_file, ":", err)
+		log.Fatal("Error reading file ", file, ":", err)
 	}
-	helm_content := string(helm_raw)
-
-	patterns_raw, err := os.ReadFile(patterns_file)
-	if err != nil {
-		log.Fatal("Error reading file ", patterns_file, ":", err)
-	}
-
-	// Deserialize the JSON into the slice
-	var regexPatterns []string
-	json_err := json.Unmarshal(patterns_raw, &regexPatterns)
-	if json_err != nil {
-		log.Fatal("Error deserializing json:", json_err)
-	}
+	file_content := string(file_content_raw)
 
 	// Access the parsed regex patterns
-	for _, pattern := range regexPatterns {
+	for _, pattern := range patterns {
 		// Compile the regex pattern
 		regex, err := regexp.Compile(pattern)
 		if err != nil {
 			log.Fatal("Error compiling regex:", err)
 		}
 
-		if !regex.MatchString(helm_content) {
-			log.Fatal("The file ", path.Base(helm_file), " does not contain the pattern:\n", pattern)
+		if !regex.MatchString(file_content) {
+			log.Fatal("The file ", path.Base(file), " does not contain the pattern:\n", pattern)
 		}
 	}
 }
 
-func find_chart_and_value_files(dir string) (string, string) {
-	var chart_file string
-	var values_file string
+func find_file(dir string, file_name string) string {
+	var found_file string
 
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() {
-			if info.Name() == "Chart.yaml" {
-				chart_file = path
-			}
-			if info.Name() == "values.yaml" {
-				values_file = path
-			}
-			if chart_file != "" && values_file != "" {
-				return filepath.SkipDir
-			}
+		if !info.IsDir() && info.Name() == file_name {
+			found_file = path
+			return filepath.SkipDir
 		}
 		return nil
 	})
 
 	if err != nil {
-		log.Fatal("Failed to find chart and value files: ", err)
+		log.Fatal("Failed to find file: ", file_name, " in directory: ", dir, " with error: ", err)
 	}
 
-	if chart_file == "" {
-		log.Fatal("Failed to find Chart.yaml")
+	if found_file == "" {
+		log.Fatal("Failed to find file: ", file_name)
 	}
 
-	if values_file == "" {
-		log.Fatal("Failed to find values.yaml")
+	return found_file
+}
+
+func read_patterns_file(filePath string) []string {
+	// Read the file content
+	fileContent, err := os.ReadFile(filePath)
+	if err != nil {
+		log.Fatalf("Error reading file %s: %v", filePath, err)
 	}
 
-	return chart_file, values_file
+	// Decode the JSON into a list of strings
+	var patterns []string
+	if err := json.Unmarshal(fileContent, &patterns); err != nil {
+		log.Fatalf("Error decoding JSON from file %s: %v", filePath, err)
+	}
+
+	return patterns
 }
 
 func extract_tar_gz(file string, location string) {
 	gzipStream, err := os.Open(file)
 	if err != nil {
-		log.Fatal("error reading ", file, err)
+		log.Fatal("Error reading ", file, err)
 	}
 
 	uncompressedStream, err := gzip.NewReader(gzipStream)
@@ -119,7 +137,7 @@ func extract_tar_gz(file string, location string) {
 		log.Fatal("Failed to create directory ", location, " ", err)
 	}
 
-	for true {
+	for {
 		header, err := tarReader.Next()
 
 		if err == io.EOF {
@@ -179,9 +197,31 @@ func main() {
 	extract_tar_gz(args.helm_package, extract_dir)
 
 	// Locate chart and value files
-	chart_file, value_file := find_chart_and_value_files(extract_dir)
+	chart_file := find_file(extract_dir, "Chart.yaml")
+	value_file := find_file(extract_dir, "values.yaml")
 
-	// Perform regex tests
-	test_patterns(chart_file, args.chart_patterns)
-	test_patterns(value_file, args.values_patterns)
+	chart_patterns := read_patterns_file(args.chart_patterns)
+	value_patterns := read_patterns_file(args.values_patterns)
+
+	// Perform regex tests for Chart.yaml and values.yaml
+	test_patterns(chart_file, chart_patterns)
+	test_patterns(value_file, value_patterns)
+
+	// Handle templates patterns
+	if args.templates_patterns != "" {
+		templates_patterns_raw, err := os.ReadFile(args.templates_patterns)
+		if err != nil {
+			log.Fatal("Error reading templates patterns file:", err)
+		}
+
+		var templates_patterns map[string][]string
+		if err := json.Unmarshal(templates_patterns_raw, &templates_patterns); err != nil {
+			log.Fatal("Error parsing templates patterns JSON:", err)
+		}
+
+		for template, patterns := range templates_patterns {
+			template_file := find_file(extract_dir, template)
+			test_patterns(template_file, patterns)
+		}
+	}
 }

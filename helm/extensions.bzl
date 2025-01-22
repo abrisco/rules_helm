@@ -21,14 +21,23 @@ exports_files(glob(["**"]))
 """
 
 def _helm_impl(ctx):
-    module = ctx.modules[0]
-    options = module.tags.options
-    version = options[0].version
-    helm_url_templates = options[0].helm_url_templates
-    plugins = options[0].plugins
+    for module in ctx.modules:
+        if not module.is_root:
+            continue
+        if module.is_root and len(module.tags.options) > 0:
+            # TODO Use deprecation tag when available: https://github.com/bazelbuild/bazel/issues/24843
+            print("helm.options() is deprecated. Use helm.toolchain() instead.")  # buildifier: disable=print
+        toolchain_options = module.tags.toolchain + module.tags.options
+        if len(toolchain_options) > 1:
+            fail("Only a single helm toolchain is supported for now.")
+        if len(toolchain_options) == 1:
+            toolchain_option = toolchain_options[0]
+            version = toolchain_option.version
+            helm_url_templates = toolchain_option.helm_url_templates
+            plugins = toolchain_option.plugins
 
-    _register_toolchains(version, helm_url_templates, plugins)
-    _register_go_yaml()
+            _register_toolchains(version, helm_url_templates, plugins)
+            _register_go_yaml()
 
 def _register_toolchains(version, helm_url_templates, plugins):
     if not version in HELM_VERSIONS:
@@ -93,26 +102,32 @@ def _register_go_yaml():
         build_file = Label("//3rdparty/yaml:BUILD.yaml.bazel"),
     )
 
-options = tag_class(attrs = {
-    "helm_url_templates": attr.string_list(
-        doc = (
-            "A url template used to download helm. The template can contain the following " +
-            "format strings `{platform}` for the helm platform, `{version}` for the helm " +
-            "version, and `{compression}` for the archive type containing the helm binary."
+_toolchain = tag_class(
+    doc = "Configure a helm toolchain.",
+    attrs = {
+        "helm_url_templates": attr.string_list(
+            doc = (
+                "A url template used to download helm. The template can contain the following " +
+                "format strings `{platform}` for the helm platform, `{version}` for the helm " +
+                "version, and `{compression}` for the archive type containing the helm binary."
+            ),
+            default = DEFAULT_HELM_URL_TEMPLATES,
         ),
-        default = DEFAULT_HELM_URL_TEMPLATES,
-    ),
-    "plugins": attr.string_list(
-        doc = "A list of plugins to add to the generated toolchain.",
-        default = [],
-    ),
-    "version": attr.string(
-        doc = "The version of helm to download for the toolchain.",
-        default = DEFAULT_HELM_VERSION,
-    ),
-})
+        "plugins": attr.string_list(
+            doc = "A list of plugins to add to the generated toolchain.",
+            default = [],
+        ),
+        "version": attr.string(
+            doc = "The version of helm to download for the toolchain.",
+            default = DEFAULT_HELM_VERSION,
+        ),
+    },
+)
 
 helm = module_extension(
     implementation = _helm_impl,
-    tag_classes = {"options": options},
+    tag_classes = {
+        "options": _toolchain,  # deprecated: use toolchain instead and remove in next major version
+        "toolchain": _toolchain,
+    },
 )
