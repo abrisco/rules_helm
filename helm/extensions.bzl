@@ -51,6 +51,9 @@ def _helm_impl(ctx):
     _register_toolchains(**toolchain_config)
     _register_go_yaml()
 
+    # Separate iteration, because this can depend on the _register_toolchains called above.
+    # And the _register_toolchains needs to be called *after* iteration of all modules.
+    for module in ctx.modules:
         for repository in module.tags.import_repository:
             if not module.is_root:
                 print("Ignoring import_repository of", repository.name, "from", repository.repository, "because it's not in the root module")  # buildifier: disable=print
