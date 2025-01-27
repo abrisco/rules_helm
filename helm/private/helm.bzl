@@ -13,6 +13,7 @@ def helm_chart(
         values_json = None,
         substitutions = {},
         templates = None,
+        files = [],
         images = [],
         deps = None,
         install_name = None,
@@ -41,11 +42,12 @@ def helm_chart(
         name (str): The name of the [helm_package](#helm_package) target.
         chart (str, optional): The path to the chart directory. Defaults to `Chart.yaml`.
         chart_json (str, optional): The json encoded contents of `Chart.yaml`.
-        crds (list, optional): A list of crd files to include in the package.
+        crds (list, optional): A list of crd files to include in the package. All files must either source files or generated files relative to the package
         values (str, optional): The path to the values file. Defaults to `values.yaml`.
         values_json (str, optional): The json encoded contents of `values.yaml`.
         substitutions (dict, optional): A dictionary of substitutions to apply to `values.yaml`.
-        templates (list, optional): A list of template files to include in the package.
+        templates (list, optional): A list of template files to include in the package. All files must either source files or generated files relative to the package
+        files (list, optional): Additional files to be added to the chart. All files must either source files or generated files relative to the package.
         images (list, optional): A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets
         deps (list, optional): A list of helm package dependencies.
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
@@ -71,9 +73,11 @@ def helm_chart(
         chart = chart,
         chart_json = chart_json,
         crds = crds,
+        data = data,
         deps = deps,
         images = images,
         templates = templates,
+        files = files,
         values = values,
         values_json = values_json,
         substitutions = substitutions,

@@ -172,8 +172,8 @@ A rule for performing `helm lint` on a helm package
 <pre>
 load("@rules_helm//helm:defs.bzl", "helm_package")
 
-helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-deps">deps</a>, <a href="#helm_package-chart">chart</a>, <a href="#helm_package-chart_json">chart_json</a>, <a href="#helm_package-crds">crds</a>, <a href="#helm_package-images">images</a>, <a href="#helm_package-stamp">stamp</a>, <a href="#helm_package-substitutions">substitutions</a>, <a href="#helm_package-templates">templates</a>, <a href="#helm_package-values">values</a>,
-             <a href="#helm_package-values_json">values_json</a>)
+helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-deps">deps</a>, <a href="#helm_package-chart">chart</a>, <a href="#helm_package-chart_json">chart_json</a>, <a href="#helm_package-crds">crds</a>, <a href="#helm_package-files">files</a>, <a href="#helm_package-images">images</a>, <a href="#helm_package-stamp">stamp</a>, <a href="#helm_package-substitutions">substitutions</a>, <a href="#helm_package-templates">templates</a>,
+             <a href="#helm_package-values">values</a>, <a href="#helm_package-values_json">values_json</a>)
 </pre>
 
 Rules for creating Helm chart packages.
@@ -188,10 +188,11 @@ Rules for creating Helm chart packages.
 | <a id="helm_package-chart"></a>chart |  The `Chart.yaml` file of the helm chart   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="helm_package-chart_json"></a>chart_json |  The `Chart.yaml` file of the helm chart as a json object   | String | optional |  `""`  |
 | <a id="helm_package-crds"></a>crds |  All crds associated with the current helm chart. E.g., the `./crds` directory   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="helm_package-files"></a>files |  Additional files to be added to the chart. All files must either source files or generated files relative to the package.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_package-images"></a>images |  A list of                 [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags)                 targets.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_package-stamp"></a>stamp |  Whether to encode build information into the helm actions. Possible values:<br><br>- `stamp = 1`: Always stamp the build information into the helm actions, even in                 [--nostamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) builds.                 This setting should be avoided, since it potentially kills remote caching for the target and                 any downstream actions that depend on it.<br><br>- `stamp = 0`: Always replace build information by constant values. This gives good build result caching.<br><br>- `stamp = -1`: Embedding of build information is controlled by the                 [--[no]stamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) flag.<br><br>Stamped targets are not rebuilt unless their dependencies change.   | Integer | optional |  `-1`  |
 | <a id="helm_package-substitutions"></a>substitutions |  A dictionary of substitutions to apply to the `values.yaml` file.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
-| <a id="helm_package-templates"></a>templates |  All templates associated with the current helm chart. E.g., the `./templates` directory   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="helm_package-templates"></a>templates |  All templates associated with the current helm chart. E.g., the `./templates` directory. All files must either source files or generated files relative to the package.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="helm_package-values"></a>values |  The `values.yaml` file for the current package.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="helm_package-values_json"></a>values_json |  The `values.yaml` file for the current package as a json object.   | String | optional |  `""`  |
 
@@ -451,8 +452,8 @@ str: A json encoded string which represents `Chart.yaml` contents.
 <pre>
 load("@rules_helm//helm:defs.bzl", "helm_chart")
 
-helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">chart</a>, <a href="#helm_chart-chart_json">chart_json</a>, <a href="#helm_chart-crds">crds</a>, <a href="#helm_chart-values">values</a>, <a href="#helm_chart-values_json">values_json</a>, <a href="#helm_chart-substitutions">substitutions</a>, <a href="#helm_chart-templates">templates</a>, <a href="#helm_chart-images">images</a>,
-           <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-login_url">login_url</a>, <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-install_opts">install_opts</a>, <a href="#helm_chart-upgrade_opts">upgrade_opts</a>,
+helm_chart(<a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">chart</a>, <a href="#helm_chart-chart_json">chart_json</a>, <a href="#helm_chart-crds">crds</a>, <a href="#helm_chart-values">values</a>, <a href="#helm_chart-values_json">values_json</a>, <a href="#helm_chart-substitutions">substitutions</a>, <a href="#helm_chart-templates">templates</a>, <a href="#helm_chart-files">files</a>,
+           <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-login_url">login_url</a>, <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-install_opts">install_opts</a>, <a href="#helm_chart-upgrade_opts">upgrade_opts</a>,
            <a href="#helm_chart-uninstall_opts">uninstall_opts</a>, <a href="#helm_chart-data">data</a>, <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">**kwargs</a>)
 </pre>
 
@@ -477,11 +478,12 @@ Rules for producing a helm package and some convenience targets.
 | <a id="helm_chart-name"></a>name |  The name of the [helm_package](#helm_package) target.   |  none |
 | <a id="helm_chart-chart"></a>chart |  The path to the chart directory. Defaults to `Chart.yaml`.   |  `None` |
 | <a id="helm_chart-chart_json"></a>chart_json |  The json encoded contents of `Chart.yaml`.   |  `None` |
-| <a id="helm_chart-crds"></a>crds |  A list of crd files to include in the package.   |  `None` |
+| <a id="helm_chart-crds"></a>crds |  A list of crd files to include in the package. All files must either source files or generated files relative to the package   |  `None` |
 | <a id="helm_chart-values"></a>values |  The path to the values file. Defaults to `values.yaml`.   |  `None` |
 | <a id="helm_chart-values_json"></a>values_json |  The json encoded contents of `values.yaml`.   |  `None` |
 | <a id="helm_chart-substitutions"></a>substitutions |  A dictionary of substitutions to apply to `values.yaml`.   |  `{}` |
-| <a id="helm_chart-templates"></a>templates |  A list of template files to include in the package.   |  `None` |
+| <a id="helm_chart-templates"></a>templates |  A list of template files to include in the package. All files must either source files or generated files relative to the package   |  `None` |
+| <a id="helm_chart-files"></a>files |  Additional files to be added to the chart. All files must either source files or generated files relative to the package.   |  `[]` |
 | <a id="helm_chart-images"></a>images |  A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets   |  `[]` |
 | <a id="helm_chart-deps"></a>deps |  A list of helm package dependencies.   |  `None` |
 | <a id="helm_chart-install_name"></a>install_name |  The `helm install` name to use. `name` will be used if unset.   |  `None` |

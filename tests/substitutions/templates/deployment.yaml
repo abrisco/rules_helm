@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+        - name: {{ .Values.stringReplacment }}
+          image: "nginx@{{ .Values.image.sha256 }}"
+          imagePullPolicy: IfNotPresent

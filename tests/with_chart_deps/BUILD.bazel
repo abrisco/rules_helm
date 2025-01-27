@@ -8,6 +8,10 @@ helm_chart(
     chart = "Chart.yaml",
     values = "values.yaml",
     deps = [
+        # Make sure that charts that are created by rules_helm can be used as dependencies
+        "//tests/inline_chart",
+        "//tests/simple",
+        # Make sure that charts that are imported from external repositories can be used as dependencies
         "@helm_test_deps__with_chart_deps_postgresql//:postgresql",
         "@helm_test_deps__with_chart_deps_redis//:redis",
     ],

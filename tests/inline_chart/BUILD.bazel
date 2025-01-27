@@ -10,6 +10,7 @@ helm_package(
     chart = ":chart_file",
     templates = glob(["templates/**"]),
     values = "values.yaml",
+    visibility = ["//tests/with_chart_deps:__subpackages__"],
 )
 
 helm_lint_test(

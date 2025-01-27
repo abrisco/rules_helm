@@ -1,5 +1,6 @@
 """Helm rules"""
 
+load("@aspect_bazel_lib//lib:expand_make_vars.bzl", "expand_locations", "expand_variables")
 load("//helm:providers.bzl", "HelmPackageInfo")
 load("//helm/private:helm_utils.bzl", "is_stamping_enabled")
 load("//helm/private:json_to_yaml.bzl", "json_to_yaml")
@@ -52,6 +53,18 @@ _oci_push_repository_aspect = aspect(
     implementation = _oci_push_repository_aspect_impl,
 )
 
+def _get_chart_relative_path(ctx, file):
+    # We remove the genfiles_dir in case the file is a generated file
+    path = file.short_path.removeprefix(ctx.genfiles_dir.path).removeprefix("/")
+
+    if path.startswith(ctx.label.package):
+        return path.removeprefix(ctx.label.package).removeprefix("/")
+    else:
+        fail("File {} is not relative to {}. You can either copy the files to so that they are relative to the package or use a Bazel rule to copy the files in a target that is relative to the package.".format(
+            file.short_path,
+            ctx.label.package,
+        ))
+
 def _helm_package_impl(ctx):
     if (ctx.attr.chart and ctx.attr.chart_json) or (not ctx.attr.chart and not ctx.attr.chart_json):
         fail("Helm package {} must have either a `chart` or `chart_json` attribute".format(
@@ -96,23 +109,28 @@ def _helm_package_impl(ctx):
     args.add("-values", values_yaml)
 
     substitutions_file = ctx.actions.declare_file("{}/substitutions.json".format(ctx.label.name))
+    expanded_substitutions = {k: expand_variables(ctx, expand_locations(ctx, v, ctx.attr.data)) for k, v in ctx.attr.substitutions.items()}
     ctx.actions.write(
         output = substitutions_file,
-        content = json.encode_indent(ctx.attr.substitutions, indent = " " * 4),
+        content = json.encode_indent(expanded_substitutions, indent = " " * 4),
     )
     args.add("-substitutions", substitutions_file)
 
     templates_manifest = ctx.actions.declare_file("{}/templates_manifest.json".format(ctx.label.name))
     ctx.actions.write(
         output = templates_manifest,
-        content = json.encode_indent({file.path: file.short_path for file in ctx.files.templates}, indent = " " * 4),
+        content = json.encode_indent({file.path: _get_chart_relative_path(ctx, file) for file in ctx.files.templates}, indent = " " * 4),
     )
     args.add("-templates_manifest", templates_manifest)
+
+    for f in ctx.files.files:
+        fmt = "%s=" + _get_chart_relative_path(ctx, f)
+        args.add("-add_files", f, format = fmt)
 
     crds_manifest = ctx.actions.declare_file("{}/crds_manifest.json".format(ctx.label.name))
     ctx.actions.write(
         output = crds_manifest,
-        content = json.encode_indent({file.path: file.short_path for file in ctx.files.crds}, indent = " " * 4),
+        content = json.encode_indent({file.path: _get_chart_relative_path(ctx, file) for file in ctx.files.crds}, indent = " " * 4),
     )
     args.add("-crds_manifest", crds_manifest)
 
@@ -180,7 +198,7 @@ def _helm_package_impl(ctx):
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
         inputs = depset(
-            ctx.files.templates + ctx.files.crds + stamps + image_inputs + deps + [
+            ctx.files.templates + ctx.files.data + ctx.files.files + ctx.files.crds + stamps + image_inputs + deps + [
                 chart_yaml,
                 values_yaml,
                 templates_manifest,
@@ -224,9 +242,19 @@ helm_package = rule(
             default = [],
             allow_files = True,
         ),
+        "data": attr.label_list(
+            doc = "Additional data files used for e.g. template substitutions. Note that these files are not included in the created helm chart but only used during the build process.",
+            default = [],
+            allow_files = True,
+        ),
         "deps": attr.label_list(
             doc = "Other helm packages this package depends on.",
             providers = [HelmPackageInfo],
+        ),
+        "files": attr.label_list(
+            doc = "Additional files to be added to the chart. All files must either source files or generated files relative to the package.",
+            allow_empty = True,
+            allow_files = True,
         ),
         "images": attr.label_list(
             doc = """\
@@ -255,11 +283,11 @@ helm_package = rule(
             values = [1, 0, -1],
         ),
         "substitutions": attr.string_dict(
-            doc = "A dictionary of substitutions to apply to the `values.yaml` file.",
+            doc = "A dictionary of substitutions to apply to the `values.yaml` file. Supports make variable expansion. You can append `| readfile` to read the content of the file",
             default = {},
         ),
         "templates": attr.label_list(
-            doc = "All templates associated with the current helm chart. E.g., the `./templates` directory",
+            doc = "All templates associated with the current helm chart. E.g., the `./templates` directory. All files must either source files or generated files relative to the package.",
             allow_files = True,
         ),
         "values": attr.label(
