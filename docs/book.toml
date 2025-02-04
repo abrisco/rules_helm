@@ -1,0 +1,9 @@
+[book]
+authors = ["abrisco"]
+language = "en"
+multilingual = false
+src = "src"
+title = "rules_helm"
+
+[output.html]
+git-repository-url = "https://github.com/abrisco/rules_helm/"
