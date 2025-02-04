@@ -27,7 +27,7 @@ jobs:
 
       # Caches and restores the Bazel outputs.
       - name: Retain Bazel cache (linux)
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         env:
           cache-name: bazel-cache
         with:
@@ -37,7 +37,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}
         if: startswith(runner.os, 'Linux')
       - name: Retain Bazel cache (MacOS)
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         env:
           cache-name: bazel-cache
         with:
@@ -47,7 +47,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}
         if: startswith(runner.os, 'MacOS')
       - name: Retain Bazel cache (Windows)
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         env:
           cache-name: bazel-cache
         with:
@@ -87,7 +87,7 @@ jobs:
 
       # Caches and restores the Bazel outputs.
       - name: Retain Bazel cache (linux)
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         env:
           cache-name: bazel-cache
         with:
@@ -97,7 +97,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}
         if: startswith(runner.os, 'Linux')
       - name: Retain Bazel cache (MacOS)
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         env:
           cache-name: bazel-cache
         with:
@@ -107,7 +107,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}
         if: startswith(runner.os, 'MacOS')
       - name: Retain Bazel cache (Windows)
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         env:
           cache-name: bazel-cache
         with:
