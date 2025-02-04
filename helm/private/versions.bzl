@@ -1,6 +1,6 @@
 """Constants for accessing helm binaries"""
 
-DEFAULT_HELM_VERSION = "3.16.3"
+DEFAULT_HELM_VERSION = "3.17.0"
 
 DEFAULT_HELM_URL_TEMPLATES = [
     "https://get.helm.sh/helm-v{version}-{platform}.{compression}",
@@ -325,6 +325,16 @@ HELM_VERSIONS = {
         "linux-i386": "sha256-cDGPYP7DIZaA//hskpPiqS+4uaaR1BeRZhB0WI8ido4=",
         "linux-ppc64le": "sha256-Jm92mMVqck/d06LyuGKtSWxDONznnwKC/bxuI+Fzhgg=",
         "windows-amd64": "sha256-GlKqVuVRaMPT0uRfqDOjIpDk43kFWYUdzh5wfrdyi4E=",
+    },
+    "3.17.0": {
+        "darwin-amd64": "sha256-DV/VHPUetLlxLVLs2PKjzYZWgFlcylfbOO4BgCvUZuo=",
+        "darwin-arm64": "sha256-XbKSxpunVt2/E5q7YjsChg/u8Vx/Gk6mm3dxW5FlomE=",
+        "linux-amd64": "sha256-+10SZi/ebu/zasTMrL86vtlrDuLeB6/d5O2xTmE67iQ=",
+        "linux-arm": "sha256-o4hHgEm/StRA+jlPKEIapDzsNjG6GXqCA8SF7b7D4/4=",
+        "linux-arm64": "sha256-xNS+joAIK36qQR4+Ix1izwXQHN3+9ZsNAQBqeQHhHuQ=",
+        "linux-i386": "sha256-r4m+A7sVF1zSdXO0j0uWIeCJgqt3iN024HO6rJiNay4=",
+        "linux-ppc64le": "sha256-MoM6z3KyQOnKeKPqxjCgukIOBzsC3zAww2mih7i9x2k=",
+        "windows-amd64": "sha256-BiXlFDcQeZGSL3atvsSk8SpEOJQhgmdzmat1ij7IvcU=",
     },
     "3.4.2": {
         "darwin-amd64": "sha256-wzt+5ysABvI7M/UDK1Md1gn/97CKQyT5ugdyKk8/7Jo=",
