@@ -1,1 +1,0 @@
-repo_utils.bzl vendored from https://github.com/aspect-build/bazel-lib/blob/v2.7.3/lib/private/repo_utils.bzl
