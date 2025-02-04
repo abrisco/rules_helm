@@ -2,7 +2,6 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//3rdparty/bazel-lib:repo_utils.bzl", "repo_utils")
 load("//helm/private:versions.bzl", "CONSTRAINTS", "DEFAULT_HELM_URL_TEMPLATES", "DEFAULT_HELM_VERSION", "HELM_VERSIONS")
 
 _HELM_TAR_BUILD_CONTENT = """\
@@ -111,6 +110,46 @@ helm_toolchain_repository = repository_rule(
     },
 )
 
+def _platform(rctx):
+    """Returns a normalized name of the host os and CPU architecture.
+
+    Alias archictures names are normalized:
+
+    x86_64 => amd64
+    aarch64 => arm64
+
+    The result can be used to generate repository names for host toolchain
+    repositories for toolchains that use these normalized names.
+
+    Common os & architecture pairs that are returned are,
+
+    - darwin_amd64
+    - darwin_arm64
+    - linux_amd64
+    - linux_arm64
+    - linux_s390x
+    - linux_ppc64le
+    - windows_amd64
+
+    Args:
+        rctx: rctx
+
+    Returns:
+        The normalized "<os>_<arch>" string of the host os and CPU architecture.
+    """
+    if rctx.os.name.lower().startswith("linux"):
+        os = "linux"
+    elif rctx.os.name.lower().startswith("mac os"):
+        os = "darwin"
+    elif rctx.os.name.lower().startswith("freebsd"):
+        os = "freebsd"
+    elif rctx.os.name.lower().find("windows") != -1:
+        os = "windows"
+    else:
+        fail("unrecognized os")
+
+    return "%s_%s" % (os, rctx.os.arch)
+
 def _helm_host_alias_repository_impl(repository_ctx):
     is_windows = repository_ctx.os.name.lower().find("windows") != -1
     ext = ".exe" if is_windows else ""
@@ -124,7 +163,7 @@ exports_files(["helm{ext}"])
 
     repository_ctx.symlink("../{name}_{platform}/helm{ext}".format(
         name = repository_ctx.attr.name,
-        platform = repo_utils.platform(repository_ctx),
+        platform = _platform(repository_ctx),
         ext = ext,
     ), "helm{ext}".format(ext = ext))
 
