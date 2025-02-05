@@ -17,5 +17,3 @@ bcr_test_module:
       test_targets:
         - "--"
         - "//..."
-        # Docs test renders differently in bcr CI, don't test this.
-        - "-//docs:docs_diff_test"
