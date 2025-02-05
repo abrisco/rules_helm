@@ -1,0 +1,51 @@
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+
+copy_file(
+    name = "copied_file",
+    src = "//tests/with_files/common:data.txt",
+    out = "copied/file.txt",
+)
+
+write_file(
+    name = "generated_file",
+    out = "generated/file.txt",
+    content = [
+        "La-Li-Lu-Le-Lo",
+        "",
+    ],
+    newline = "unix",
+)
+
+helm_chart(
+    name = "with_files",
+    chart = "Chart.yaml",
+    files = [
+        "files/file.txt",
+        ":copied_file",
+        ":generated_file",
+    ],
+    registry_url = "oci://localhost/helm-registry",
+    values = "values.yaml",
+)
+
+helm_lint_test(
+    name = "with_files_lint_test",
+    chart = ":with_files",
+)
+
+helm_template_test(
+    name = "with_files_template_test",
+    chart = ":with_files",
+    template_patterns = {
+        "with_files/templates/deployment.yaml": [
+            # Base64 encoded value
+            r"FROM_SRC: \"SGVsbG8gV29ybGQuCg==\"",
+            # Base64 encoded value
+            r"FROM_GENERATED: \"TGEtTGktTHUtTGUtTG8K\"",
+            # Base64 encoded value
+            r"FROM_COPIED: \"SGFsbG8gV2VsdCEK\"",
+        ],
+    },
+)

@@ -52,6 +52,12 @@ _oci_push_repository_aspect = aspect(
     implementation = _oci_push_repository_aspect_impl,
 )
 
+def _rlocationpath(file, workspace_name):
+    if file.short_path.startswith("../"):
+        return file.short_path[len("../"):]
+
+    return "{}/{}".format(workspace_name, file.short_path)
+
 def _helm_package_impl(ctx):
     if (ctx.attr.chart and ctx.attr.chart_json) or (not ctx.attr.chart and not ctx.attr.chart_json):
         fail("Helm package {} must have either a `chart` or `chart_json` attribute".format(
@@ -94,6 +100,10 @@ def _helm_package_impl(ctx):
 
     args.add("-chart", chart_yaml)
     args.add("-values", values_yaml)
+    args.add("-package", "{}/{}".format(
+        ctx.label.workspace_name if ctx.label.workspace_name else ctx.workspace_name,
+        ctx.label.package,
+    ))
 
     substitutions_file = ctx.actions.declare_file("{}/substitutions.json".format(ctx.label.name))
     ctx.actions.write(
@@ -105,14 +115,21 @@ def _helm_package_impl(ctx):
     templates_manifest = ctx.actions.declare_file("{}/templates_manifest.json".format(ctx.label.name))
     ctx.actions.write(
         output = templates_manifest,
-        content = json.encode_indent({file.path: file.short_path for file in ctx.files.templates}, indent = " " * 4),
+        content = json.encode_indent({file.path: _rlocationpath(file, ctx.workspace_name) for file in ctx.files.templates}, indent = " " * 4),
     )
     args.add("-templates_manifest", templates_manifest)
+
+    files_manifest = ctx.actions.declare_file("{}/files_manifest.json".format(ctx.label.name))
+    ctx.actions.write(
+        output = files_manifest,
+        content = json.encode_indent({file.path: _rlocationpath(file, ctx.workspace_name) for file in ctx.files.files}, indent = " " * 4),
+    )
+    args.add("-files_manifest", files_manifest)
 
     crds_manifest = ctx.actions.declare_file("{}/crds_manifest.json".format(ctx.label.name))
     ctx.actions.write(
         output = crds_manifest,
-        content = json.encode_indent({file.path: file.short_path for file in ctx.files.crds}, indent = " " * 4),
+        content = json.encode_indent({file.path: _rlocationpath(file, ctx.workspace_name) for file in ctx.files.crds}, indent = " " * 4),
     )
     args.add("-crds_manifest", crds_manifest)
 
@@ -180,10 +197,11 @@ def _helm_package_impl(ctx):
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
         inputs = depset(
-            ctx.files.templates + ctx.files.crds + stamps + image_inputs + deps + [
+            ctx.files.templates + ctx.files.files + ctx.files.crds + stamps + image_inputs + deps + [
                 chart_yaml,
                 values_yaml,
                 templates_manifest,
+                files_manifest,
                 crds_manifest,
                 substitutions_file,
             ],
@@ -220,13 +238,21 @@ helm_package = rule(
             doc = "The `Chart.yaml` file of the helm chart as a json object",
         ),
         "crds": attr.label_list(
-            doc = "All crds associated with the current helm chart. E.g., the `./crds` directory",
+            doc = (
+                "All [Custom Resource Definitions](https://helm.sh/docs/chart_best_practices/custom_resource_definitions/) " +
+                "associated with the current helm chart. E.g., the `./crds` directory"
+            ),
             default = [],
             allow_files = True,
         ),
         "deps": attr.label_list(
             doc = "Other helm packages this package depends on.",
             providers = [HelmPackageInfo],
+        ),
+        "files": attr.label_list(
+            doc = "Files accessed in templates via the [`.Files` api](https://helm.sh/docs/chart_template_guide/accessing_files/)",
+            allow_files = True,
+            default = [],
         ),
         "images": attr.label_list(
             doc = """\

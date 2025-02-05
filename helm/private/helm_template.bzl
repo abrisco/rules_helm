@@ -12,6 +12,14 @@ def _helm_template_test_impl(ctx):
             ctx.label,
         ))
 
+    template_patterns = None
+    if ctx.attr.template_patterns:
+        template_patterns = ctx.actions.declare_file("{}.template_patterns.json".format(ctx.label.name))
+        ctx.actions.write(
+            output = template_patterns,
+            content = json.encode_indent(ctx.attr.template_patterns, indent = " " * 4),
+        )
+
     args_file = None
     runfiles = ctx.runfiles()
     if ctx.attr.installer:
@@ -63,6 +71,15 @@ def _helm_template_test_impl(ctx):
         output = runner_wrapper,
     )
 
+    env = {
+        "RULES_HELM_HELM_RUNNER_ARGS_FILE": rlocationpath(args_file, ctx.workspace_name),
+        "RULES_HELM_HELM_TEMPLATE_TEST": "1",
+    }
+
+    if template_patterns:
+        runfiles = runfiles.merge(ctx.runfiles(files = [template_patterns]))
+        env["RULES_HELM_HELM_TEMPLATE_TEST_PATTERNS"] = rlocationpath(template_patterns, ctx.workspace_name)
+
     return [
         DefaultInfo(
             files = depset([runner_wrapper]),
@@ -70,13 +87,7 @@ def _helm_template_test_impl(ctx):
             executable = runner_wrapper,
         ),
         RunEnvironmentInfo(
-            environment = {
-                "RULES_HELM_HELM_RUNNER_ARGS_FILE": rlocationpath(
-                    args_file,
-                    ctx.workspace_name,
-                ),
-                "RULES_HELM_HELM_TEMPLATE_TEST": "1",
-            },
+            environment = env,
         ),
     ]
 
@@ -93,6 +104,9 @@ helm_template_test = rule(
         "installer": attr.label(
             doc = "The `helm_install`/`helm_upgrade` target to resolve templates for. Mutually exclusive with `chart`.",
             providers = [HelmInstallInfo],
+        ),
+        "template_patterns": attr.string_list_dict(
+            doc = "A mapping of template paths to regex patterns required to match.",
         ),
         "_copier": attr.label(
             cfg = "exec",

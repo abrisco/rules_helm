@@ -5,6 +5,7 @@ load("//helm/private:helm_package.bzl", "helm_package")
 load("//helm/private:helm_registry.bzl", "helm_push", "helm_push_images")
 
 def helm_chart(
+        *,
         name,
         chart = None,
         chart_json = None,
@@ -13,6 +14,7 @@ def helm_chart(
         values_json = None,
         substitutions = {},
         templates = None,
+        files = [],
         images = [],
         deps = None,
         install_name = None,
@@ -46,6 +48,7 @@ def helm_chart(
         values_json (str, optional): The json encoded contents of `values.yaml`.
         substitutions (dict, optional): A dictionary of substitutions to apply to `values.yaml`.
         templates (list, optional): A list of template files to include in the package.
+        files (list, optional): Files accessed in templates via the [`.Files` api](https://helm.sh/docs/chart_template_guide/accessing_files/).
         images (list, optional): A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets
         deps (list, optional): A list of helm package dependencies.
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
@@ -56,7 +59,7 @@ def helm_chart(
         install_opts (list, optional): Additional options to pass to `helm install`.
         uninstall_opts (list, optional): Additional options to pass to `helm uninstall`.
         upgrade_opts (list, optional): Additional options to pass to `helm upgrade`.
-        data (list, optional): Additional runtime data to pass to the helm templates.
+        data (list, optional): Additional runtime data to pass to the helm install, upgrade, and uninstall targets.
         stamp (int):  Whether to encode build information into the helm chart.
         **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
@@ -72,12 +75,13 @@ def helm_chart(
         chart_json = chart_json,
         crds = crds,
         deps = deps,
+        files = files,
         images = images,
+        stamp = stamp,
+        substitutions = substitutions,
         templates = templates,
         values = values,
         values_json = values_json,
-        substitutions = substitutions,
-        stamp = stamp,
         **kwargs
     )
 
