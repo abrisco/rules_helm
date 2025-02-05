@@ -47,7 +47,7 @@ func parse_args() Arguments {
 	helm_package, _ := os.LookupEnv("HELM_PACKAGE")
 	chart_patterns, _ := os.LookupEnv("CHART_PATTERNS")
 	values_patterns, _ := os.LookupEnv("VALUES_PATTERNS")
-	templates_patterns, _ := os.LookupEnv("TEMPLATES_PATTERNS")
+	templates_patterns, _ := os.LookupEnv("TEMPLATE_PATTERNS")
 
 	var args Arguments
 	args.helm_package = GetRunfile(helm_package)

@@ -122,7 +122,7 @@ helm_template_test(
 helm_package_regex_test(
     name = "regex_test",
     package = ":generated_templates",
-    templates_patterns = {
+    template_patterns = {
         "deployment.yaml": ["apiVersion: apps/v1"],
         "service.yaml": ["apiVersion: v1"],
     },

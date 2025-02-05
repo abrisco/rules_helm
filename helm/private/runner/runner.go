@@ -1,10 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"syscall"
 
@@ -27,6 +31,48 @@ func parseArgsUpToDashDash(argv []string) ([]string, []string) {
 		}
 	}
 	return before, after
+}
+
+// ParseHelmOutput extracts sections of Helm output and maps them to their respective sources.
+func parseHelmOutput(input string) map[string]string {
+	result := make(map[string]string)
+	sections := strings.Split(input, "---")
+	sourceRegex := regexp.MustCompile(`(?m)^# Source: (.+)$`)
+
+	for _, section := range sections {
+		section = strings.TrimSpace(section)
+		if section == "" {
+			continue
+		}
+
+		matches := sourceRegex.FindStringSubmatch(section)
+		if len(matches) > 1 {
+			source := matches[1]
+			content := strings.TrimSpace(strings.Replace(section, matches[0], "", 1))
+			result[source] = content
+		}
+	}
+
+	return result
+}
+
+func loadTemplatePatterns(path string) (map[string][]string, error) {
+	var data map[string][]string
+
+	file, err := os.Open(path)
+	if err != nil {
+		return data, fmt.Errorf("Error opening json file:", err)
+	}
+	// Ensure file gets closed when done
+	defer file.Close()
+
+	// Decode the JSON file into the struct
+	decoder := json.NewDecoder(file)
+	if err := decoder.Decode(&data); err != nil {
+		return data, fmt.Errorf("Error decoding JSON:", err)
+	}
+
+	return data, nil
 }
 
 func main() {
@@ -103,6 +149,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	var test_stream bytes.Buffer
+
 	if is_test {
 		var cleanArgs []string
 		dir, err := os.Getwd()
@@ -117,23 +165,69 @@ func main() {
 			}
 		}
 		log.Println(strings.Join(cleanArgs, " "))
+		cmd.Stdout = &test_stream
+		cmd.Stderr = &test_stream
 	} else {
 		cmd.Env = helm_utils.SandboxFreeEnv(cmd.Env)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
 	}
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 
 	if is_debug {
 		log.Println(strings.Join(cmd.Args, " "))
 	}
-	if err := cmd.Run(); err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
+
+	var exitCode int = 0
+	var cmdError error = nil
+
+	cmdErr := cmd.Run()
+	if cmdErr != nil {
+		if exitError, ok := cmdErr.(*exec.ExitError); ok {
 			if status, ok := exitError.Sys().(syscall.WaitStatus); ok {
-				exitCode := status.ExitStatus()
-				os.Exit(exitCode)
+				exitCode = status.ExitStatus()
+			}
+		} else {
+			cmdError = cmdErr
+			exitCode = 1
+		}
+	}
+
+	if cmdError != nil {
+		log.Fatal(cmdError)
+	}
+
+	// Perform any regex pattern checks requested.
+	if is_test {
+		fmt.Printf(test_stream.String())
+
+		patternsVar, exists := os.LookupEnv("RULES_HELM_HELM_TEMPLATE_TEST_PATTERNS")
+		if exists {
+			patternsFile := helm_utils.GetRunfile(patternsVar)
+			patterns, err := loadTemplatePatterns(patternsFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			templates := parseHelmOutput(test_stream.String())
+			for templatePath, testPatterns := range patterns {
+				content, found := templates[templatePath]
+				if !found {
+					log.Fatalf("Template not found in the helm chart: %s", templatePath)
+				}
+
+				for _, pattern := range testPatterns {
+					regex, err := regexp.Compile(pattern)
+					if err != nil {
+						log.Fatal("Error compiling regex:", err)
+					}
+
+					if !regex.MatchString(content) {
+						log.Fatalf("Error: The file `%s` does not contain the pattern:\n```\n%s\n```", templatePath, pattern)
+					}
+				}
 			}
 		}
-		os.Exit(1)
 	}
+
+	os.Exit(exitCode)
 }
