@@ -42,6 +42,9 @@ def _helm_push_impl(ctx):
     if ctx.attr.login_url:
         args.add("-login_url", ctx.attr.login_url)
 
+    if ctx.attr.push_cmd:
+        args.add("-push_cmd", ctx.attr.push_cmd)
+
     image_runfiles = ctx.runfiles()
     if ctx.attr.include_images:
         image_pushers, image_runfiles = _get_image_push_commands(
@@ -105,6 +108,9 @@ if the following environment variables are defined:
             doc = "The helm package to push to the registry.",
             providers = [HelmPackageInfo],
             mandatory = True,
+        ),
+        "push_cmd": attr.string(
+            doc = "An alternative command to `push` for publishing the helm chart. E.g. `cm-push`",
         ),
         "registry_url": attr.string(
             doc = "The registry URL at which to push the helm chart to. E.g. `oci://my.registry.io/chart-name`",
