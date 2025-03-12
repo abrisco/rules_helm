@@ -20,6 +20,7 @@ def helm_chart(
         install_name = None,
         registry_url = None,
         login_url = None,
+        push_cmd = None,
         helm_opts = [],
         install_opts = [],
         upgrade_opts = [],
@@ -55,6 +56,7 @@ def helm_chart(
         registry_url (str, Optional): The registry url for the helm chart. `{name}.push_registry`
             is only defined when a value is passed here.
         login_url (str, optional): The registry url to log into for publishing helm charts.
+        push_cmd (str, optional): An alternative command to `push` for publishing helm charts.
         helm_opts (list, optional): Additional options to pass to helm.
         install_opts (list, optional): Additional options to pass to `helm install`.
         uninstall_opts (list, optional): Additional options to pass to `helm uninstall`.
@@ -98,6 +100,7 @@ def helm_chart(
             include_images = False,
             registry_url = registry_url,
             login_url = login_url,
+            push_cmd = push_cmd,
             **kwargs
         )
 
@@ -107,6 +110,7 @@ def helm_chart(
             package = name,
             registry_url = registry_url,
             login_url = login_url,
+            push_cmd = push_cmd,
             **kwargs
         )
 

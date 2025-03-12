@@ -66,6 +66,7 @@ func main() {
 	rawChartPath := flag.String("chart", "", "Path to Helm .tgz file")
 	registryURL := flag.String("registry_url", "", "URL of registry to upload helm chart")
 	rawLoginURL := flag.String("login_url", "", "URL of registry to login to.")
+	pushCmd := flag.String("push_cmd", "push", "Command to publish helm chart.")
 	rawImagePushers := flag.String("image_pushers", "", "Comma-separated list of image pusher executables")
 
 	// Parse command line arguments
@@ -145,6 +146,6 @@ func main() {
 	}
 
 	// Subprocess helm push
-	log.Println("Running helm push...")
-	runHelm(helmPath, []string{"push", chartPath, *registryURL}, helmPluginsPath, nil)
+	log.Printf("Running helm %s...\n", *pushCmd)
+	runHelm(helmPath, []string{*pushCmd, chartPath, *registryURL}, helmPluginsPath, nil)
 }
