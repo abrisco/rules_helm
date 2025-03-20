@@ -148,7 +148,14 @@ def _platform(rctx):
     else:
         fail("unrecognized os")
 
-    return "%s_%s" % (os, rctx.os.arch)
+    # Normalize architecture names
+    arch = rctx.os.arch
+    if arch == "aarch64":
+        arch = "arm64"
+    elif arch == "x86_64":
+        arch = "amd64"
+
+    return "%s_%s" % (os, arch)
 
 def _helm_host_alias_repository_impl(repository_ctx):
     is_windows = repository_ctx.os.name.lower().find("windows") != -1
