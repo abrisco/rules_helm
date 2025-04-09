@@ -101,27 +101,34 @@ func main() {
 	// Parse command line arguments
 	flag.CommandLine.Parse(internalArgs)
 
-	// Check required arguments
-	if *rawHelmPath == "" || *rawHelmPluginsPath == "" || *rawChartPath == "" {
-		log.Fatalf("Missing required arguments: helm, helm_plugins, chart")
-	}
-
-	helmPath := helm_utils.GetRunfile(*rawHelmPath)
-	helmPluginsPath := helm_utils.GetRunfile(*rawHelmPluginsPath)
-	chartPath := helm_utils.GetRunfile(*rawChartPath)
-
 	_, is_test := os.LookupEnv("RULES_HELM_HELM_TEMPLATE_TEST")
 	_, is_debug := os.LookupEnv("RULES_HELM_DEBUG")
 
-	// Update the chart path whenever it's found.
-	for i, item := range helmArgs {
+	// force template when testing and check in uninstall
+	is_uninstall := false
+	for _, item := range helmArgs {
+		is_uninstall = is_uninstall || item == "uninstall"
 		if is_test {
 			if item == "install" || item == "upgrade" {
 				item = "template"
 			}
 		}
+	}
 
-		helmArgs[i] = strings.ReplaceAll(item, *rawChartPath, chartPath)
+	// Check required arguments
+	if *rawHelmPath == "" || *rawHelmPluginsPath == "" || (!is_uninstall && *rawChartPath == "") {
+		log.Fatalf("Missing required arguments: helm, helm_plugins or chart")
+	}
+
+	helmPath := helm_utils.GetRunfile(*rawHelmPath)
+	helmPluginsPath := helm_utils.GetRunfile(*rawHelmPluginsPath)
+
+	// Update the chart path whenever it's found.
+	if *rawChartPath != "" {
+		chartPath := helm_utils.GetRunfile(*rawChartPath)
+		for i, item := range helmArgs {
+			helmArgs[i] = strings.ReplaceAll(item, *rawChartPath, chartPath)
+		}
 	}
 
 	var imagePushers []string
