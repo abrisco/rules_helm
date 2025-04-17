@@ -1,5 +1,5 @@
 {
   "integrity": "",
   "strip_prefix": "",
-  "url": "https://github.com/{OWNER}/{REPO}/releases/download/{TAG}/{REPO}-v{TAG}.tar.gz"
+  "url": "https://github.com/{OWNER}/{REPO}/releases/download/{VERSION}/rules_helm-v{VERSION}.tar.gz"
 }
