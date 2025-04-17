@@ -19,43 +19,17 @@ jobs:
       matrix:
         include:
           - os: macos-14
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
           - os: windows-2019
     steps:
       # Checkout the code
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      # Caches and restores the Bazel outputs.
-      - name: Retain Bazel cache (linux)
-        uses: actions/cache@v4
-        env:
-          cache-name: bazel-cache
+      - uses: bazel-contrib/setup-bazel@0.14.0
         with:
-          path: |
-            ~/.cache/bazelisk
-            ~/.cache/bazel
-          key: ${{ runner.os }}-${{ env.cache-name }}
-        if: startswith(runner.os, 'Linux')
-      - name: Retain Bazel cache (MacOS)
-        uses: actions/cache@v4
-        env:
-          cache-name: bazel-cache
-        with:
-          path: |
-            ~/.cache/bazelisk
-            /private/var/tmp/_bazel_runner
-          key: ${{ runner.os }}-${{ env.cache-name }}
-        if: startswith(runner.os, 'MacOS')
-      - name: Retain Bazel cache (Windows)
-        uses: actions/cache@v4
-        env:
-          cache-name: bazel-cache
-        with:
-          path: |
-            ~/.cache/bazelisk
-            C:/bzl
-          key: ${{ runner.os }}-${{ env.cache-name }}
-        if: startswith(runner.os, 'Windows')
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
 
       - name: Setup Bazelrc (Windows)
         run: |
@@ -79,43 +53,17 @@ jobs:
       matrix:
         include:
           - os: macos-14
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
           - os: windows-2019
     steps:
       # Checkout the code
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      # Caches and restores the Bazel outputs.
-      - name: Retain Bazel cache (linux)
-        uses: actions/cache@v4
-        env:
-          cache-name: bazel-cache
+      - uses: bazel-contrib/setup-bazel@0.14.0
         with:
-          path: |
-            ~/.cache/bazelisk
-            ~/.cache/bazel
-          key: ${{ runner.os }}-${{ env.cache-name }}
-        if: startswith(runner.os, 'Linux')
-      - name: Retain Bazel cache (MacOS)
-        uses: actions/cache@v4
-        env:
-          cache-name: bazel-cache
-        with:
-          path: |
-            ~/.cache/bazelisk
-            /private/var/tmp/_bazel_runner
-          key: ${{ runner.os }}-${{ env.cache-name }}
-        if: startswith(runner.os, 'MacOS')
-      - name: Retain Bazel cache (Windows)
-        uses: actions/cache@v4
-        env:
-          cache-name: bazel-cache
-        with:
-          path: |
-            ~/.cache/bazelisk
-            C:/bzl
-          key: ${{ runner.os }}-${{ env.cache-name }}
-        if: startswith(runner.os, 'Windows')
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
 
       - name: Setup Bazelrc (Windows)
         run: |
@@ -138,7 +86,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout the code
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Buildifier
         run: |
           wget "https://github.com/bazelbuild/buildtools/releases/download/v${BUILDIFIER_VERSION}/buildifier-linux-amd64" -O buildifier
@@ -151,7 +99,7 @@ jobs:
   ci-gofmt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: Jerome1337/gofmt-action@v1.0.5
         with:
           gofmt-flags: -e -d
