@@ -1,6 +1,6 @@
 """Constants for accessing helm binaries"""
 
-DEFAULT_HELM_VERSION = "3.17.1"
+DEFAULT_HELM_VERSION = "3.17.3"
 
 DEFAULT_HELM_URL_TEMPLATES = [
     "https://get.helm.sh/helm-v{version}-{platform}.{compression}",
@@ -20,7 +20,7 @@ CONSTRAINTS = {
 # This list is manually updated using the following command to get the
 # integrity values for each artifact:
 # ```
-# bazel query 'set(@helm_darwin_amd64//... @helm_darwin_arm64//... @helm_linux_amd64//... @helm_linux_arm//... @helm_linux_arm64//... @helm_linux_i386//... @helm_linux_ppc64le//... @helm_windows_amd64//...)' 2>&1 | grep integrity
+# bazel run //tools/fetch_shas -- <version>
 # ```
 HELM_VERSIONS = {
     "2.17.0": {
@@ -345,6 +345,26 @@ HELM_VERSIONS = {
         "linux-i386": "sha256-uXJWKhFxZz2yiS8AAkiyVA3c1vdoUOwVKFKo6c55css=",
         "linux-ppc64le": "sha256-QiM5Tz/Kgqf46NCDyvb68O4GOdjyNQcTNFeSNweKLC4=",
         "windows-amd64": "sha256-CCge5tTScoNf8QxRC4s5c20RLZy4nfvIU/6DkT++SNA=",
+    },
+    "3.17.2": {
+        "darwin-amd64": "sha256-PiQCOMejoQ79N7jhZhWyjpS6XbWVcke7QgCbptUvduk=",
+        "darwin-arm64": "sha256-uEPOvL68nsyx5Dq6nMp2k9MunyxKNTRJkOO3s4GTOUg=",
+        "linux-amd64": "sha256-kMKHkqHrX7C1ACjjnr+CZTHr/Pc/WZBQ29ebqy8nckE=",
+        "linux-arm": "sha256-CxPshYDdVJi1otfLNBRuCYBJ9ZUAombbG7mPWWSeuQo=",
+        "linux-arm64": "sha256-14127HYlqUmR6IesBJ2T9EvXDkh2IAuUX4E8nh7R33w=",
+        "linux-i386": "sha256-HFmcRVm5fYzyEAcE9c3DJp3LNptVNxGwmlZOHYnHJdw=",
+        "linux-ppc64le": "sha256-a7HIMHi91emsrVeT38mrO1tW1BByOmYP8dph29/zIHs=",
+        "windows-amd64": "sha256-92/nb6EW0rrpSK7pu1S6Eb9bcmoJ9zLOanTrZa8ohrE=",
+    },
+    "3.17.3": {
+        "darwin-amd64": "sha256-IO+N9GcTSab8VWpiG+EXDdcJxsDPX36Dotn7BRX9l/w=",
+        "darwin-arm64": "sha256-ia7EPOB7BiOfG7pKZQcja7SK5Ie8UGWo4lTTzlihaZc=",
+        "linux-amd64": "sha256-7oizyFGuZGaj3lB/e+c/6U1Uy/KYfLqj0aODLqMx8s0=",
+        "linux-arm": "sha256-YNdtHhLT4Fip6aggnv90im+rWUgCih8IYPSOFBJD0z0=",
+        "linux-arm64": "sha256-eUTj3v04bHb9ktnm/sXC1loyP2+twZv7XnBOPu4QNI4=",
+        "linux-i386": "sha256-UXQteMBmQ34js8qYNw3zQfkTa0CDgf5aFQ1wudm/JNc=",
+        "linux-ppc64le": "sha256-uCGIWlArL6FZ4+86/pzebmyYdtSmI/GIaIKcPuSjxkw=",
+        "windows-amd64": "sha256-jqk+L2KF5kne3lg6yQ/4zbk4ylPsbPX+kJ8jA/vCLZY=",
     },
     "3.4.2": {
         "darwin-amd64": "sha256-wzt+5ysABvI7M/UDK1Md1gn/97CKQyT5ugdyKk8/7Jo=",
