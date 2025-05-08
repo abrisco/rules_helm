@@ -9,6 +9,7 @@ helm_package(
     name = "inline_chart",
     chart = ":chart_file",
     templates = glob(["templates/**"]),
+    values = "values.yaml",
 )
 
 helm_lint_test(
