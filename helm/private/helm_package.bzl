@@ -101,7 +101,8 @@ def _helm_package_impl(ctx):
     args.add("-chart", chart_yaml)
     args.add("-values", values_yaml)
 
-    args.add("-schema", ctx.file.schema)
+    if ctx.file.schema:
+        args.add("-schema", ctx.file.schema)
 
     args.add("-package", "{}/{}".format(
         ctx.label.workspace_name if ctx.label.workspace_name else ctx.workspace_name,
