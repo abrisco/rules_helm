@@ -96,7 +96,6 @@ spec:
 
 helm_chart(
     name = "generated_templates",
-    chart = "Chart.yaml",
     registry_url = "oci://localhost/helm-registry",
     templates = [
         ":templates/deployment.yaml",
@@ -106,7 +105,6 @@ helm_chart(
         "templates/**/*.tpl",
         "templates/**/*.txt",
     ]),
-    values = "values.yaml",
 )
 
 helm_lint_test(

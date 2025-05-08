@@ -2,8 +2,6 @@ load("//helm:defs.bzl", "helm_chart")
 
 helm_chart(
     name = "chart",
-    chart = "Chart.yaml",
-    values = "values.yaml",
 )
 
 genrule(
