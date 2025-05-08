@@ -1,0 +1,25 @@
+load("//helm:defs.bzl", "chart_content", "helm_chart", "helm_lint_test", "helm_template_test")
+
+helm_chart(
+    name = "chart_json",
+    chart_json = chart_content(
+        name = "chart_json",
+        api_version = "v2",
+        app_version = "1.16.0",
+        description = "A Helm chart for Kubernetes by Bazel.",
+        type = "application",
+        version = "0.1.0",
+    ),
+    registry_url = "oci://localhost/helm-registry",
+    values = "values.yaml",
+)
+
+helm_lint_test(
+    name = "chart_json_lint_test",
+    chart = ":chart_json",
+)
+
+helm_template_test(
+    name = "chart_json_template_test",
+    chart = ":chart_json",
+)
