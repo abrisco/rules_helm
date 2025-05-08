@@ -100,6 +100,9 @@ def _helm_package_impl(ctx):
 
     args.add("-chart", chart_yaml)
     args.add("-values", values_yaml)
+
+    args.add('-schema', ctx.file.schema)
+
     args.add("-package", "{}/{}".format(
         ctx.label.workspace_name if ctx.label.workspace_name else ctx.workspace_name,
         ctx.label.package,
@@ -197,7 +200,7 @@ def _helm_package_impl(ctx):
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
         inputs = depset(
-            ctx.files.templates + ctx.files.files + ctx.files.crds + stamps + image_inputs + deps + [
+            ctx.files.templates + ctx.files.schema + ctx.files.files + ctx.files.crds + stamps + image_inputs + deps + [
                 chart_yaml,
                 values_yaml,
                 templates_manifest,
@@ -294,6 +297,10 @@ helm_package = rule(
         ),
         "values_json": attr.string(
             doc = "The `values.yaml` file for the current package as a json object.",
+        ),
+        "schema": attr.label(
+            doc = "The `values.schema.json` file for the current package.",
+            allow_single_file = True,
         ),
         "_json_to_yaml": attr.label(
             doc = "A tools for converting json files to yaml files.",

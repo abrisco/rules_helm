@@ -95,6 +95,7 @@ type Arguments struct {
 	Package            string
 	Chart              string
 	Values             string
+	Schema             string
 	Substitutions      string
 	DepsManifest       string
 	Helm               string
@@ -116,6 +117,7 @@ func parseArgs() Arguments {
 	flag.StringVar(&args.Package, "package", "", "The rlocationpath style package identifier for the current Bazel target.")
 	flag.StringVar(&args.Chart, "chart", "", "The helm `chart.yaml` file.")
 	flag.StringVar(&args.Values, "values", "", "The helm `values.yaml` file.")
+	flag.StringVar(&args.Schema, "schema", "", "The helm `values.schema.json` file.")
 	flag.StringVar(&args.Substitutions, "substitutions", "", "A json file containing key value pairs to substitute into the values file.")
 	flag.StringVar(&args.DepsManifest, "deps_manifest", "", "A file containing a list of all helm dependency (`charts/*.tgz`) files.")
 	flag.StringVar(&args.Helm, "helm", "", "The path to a helm executable.")
@@ -432,7 +434,7 @@ func copyFile(source string, dest string) error {
 	return nil
 }
 
-func installHelmContent(workingDir string, packagePath string, stampedChartContent string, stampedValuesContent string, templatesManifest string, filesManifest string, crdsManifest string, depsManifest string) (string, error) {
+func installHelmContent(workingDir string, packagePath string, stampedChartContent string, stampedValuesContent string, stampedSchemaContent string, templatesManifest string, filesManifest string, crdsManifest string, depsManifest string) (string, error) {
 	templatesParent := filepath.Join(workingDir, packagePath)
 
 	err := os.MkdirAll(templatesParent, 0700)
@@ -561,6 +563,15 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 	err = os.WriteFile(valuesYaml, []byte(stampedValuesContent), 0644)
 	if err != nil {
 		return "", fmt.Errorf("Error writing values file %s: %w", valuesYaml, err)
+	}
+
+	fmt.Printf("len(stampedSchemaContent): %d", len(stampedSchemaContent))
+	if len(stampedSchemaContent) > 0 {
+		schemaJson := filepath.Join(templatesParent, "values.schema.json")
+		err = os.WriteFile(schemaJson, []byte(stampedSchemaContent), 0644)
+		if err != nil {
+			return "", fmt.Errorf("Error writing schema file %s: %w", schemaJson, err)
+		}
 	}
 
 	crdsManifestContent, err := os.ReadFile(crdsManifest)
@@ -808,6 +819,12 @@ func main() {
 	}
 	valuesContent := string(valuesBytes)
 
+	schemaBytes, err := os.ReadFile(args.Schema)
+	if err != nil && !os.IsNotExist(err) {
+		log.Fatal(err)
+	}
+	schemaContent := string(schemaBytes)
+
 	// Collect all stamp values
 	stamps, err := loadStamps(args.VolatileStatusFile, args.StableStatusFile)
 	if err != nil {
@@ -834,13 +851,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	stampedSchemaContent, err := applyStamping(string(schemaContent), stamps, imageStamps, true)
+	if err != nil {
+		log.Fatal(err)
+	}
 	stampedChartContent, err = sanitizeChartContent(stampedChartContent)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Create a directory in which to run helm package
-	helmDir, err := installHelmContent(dir, args.Package, stampedChartContent, stampedValuesContent, args.TemplatesManifest, args.FilesManifest, args.CrdsManifest, args.DepsManifest)
+	helmDir, err := installHelmContent(dir, args.Package, stampedChartContent, stampedValuesContent, stampedSchemaContent, args.TemplatesManifest, args.FilesManifest, args.CrdsManifest, args.DepsManifest)
 	if err != nil {
 		log.Fatal(err)
 	}
