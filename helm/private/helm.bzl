@@ -65,6 +65,12 @@ def helm_chart(
         stamp (int):  Whether to encode build information into the helm chart.
         **kwargs (dict): Additional keyword arguments for `helm_package`.
     """
+    if chart_json == None and chart == None:
+        chart = "Chart.yaml"
+
+    if values_json == None and values == None:
+        values = "values.yaml"
+
     if templates == None:
         templates = native.glob(["templates/**"])
 

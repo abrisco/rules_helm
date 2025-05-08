@@ -14,14 +14,12 @@ EXCLUDE_WINDOWS = select({
 
 helm_chart(
     name = "with_image_deps",
-    chart = "Chart.yaml",
     images = [
         ":image_a.push",
         "//tests/with_image_deps:image_b.push",
         "//tests/with_image_deps:image_c.push",
     ],
     target_compatible_with = EXCLUDE_WINDOWS,
-    values = "values.yaml",
 )
 
 helm_lint_test(
