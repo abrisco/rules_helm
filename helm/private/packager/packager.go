@@ -851,7 +851,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	stampedSchemaContent, err := applyStamping(string(schemaContent), stamps, imageStamps, true)
+	stampedSchemaContent, err := applyStamping(string(schemaContent), stamps, imageStamps, false)
 	if err != nil {
 		log.Fatal(err)
 	}
