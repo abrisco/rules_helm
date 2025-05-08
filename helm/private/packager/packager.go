@@ -565,7 +565,6 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 		return "", fmt.Errorf("Error writing values file %s: %w", valuesYaml, err)
 	}
 
-	fmt.Printf("len(stampedSchemaContent): %d", len(stampedSchemaContent))
 	if len(stampedSchemaContent) > 0 {
 		schemaJson := filepath.Join(templatesParent, "values.schema.json")
 		err = os.WriteFile(schemaJson, []byte(stampedSchemaContent), 0644)
@@ -819,11 +818,14 @@ func main() {
 	}
 	valuesContent := string(valuesBytes)
 
-	schemaBytes, err := os.ReadFile(args.Schema)
-	if err != nil && !os.IsNotExist(err) {
-		log.Fatal(err)
+	schemaContent := ""
+	if args.Schema != "" {
+		schemaBytes, err := os.ReadFile(args.Schema)
+		if err != nil {
+			log.Fatal(err)
+		}
+		schemaContent = string(schemaBytes)
 	}
-	schemaContent := string(schemaBytes)
 
 	// Collect all stamp values
 	stamps, err := loadStamps(args.VolatileStatusFile, args.StableStatusFile)
