@@ -20,14 +20,12 @@ write_file(
 
 helm_chart(
     name = "with_files",
-    chart = "Chart.yaml",
     files = [
         "files/file.txt",
         ":copied_file",
         ":generated_file",
     ],
     registry_url = "oci://localhost/helm-registry",
-    values = "values.yaml",
 )
 
 helm_lint_test(

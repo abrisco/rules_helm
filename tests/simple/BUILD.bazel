@@ -2,9 +2,7 @@ load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
 
 helm_chart(
     name = "simple",
-    chart = "Chart.yaml",
     registry_url = "oci://localhost/helm-registry",
-    values = "values.yaml",
 )
 
 helm_lint_test(

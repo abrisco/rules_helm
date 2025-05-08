@@ -2,14 +2,12 @@ load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
 
 helm_chart(
     name = "alt_templates",
-    chart = "Chart.yaml",
     registry_url = "oci://localhost/helm-registry",
     templates = glob([
         "alt_templates/**/*.yaml",
         "alt_templates/**/*.tpl",
         "alt_templates/**/*.txt",
     ]),
-    values = "values.yaml",
 )
 
 helm_lint_test(

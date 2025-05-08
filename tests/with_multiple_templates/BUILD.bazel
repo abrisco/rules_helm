@@ -21,9 +21,7 @@ copy_to_directory(
 
 helm_chart(
     name = "multiple",
-    chart = "Chart.yaml",
     templates = [":templates"],
-    values = "values.yaml",
 )
 
 helm_lint_test(
