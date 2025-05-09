@@ -1,0 +1,19 @@
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+
+helm_chart(
+    name = "with_lint_substitutions",
+    registry_url = "oci://localhost/helm-registry",
+)
+
+helm_lint_test(
+    name = "with_lint_substitutions_lint_test",
+    chart = ":with_lint_substitutions",
+    substitutions = {
+        "replicaCount": "2",
+    },
+)
+
+helm_template_test(
+    name = "with_lint_substitutions_template_test",
+    chart = ":with_lint_substitutions",
+)
