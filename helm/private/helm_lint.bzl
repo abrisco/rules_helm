@@ -60,7 +60,8 @@ def _helm_lint_test_impl(ctx):
     args.add("-helm", rlocationpath(toolchain.helm, ctx.workspace_name))
     args.add("-helm_plugins", rlocationpath(toolchain.helm_plugins, ctx.workspace_name))
     args.add("-package", rlocationpath(helm_pkg_info.chart, ctx.workspace_name))
-    # Passed directly to --set flag of `helm lint`, but using -subtitutions to match helm_package.bzl.
+
+    # Passed directly to --set flag of `helm lint`, but using -substitutions to match helm_package.bzl.
     args.add("-substitutions", ",".join(["%s=%s" % (k, v) for k, v in ctx.attr.substitutions.items()]))
 
     ctx.actions.write(
