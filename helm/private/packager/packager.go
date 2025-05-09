@@ -565,7 +565,7 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 		return "", fmt.Errorf("Error writing values file %s: %w", valuesYaml, err)
 	}
 
-	if len(stampedSchemaContent) > 0 {
+	if stampedSchemaContent != "" {
 		schemaJson := filepath.Join(templatesParent, "values.schema.json")
 		err = os.WriteFile(schemaJson, []byte(stampedSchemaContent), 0644)
 		if err != nil {
@@ -818,7 +818,7 @@ func main() {
 	}
 	valuesContent := string(valuesBytes)
 
-	schemaContent := ""
+	var schemaContent string
 	if args.Schema != "" {
 		schemaBytes, err := os.ReadFile(args.Schema)
 		if err != nil {
