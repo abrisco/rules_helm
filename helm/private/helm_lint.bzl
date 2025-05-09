@@ -60,6 +60,8 @@ def _helm_lint_test_impl(ctx):
     args.add("-helm", rlocationpath(toolchain.helm, ctx.workspace_name))
     args.add("-helm_plugins", rlocationpath(toolchain.helm_plugins, ctx.workspace_name))
     args.add("-package", rlocationpath(helm_pkg_info.chart, ctx.workspace_name))
+    # Passed directly to --set flag of `helm lint`, but using -subtitutions to match helm_package.bzl.
+    args.add("-substitutions", ",".join(["%s=%s" % (k, v) for k, v in ctx.attr.substitutions.items()]))
 
     ctx.actions.write(
         output = args_file,
@@ -99,6 +101,10 @@ helm_lint_test = rule(
             doc = "The helm package to run linting on.",
             mandatory = True,
             providers = [HelmPackageInfo],
+        ),
+        "substitutions": attr.string_dict(
+            doc = "A dictionary of substitutions passed to `helm lint --set flag.",
+            default = {},
         ),
         "_copier": attr.label(
             cfg = "exec",
