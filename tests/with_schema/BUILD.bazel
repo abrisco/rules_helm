@@ -1,0 +1,16 @@
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+
+helm_chart(
+    name = "schema",
+    registry_url = "oci://localhost/helm-registry",
+)
+
+helm_lint_test(
+    name = "schema_lint_test",
+    chart = ":schema",
+)
+
+helm_template_test(
+    name = "schema_template_test",
+    chart = ":schema",
+)
