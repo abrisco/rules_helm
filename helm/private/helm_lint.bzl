@@ -103,7 +103,7 @@ helm_lint_test = rule(
             providers = [HelmPackageInfo],
         ),
         "strict": attr.bool(
-            doc = "Fail on lint warnings."
+            doc = "Fail on lint warnings.",
         ),
         "_copier": attr.label(
             cfg = "exec",
