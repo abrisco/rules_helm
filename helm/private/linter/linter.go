@@ -18,9 +18,9 @@ import (
 
 type Arguments struct {
 	helm          string
+	substitutions string
 	helmPlugins   string
 	pkg           string
-	substitutions string
 	output        string
 }
 
@@ -39,10 +39,10 @@ func parse_args() Arguments {
 	var args Arguments
 
 	flag.StringVar(&args.helm, "helm", "", "The path to a helm executable")
+	flag.StringVar(&args.substitutions, "substitutions", "", "Additional values to pass to helm's --set flag.")
 	flag.StringVar(&args.helmPlugins, "helm_plugins", "", "The path to a helm plugins directory")
 	flag.StringVar(&args.output, "output", "", "The path to the Bazel `HelmPackage` action output")
 	flag.StringVar(&args.pkg, "package", "", "The path to the helm package to lint.")
-	flag.StringVar(&args.substitutions, "substitutions", "", "Additional values to pass to helm's --set flag.")
 
 	args_file, found := os.LookupEnv("RULES_HELM_HELM_LINT_TEST_ARGS_PATH")
 	if found {
@@ -147,12 +147,8 @@ func find_package_root(extract_dir string) string {
 	return file_info[0].Name()
 }
 
-func lint(directory string, package_name string, helm string, substitutions string, helmPluginsDir string, output string) {
-	args := []string{"lint", package_name}
-	if substitutions != "" {
-		args = append(args, "--set", substitutions)
-	}
-	cmd, err := helm_utils.BuildHelmCommand(helm, args, helmPluginsDir)
+func lint(directory string, helm string, helmArgs []string, helmPluginsDir string, output string) {
+	cmd, err := helm_utils.BuildHelmCommand(helm, helmArgs, helmPluginsDir)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -246,6 +242,10 @@ func main() {
 	}
 
 	lint_dir := find_package_root(dir)
+	helmArgs := []string{"lint", lint_dir}
+	if args.substitutions != "" {
+		helmArgs = append(helmArgs, "--set", args.substitutions)
+	}
 
-	lint(dir, lint_dir, helm, args.substitutions, helmPlugins, args.output)
+	lint(dir, helm, helmArgs, helmPlugins, args.output)
 }
