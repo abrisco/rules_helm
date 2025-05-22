@@ -61,7 +61,7 @@ func loadTemplatePatterns(path string) (map[string][]string, error) {
 
 	file, err := os.Open(path)
 	if err != nil {
-		return data, fmt.Errorf("Error opening json file:", err)
+		return data, fmt.Errorf("Error opening json file: %w", err)
 	}
 	// Ensure file gets closed when done
 	defer file.Close()
@@ -69,7 +69,7 @@ func loadTemplatePatterns(path string) (map[string][]string, error) {
 	// Decode the JSON file into the struct
 	decoder := json.NewDecoder(file)
 	if err := decoder.Decode(&data); err != nil {
-		return data, fmt.Errorf("Error decoding JSON:", err)
+		return data, fmt.Errorf("Error decoding JSON: %w", err)
 	}
 
 	return data, nil
@@ -205,7 +205,7 @@ func main() {
 
 	// Perform any regex pattern checks requested.
 	if is_test {
-		fmt.Printf(test_stream.String())
+		fmt.Print(test_stream.String())
 
 		patternsVar, exists := os.LookupEnv("RULES_HELM_HELM_TEMPLATE_TEST_PATTERNS")
 		if exists {
