@@ -16,9 +16,22 @@ import (
 	"github.com/abrisco/rules_helm/helm/private/helm_utils"
 )
 
+// stringSliceFlag is a custom flag type for collecting multiple values
+type stringSliceFlag []string
+
+func (i *stringSliceFlag) String() string {
+	return strings.Join(*i, ",")
+}
+
+func (i *stringSliceFlag) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
+
 type Arguments struct {
 	helm          string
 	substitutions string
+	values        stringSliceFlag
 	helmPlugins   string
 	pkg           string
 	output        string
@@ -40,6 +53,7 @@ func parse_args() Arguments {
 
 	flag.StringVar(&args.helm, "helm", "", "The path to a helm executable")
 	flag.StringVar(&args.substitutions, "substitutions", "", "Additional values to pass to helm's --set flag.")
+	flag.Var(&args.values, "values", "Values files to pass to helm's --values flag.")
 	flag.StringVar(&args.helmPlugins, "helm_plugins", "", "The path to a helm plugins directory")
 	flag.StringVar(&args.output, "output", "", "The path to the Bazel `HelmPackage` action output")
 	flag.StringVar(&args.pkg, "package", "", "The path to the helm package to lint.")
@@ -194,6 +208,14 @@ func hashString(text string) string {
 	return hex.EncodeToString(hashSum)
 }
 
+func transformStringSlice(slice []string, f func(string) string) []string {
+	res := []string{}
+	for _, s := range slice {
+		res = append(res, f(s))
+	}
+	return res
+}
+
 func main() {
 	args := parse_args()
 
@@ -227,14 +249,17 @@ func main() {
 	var pkg = args.pkg
 	var helm = args.helm
 	var helmPlugins = args.helmPlugins
+	var valuesFiles []string
 	if is_test {
 		pkg = helm_utils.GetRunfile(pkg)
 		helm = helm_utils.GetRunfile(helm)
 		helmPlugins = helm_utils.GetRunfile(helmPlugins)
+		valuesFiles = transformStringSlice(args.values, helm_utils.GetRunfile)
 	} else {
 		pkg = makeAbsolutePath(pkg)
 		helm = makeAbsolutePath(helm)
 		helmPlugins = makeAbsolutePath(helmPlugins)
+		valuesFiles = transformStringSlice(args.values, makeAbsolutePath)
 	}
 
 	if err := extractPackage(pkg, dir); err != nil {
@@ -245,6 +270,9 @@ func main() {
 	helmArgs := []string{"lint", lint_dir}
 	if args.substitutions != "" {
 		helmArgs = append(helmArgs, "--set", args.substitutions)
+	}
+	for _, v := range valuesFiles {
+		helmArgs = append(helmArgs, "--values", v)
 	}
 
 	lint(dir, helm, helmArgs, helmPlugins, args.output)

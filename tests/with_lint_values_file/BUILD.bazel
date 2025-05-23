@@ -1,0 +1,19 @@
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+
+helm_chart(
+    name = "with_lint_values_file",
+    registry_url = "oci://localhost/helm-registry",
+)
+
+helm_lint_test(
+    name = "with_lint_values_file_test",
+    chart = "with_lint_values_file",
+    values = [
+        ":lint_values.yaml",
+    ],
+)
+
+helm_template_test(
+    name = "with_lint_values_template_test",
+    chart = ":with_lint_values_file",
+)

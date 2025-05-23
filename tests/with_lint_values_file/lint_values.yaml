@@ -1,0 +1,3 @@
+# Values for use in `helm_lint_test`.
+
+replicaCount: 10
