@@ -17,11 +17,12 @@ import (
 )
 
 type Arguments struct {
-	helm        string
-	strict      bool
-	helmPlugins string
-	pkg         string
-	output      string
+	helm         string
+	strict       bool
+  subsitutions string
+	helmPlugins  string
+	pkg          string
+	output       string
 }
 
 func makeAbsolutePath(path string) string {
@@ -40,6 +41,7 @@ func parse_args() Arguments {
 
 	flag.StringVar(&args.helm, "helm", "", "The path to a helm executable")
 	flag.BoolVar(&args.strict, "strict", false, "Fail on lint warnings")
+	flag.StringVar(&args.substitutions, "substitutions", "", "Additional values to pass to helm's --set flag.")
 	flag.StringVar(&args.helmPlugins, "helm_plugins", "", "The path to a helm plugins directory")
 	flag.StringVar(&args.output, "output", "", "The path to the Bazel `HelmPackage` action output")
 	flag.StringVar(&args.pkg, "package", "", "The path to the helm package to lint.")
@@ -245,6 +247,8 @@ func main() {
 	helmArgs := []string{"lint", lint_dir}
 	if args.strict {
 		helmArgs = append(helmArgs, "--strict")
+	if args.substitutions != "" {
+		helmArgs = append(helmArgs, "--set", args.substitutions)
 	}
 
 	lint(dir, helm, helmArgs, helmPlugins, args.output)
