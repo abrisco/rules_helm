@@ -15,6 +15,7 @@ def symlink(*, ctx, output, target_file, is_executable = True):
         args.add(output)
         ctx.actions.run(
             executable = ctx.executable._copier,
+            mnemonic = "HelmCopier",
             arguments = [args],
             inputs = [target_file],
             outputs = [output],
