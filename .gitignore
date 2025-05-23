@@ -10,3 +10,6 @@ user.bazelrc
 # Lock files are not used by Bazel. Instead, lock information is required by repository rules
 Chart.lock
 .idea/
+
+# Running `helm_lint_test or `helm_template_test` targets creates _tmp/:
+_tmp/
