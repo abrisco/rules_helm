@@ -17,12 +17,12 @@ import (
 )
 
 type Arguments struct {
-	helm         string
-	strict       bool
-  subsitutions string
-	helmPlugins  string
-	pkg          string
-	output       string
+	helm          string
+	strict        bool
+	substitutions string
+	helmPlugins   string
+	pkg           string
+	output        string
 }
 
 func makeAbsolutePath(path string) string {
@@ -158,8 +158,8 @@ func lint(directory string, helm string, helmArgs []string, helmPluginsDir strin
 	cmd.Dir = directory
 
 	out, err := cmd.Output()
+	os.Stderr.WriteString(string(out))
 	if err != nil {
-		os.Stderr.WriteString(string(out))
 		log.Fatal(err)
 	}
 
@@ -247,6 +247,7 @@ func main() {
 	helmArgs := []string{"lint", lint_dir}
 	if args.strict {
 		helmArgs = append(helmArgs, "--strict")
+	}
 	if args.substitutions != "" {
 		helmArgs = append(helmArgs, "--set", args.substitutions)
 	}
