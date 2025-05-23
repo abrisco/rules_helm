@@ -9,7 +9,7 @@ helm_lint_test(
     name = "with_lint_values_file_test",
     chart = "with_lint_values_file",
     values = [
-      ":lint_values.yaml",
+        ":lint_values.yaml",
     ],
 )
 
