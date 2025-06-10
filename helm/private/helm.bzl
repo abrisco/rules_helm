@@ -75,12 +75,10 @@ def helm_chart(
         # https://github.com/helm/helm/blob/a73c51ca08297fda17f40b3b11ff602e22893334/pkg/lint/rules/template.go#L208
         templates = native.glob(
             [
-                "templates/*.yaml",
-                "templates/*.yml",
-                "templates/*.tpl",
-                "templates/*.txt",
-                "templates/tests/*.yaml",
-                "templates/tests/*.yml",
+                "templates/**/*.yaml",
+                "templates/**/*.yml",
+                "templates/**/*.tpl",
+                "templates/**/*.txt",
             ],
             allow_empty = True,
         )
