@@ -1,0 +1,11 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+
+go_binary(
+    name = "templater",
+    srcs = ["templater.go"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//helm/private/helm_utils",
+        "@in_gopkg_yaml_v3//:yaml_v3",
+    ],
+)

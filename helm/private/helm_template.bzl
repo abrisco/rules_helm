@@ -124,3 +124,52 @@ helm_template_test = rule(
         str(Label("//helm:toolchain_type")),
     ],
 )
+
+def _helm_template_impl(ctx):
+    toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
+
+    chart_info = ctx.attr.chart[HelmPackageInfo]
+
+    output = ctx.actions.declare_file(ctx.label.name + ".yaml")
+
+    args = ctx.actions.args()
+    args.add("-helm", toolchain.helm)
+    args.add("-helm_plugins", toolchain.helm_plugins.path)
+    args.add("-chart", chart_info.chart)
+    args.add("-output", output)
+
+    ctx.actions.run(
+        executable = ctx.executable._templater,
+        outputs = [output],
+        inputs = depset([chart_info.chart]),
+        tools = depset([toolchain.helm]),
+        mnemonic = "HelmTemplate",
+        arguments = [args],
+        progress_message = "Running Helm Template for {}".format(ctx.label),
+    )
+
+    return DefaultInfo(
+        files = depset([output]),
+        runfiles = ctx.runfiles([output]),
+    )
+
+helm_template = rule(
+    doc = "A rule for rendering helm chart templates to a file.",
+    implementation = _helm_template_impl,
+    attrs = {
+        "chart": attr.label(
+            doc = "The helm package to resolve charts for.",
+            mandatory = True,
+            providers = [HelmPackageInfo],
+        ),
+        "_templater": attr.label(
+            doc = "A process wrapper to use for running `helm template`.",
+            executable = True,
+            cfg = "exec",
+            default = Label("//helm/private/templater"),
+        ),
+    },
+    toolchains = [
+        str(Label("//helm:toolchain_type")),
+    ],
+)
