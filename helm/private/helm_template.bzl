@@ -130,7 +130,7 @@ def _helm_template_impl(ctx):
 
     chart_info = ctx.attr.chart[HelmPackageInfo]
 
-    output = ctx.actions.declare_file(ctx.label.name + ".yaml")
+    output = ctx.outputs.out if ctx.outputs.out else ctx.actions.declare_file(ctx.label.name + ".yaml")
 
     args = ctx.actions.args()
     args.add("-helm", toolchain.helm)
@@ -161,6 +161,9 @@ helm_template = rule(
             doc = "The helm package to resolve charts for.",
             mandatory = True,
             providers = [HelmPackageInfo],
+        ),
+        "out": attr.output(
+            doc = "The output file to write the output from `helm template`.",
         ),
         "_templater": attr.label(
             doc = "A process wrapper to use for running `helm template`.",

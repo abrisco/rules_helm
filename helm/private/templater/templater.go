@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"log"
 	"os"
@@ -58,11 +57,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
+	outputFile, err := os.Create(output)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	cmd.Stdout = outputFile
+	cmd.Stderr = os.Stderr
 
 	exitCode := 0
 	var cmdError error
@@ -80,13 +81,7 @@ func main() {
 	}
 
 	if cmdError != nil {
-		os.Stderr.Write(stderr.Bytes())
 		log.Fatal(cmdError)
-	}
-
-	err = os.WriteFile(output, stdout.Bytes(), 0644)
-	if err != nil {
-		log.Fatal(err)
 	}
 
 	os.Exit(exitCode)

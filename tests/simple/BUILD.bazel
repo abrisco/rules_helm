@@ -12,6 +12,7 @@ helm_lint_test(
 
 helm_template(
     name = "simple_template",
+    out = "simple.yaml",
     chart = ":simple",
 )
 
