@@ -11,5 +11,5 @@ user.bazelrc
 Chart.lock
 .idea/
 
-# Running `helm_lint_test or `helm_template_test` targets creates _tmp/:
+# Running `helm_lint_test` or `helm_template_test` targets creates _tmp/:
 _tmp/

@@ -208,12 +208,10 @@ func hashString(text string) string {
 	return hex.EncodeToString(hashSum)
 }
 
-func transformStringSlice(slice []string, f func(string) string) []string {
-	res := []string{}
-	for _, s := range slice {
-		res = append(res, f(s))
+func transformStringSlice(slice []string, f func(string) string) {
+	for i, s := range slice {
+		slice[i] = f(s)
 	}
-	return res
 }
 
 func main() {
@@ -249,17 +247,17 @@ func main() {
 	var pkg = args.pkg
 	var helm = args.helm
 	var helmPlugins = args.helmPlugins
-	var valuesFiles []string
+	var valuesFiles = args.values
 	if is_test {
 		pkg = helm_utils.GetRunfile(pkg)
 		helm = helm_utils.GetRunfile(helm)
 		helmPlugins = helm_utils.GetRunfile(helmPlugins)
-		valuesFiles = transformStringSlice(args.values, helm_utils.GetRunfile)
+		transformStringSlice(valuesFiles, helm_utils.GetRunfile)
 	} else {
 		pkg = makeAbsolutePath(pkg)
 		helm = makeAbsolutePath(helm)
 		helmPlugins = makeAbsolutePath(helmPlugins)
-		valuesFiles = transformStringSlice(args.values, makeAbsolutePath)
+		transformStringSlice(args.values, makeAbsolutePath)
 	}
 
 	if err := extractPackage(pkg, dir); err != nil {
