@@ -142,7 +142,7 @@ def _helm_template_impl(ctx):
         executable = ctx.executable._templater,
         outputs = [output],
         inputs = depset([chart_info.chart]),
-        tools = depset([toolchain.helm]),
+        tools = depset([toolchain.helm, toolchain.helm_plugins]),
         mnemonic = "HelmTemplate",
         arguments = [args],
         progress_message = "Running Helm Template for {}".format(ctx.label),
