@@ -17,12 +17,6 @@ helm_template(
     chart = ":simple",
 )
 
-helm_template(
-    name = "simple_template",
-    out = "simple.yaml",
-    chart = ":simple",
-)
-
 helm_template_test(
     name = "simple_template_test",
     chart = ":simple",
