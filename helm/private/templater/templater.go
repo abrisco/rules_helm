@@ -6,15 +6,29 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"syscall"
 
 	"github.com/abrisco/rules_helm/helm/private/helm_utils"
 )
 
+// stringSliceFlag is a custom flag type for collecting multiple values
+type stringSliceFlag []string
+
+func (i *stringSliceFlag) String() string {
+	return strings.Join(*i, ",")
+}
+
+func (i *stringSliceFlag) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
+
 type Arguments struct {
 	helm        string
 	helmPlugins string
 	chart       string
+	values      stringSliceFlag
 	output      string
 }
 
@@ -29,12 +43,13 @@ func makeAbsolutePath(path string) string {
 	return filepath.Join(cwd, path)
 }
 
-func parse_args() Arguments {
+func parseArgs() Arguments {
 	var args Arguments
 
 	flag.StringVar(&args.helm, "helm", "", "The path to a helm executable")
 	flag.StringVar(&args.helmPlugins, "helm_plugins", "", "The path to a helm plugins directory")
 	flag.StringVar(&args.chart, "chart", "", "The path to the helm chart to template.")
+	flag.Var(&args.values, "values", "Values files to pass to helm's --values flag.")
 	flag.StringVar(&args.output, "output", "", "The output file to write.")
 	flag.Parse()
 
@@ -42,7 +57,7 @@ func parse_args() Arguments {
 }
 
 func main() {
-	args := parse_args()
+	args := parseArgs()
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
@@ -52,6 +67,9 @@ func main() {
 	output := makeAbsolutePath(args.output)
 
 	helmArgs := []string{"template", chart}
+	for _, v := range args.values {
+		helmArgs = append(helmArgs, "--values", makeAbsolutePath(v))
+	}
 	cmd, err := helm_utils.BuildHelmCommand(helm, helmArgs, helmPlugins)
 	if err != nil {
 		log.Fatal(err)
