@@ -117,20 +117,19 @@ def _helm_import_repository_impl(repository_ctx):
 
 helm_import_repository = repository_rule(
     implementation = _helm_import_repository_impl,
-    doc = "A rule for fetching external Helm charts from an arbitrary repository.",
+    doc = "A rule for fetching external Helm charts from an arbitrary URL or repository.",
     attrs = {
         "chart_name": attr.string(
             doc = "Chart name to import.",
         ),
         "repository": attr.string(
             doc = "Chart repository url where to locate the requested chart.",
-            mandatory = True,
         ),
         "sha256": attr.string(
             doc = "The expected SHA-256 hash of the chart imported.",
         ),
         "url": attr.string(
-            doc = "The url where the chart can be directly downloaded.",
+            doc = "The url where the chart can be directly downloaded. Takes precendence over `repository`",
         ),
         "version": attr.string(
             doc = "Specify a version constraint for the chart version to use.",
