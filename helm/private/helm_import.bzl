@@ -68,13 +68,20 @@ alias(
 """
 
 def _helm_import_repository_impl(repository_ctx):
-    chart_name = repository_ctx.attr.chart_name or repository_ctx.name
+    if repository_ctx.attr.url and repository_ctx.attr.repository:
+        fail("`url` and `repository` are exclusive arguments.")
 
     if repository_ctx.attr.url:
         chart_url = repository_ctx.attr.url
+        if repository_ctx.attr.chart_name:
+            fail("`url` provided, do not set `chart_name`")
+        if repository_ctx.attr.version:
+            fail("`url` provided, do not set `version`")
     else:
+        if not repository_ctx.attr.chart_name:
+            fail("`chart_name` is required to locate chart")
         if not repository_ctx.attr.version:
-            fail("`version` is needed to locate charts")
+            fail("`version` is required to locate chart")
 
         repo_yaml = "index.yaml"
         repository_ctx.download(
@@ -85,7 +92,7 @@ def _helm_import_repository_impl(repository_ctx):
             ),
         )
         file_name = "{}-{}.tgz".format(
-            chart_name,
+            repository_ctx.attr.chart_name,
             repository_ctx.attr.version,
         )
 
@@ -93,6 +100,7 @@ def _helm_import_repository_impl(repository_ctx):
 
     # Parse the chart file name from the URL
     _, _, chart_file = chart_url.rpartition("/")
+    chart_name, _, chart_version = chart_file.removesuffix(".tgz").rpartition("-")
 
     repository_ctx.file("BUILD.bazel", content = _HELM_DEP_BUILD_FILE.format(
         chart_name = chart_name,
@@ -107,12 +115,12 @@ def _helm_import_repository_impl(repository_ctx):
     )
 
     return {
-        "chart_name": repository_ctx.attr.chart_name,
+        "chart_name": chart_name,
         "name": repository_ctx.name,
         "repository": repository_ctx.attr.repository,
         "sha256": result.sha256,
         "url": chart_url,
-        "version": repository_ctx.attr.version,
+        "version": chart_version,
     }
 
 helm_import_repository = repository_rule(
@@ -120,19 +128,19 @@ helm_import_repository = repository_rule(
     doc = "A rule for fetching external Helm charts from an arbitrary URL or repository.",
     attrs = {
         "chart_name": attr.string(
-            doc = "Chart name to import.",
+            doc = "Chart name to import. Must be set if `repository` is specified",
         ),
         "repository": attr.string(
-            doc = "Chart repository url where to locate the requested chart.",
+            doc = "Chart repository url where to locate the requested chart. Mutually exclusive with `url`.",
         ),
         "sha256": attr.string(
             doc = "The expected SHA-256 hash of the chart imported.",
         ),
         "url": attr.string(
-            doc = "The url where the chart can be directly downloaded. Takes precendence over `repository`",
+            doc = "The url where a chart can be directly downloaded. Mutually exclusive with `chart_name`, `repository`, and `version`",
         ),
         "version": attr.string(
-            doc = "Specify a version constraint for the chart version to use.",
+            doc = "Specify a version constraint for the chart version to use. Must be set if `repository` is specified.",
         ),
     },
 )
