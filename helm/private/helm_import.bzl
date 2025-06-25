@@ -98,6 +98,9 @@ def _helm_import_repository_impl(repository_ctx):
 
         chart_url = _find_chart_url(repository_ctx, repo_yaml, file_name)
 
+    if not chart_url.startswith("http"):
+        fail("Cannot download from {}, unsupported protocol".format(chart_url))
+
     # Parse the chart file name from the URL
     _, _, chart_file = chart_url.rpartition("/")
     chart_name, _, chart_version = chart_file.removesuffix(".tgz").rpartition("-")
