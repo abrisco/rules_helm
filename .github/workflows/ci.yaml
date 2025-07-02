@@ -20,7 +20,7 @@ jobs:
         include:
           - os: macos-14
           - os: ubuntu-22.04
-          - os: windows-2019
+          - os: windows-latest
     steps:
       # Checkout the code
       - uses: actions/checkout@v4
@@ -54,7 +54,7 @@ jobs:
         include:
           - os: macos-14
           - os: ubuntu-22.04
-          - os: windows-2019
+          - os: windows-latest
     steps:
       # Checkout the code
       - uses: actions/checkout@v4
