@@ -168,6 +168,7 @@
 <li><a href="#helm_push">helm_push</a></li>
 <li><a href="#helm_push_images">helm_push_images</a></li>
 <li><a href="#helm_push_registry">helm_push_registry</a></li>
+<li><a href="#helm_template">helm_template</a></li>
 <li><a href="#helm_template_test">helm_template_test</a></li>
 <li><a href="#helm_toolchain">helm_toolchain</a></li>
 <li><a href="#helm_uninstall">helm_uninstall</a></li>
@@ -364,6 +365,21 @@ if the following environment variables are defined:</p>
 <tr><td style="text-align: left"><a id="helm_push_registry-package"></a>package</td><td style="text-align: left">The helm package to push to the registry.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="helm_push_registry-push_cmd"></a>push_cmd</td><td style="text-align: left">An alternative command to <code>push</code> for publishing the helm chart. E.g. <code>cm-push</code></td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_push_registry-registry_url"></a>registry_url</td><td style="text-align: left">The registry URL at which to push the helm chart to. E.g. <code>oci://my.registry.io/chart-name</code></td><td style="text-align: left">String</td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+</tbody></table>
+</div>
+<p><a id="helm_template"></a></p>
+<h2 id="helm_template"><a class="header" href="#helm_template">helm_template</a></h2>
+<pre>
+load("@rules_helm//helm:defs.bzl", "helm_template")
+
+helm_template(<a href="#helm_template-name">name</a>, <a href="#helm_template-out">out</a>, <a href="#helm_template-chart">chart</a>)
+</pre>
+<p>A rule for rendering helm chart templates to a file.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_template-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_template-out"></a>out</td><td style="text-align: left">The output file to write the output from <code>helm template</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_template-chart"></a>chart</td><td style="text-align: left">The helm package to resolve charts for.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 </tbody></table>
 </div>
 <p><a id="helm_template_test"></a></p>
