@@ -156,8 +156,8 @@ func lint(directory string, helm string, helmArgs []string, helmPluginsDir strin
 	cmd.Dir = directory
 
 	out, err := cmd.Output()
+	os.Stderr.WriteString(string(out))
 	if err != nil {
-		os.Stderr.WriteString(string(out))
 		log.Fatal(err)
 	}
 
