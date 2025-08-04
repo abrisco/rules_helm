@@ -243,7 +243,7 @@ helm_package = rule(
                 "associated with the current helm chart. E.g., the `./crds` directory"
             ),
             default = [],
-            allow_files = True,
+            allow_files = [".yaml"],
         ),
         "deps": attr.label_list(
             doc = "Other helm packages this package depends on.",
