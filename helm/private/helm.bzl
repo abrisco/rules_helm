@@ -72,10 +72,19 @@ def helm_chart(
         values = "values.yaml"
 
     if templates == None:
-        templates = native.glob(["templates/**"])
+        # https://github.com/helm/helm/blob/a73c51ca08297fda17f40b3b11ff602e22893334/pkg/lint/rules/template.go#L208
+        templates = native.glob(
+            [
+                "templates/**/*.yaml",
+                "templates/**/*.yml",
+                "templates/**/*.tpl",
+                "templates/**/*.txt",
+            ],
+            allow_empty = True,
+        )
 
     if crds == None:
-        crds = native.glob(["crds/**"], allow_empty = True)
+        crds = native.glob(["crds/**/*.yaml"], allow_empty = True)
 
     helm_package(
         name = name,

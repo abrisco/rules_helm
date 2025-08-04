@@ -243,7 +243,7 @@ helm_package = rule(
                 "associated with the current helm chart. E.g., the `./crds` directory"
             ),
             default = [],
-            allow_files = True,
+            allow_files = [".yaml"],
         ),
         "deps": attr.label_list(
             doc = "Other helm packages this package depends on.",
@@ -286,7 +286,7 @@ helm_package = rule(
         ),
         "templates": attr.label_list(
             doc = "All templates associated with the current helm chart. E.g., the `./templates` directory",
-            allow_files = True,
+            allow_files = [".yaml", ".yml", ".tpl", ".txt"],
         ),
         "values": attr.label(
             doc = "The `values.yaml` file for the current package.",
