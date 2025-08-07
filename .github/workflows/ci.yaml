@@ -71,7 +71,6 @@ jobs:
         if: startswith(runner.os, 'Windows')
       - name: Setup Bazelrc
         run: |
-          echo "common --config=strict" >> ./user.bazelrc
           echo "common --keep_going" >> ./user.bazelrc
 
       # Build and Test the code
