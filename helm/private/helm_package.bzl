@@ -100,6 +100,10 @@ def _helm_package_impl(ctx):
 
     args.add("-chart", chart_yaml)
     args.add("-values", values_yaml)
+
+    if ctx.file.schema:
+        args.add("-schema", ctx.file.schema)
+
     args.add("-package", "{}/{}".format(
         ctx.label.workspace_name if ctx.label.workspace_name else ctx.workspace_name,
         ctx.label.package,
@@ -197,7 +201,7 @@ def _helm_package_impl(ctx):
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
         inputs = depset(
-            ctx.files.templates + ctx.files.files + ctx.files.crds + stamps + image_inputs + deps + [
+            ctx.files.templates + ctx.files.schema + ctx.files.files + ctx.files.crds + stamps + image_inputs + deps + [
                 chart_yaml,
                 values_yaml,
                 templates_manifest,
@@ -243,7 +247,7 @@ helm_package = rule(
                 "associated with the current helm chart. E.g., the `./crds` directory"
             ),
             default = [],
-            allow_files = True,
+            allow_files = [".yaml"],
         ),
         "deps": attr.label_list(
             doc = "Other helm packages this package depends on.",
@@ -260,6 +264,10 @@ helm_package = rule(
                 [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) \
                 targets.""",
             aspects = [_oci_push_repository_aspect],
+        ),
+        "schema": attr.label(
+            doc = "The `values.schema.json` file for the current package.",
+            allow_single_file = True,
         ),
         "stamp": attr.int(
             doc = """\
@@ -286,7 +294,7 @@ helm_package = rule(
         ),
         "templates": attr.label_list(
             doc = "All templates associated with the current helm chart. E.g., the `./templates` directory",
-            allow_files = True,
+            allow_files = [".yaml", ".yml", ".tpl", ".txt"],
         ),
         "values": attr.label(
             doc = "The `values.yaml` file for the current package.",
