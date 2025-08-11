@@ -36,6 +36,7 @@ load(
 )
 load(
     "//helm/private:helm_template.bzl",
+    _helm_template = "helm_template",
     _helm_template_test = "helm_template_test",
 )
 load(
@@ -65,6 +66,7 @@ helm_push = _helm_push
 helm_push_images = _helm_push_images
 helm_push_registry = _helm_push
 helm_register_toolchains = _helm_register_toolchains
+helm_template = _helm_template
 helm_template_test = _helm_template_test
 helm_toolchain = _helm_toolchain
 helm_uninstall = _helm_uninstall

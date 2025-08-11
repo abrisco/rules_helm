@@ -1,4 +1,4 @@
-load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template", "helm_template_test")
 
 helm_chart(
     name = "simple",
@@ -9,6 +9,12 @@ helm_lint_test(
     name = "simple_lint_test",
     chart = ":simple",
     strict = True,
+)
+
+helm_template(
+    name = "simple_template",
+    out = "simple.yaml",
+    chart = ":simple",
 )
 
 helm_template_test(
