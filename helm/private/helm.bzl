@@ -14,6 +14,7 @@ def helm_chart(
         values_json = None,
         substitutions = {},
         templates = None,
+        schema = None,
         files = [],
         images = [],
         deps = None,
@@ -49,6 +50,7 @@ def helm_chart(
         values_json (str, optional): The json encoded contents of `values.yaml`.
         substitutions (dict, optional): A dictionary of substitutions to apply to `values.yaml`.
         templates (list, optional): A list of template files to include in the package.
+        schema (str, optional): A JSON Schema file for values. Defaults to `values.schema.json`.
         files (list, optional): Files accessed in templates via the [`.Files` api](https://helm.sh/docs/chart_template_guide/accessing_files/).
         images (list, optional): A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) targets
         deps (list, optional): A list of helm package dependencies.
@@ -72,10 +74,23 @@ def helm_chart(
         values = "values.yaml"
 
     if templates == None:
-        templates = native.glob(["templates/**"])
+        # https://github.com/helm/helm/blob/a73c51ca08297fda17f40b3b11ff602e22893334/pkg/lint/rules/template.go#L208
+        templates = native.glob(
+            [
+                "templates/**/*.yaml",
+                "templates/**/*.yml",
+                "templates/**/*.tpl",
+                "templates/**/*.txt",
+            ],
+            allow_empty = True,
+        )
 
     if crds == None:
-        crds = native.glob(["crds/**"], allow_empty = True)
+        crds = native.glob(["crds/**/*.yaml"], allow_empty = True)
+
+    # values.schema.json is an optional file, use glob to check if it exists:
+    if schema == None and len(native.glob(["values.schema.json"], allow_empty = True)):
+        schema = "values.schema.json"
 
     helm_package(
         name = name,
@@ -90,6 +105,7 @@ def helm_chart(
         templates = templates,
         values = values,
         values_json = values_json,
+        schema = schema,
         **kwargs
     )
 

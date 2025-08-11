@@ -159,19 +159,6 @@ func main() {
 	var test_stream bytes.Buffer
 
 	if is_test {
-		var cleanArgs []string
-		dir, err := os.Getwd()
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, arg := range cmd.Args {
-			if arg == "install" || arg == "upgrade" {
-				cleanArgs = append(cleanArgs, "template")
-			} else {
-				cleanArgs = append(cleanArgs, strings.ReplaceAll(arg, dir, ""))
-			}
-		}
-		log.Println(strings.Join(cleanArgs, " "))
 		cmd.Stdout = &test_stream
 		cmd.Stderr = &test_stream
 	} else {
