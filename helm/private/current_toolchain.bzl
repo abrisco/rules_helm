@@ -21,6 +21,5 @@ def _current_helm_toolchain_impl(ctx):
 current_helm_toolchain = rule(
     implementation = _current_helm_toolchain_impl,
     toolchains = ["@rules_helm//helm:toolchain_type"],
-    incompatible_use_toolchain_transition = True,
     doc = DOC,
 )
