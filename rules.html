@@ -250,7 +250,7 @@ helm_install(<a href="#helm_install-name">name</a>, <a href="#helm_install-data"
 <pre>
 load("@rules_helm//helm:defs.bzl", "helm_lint_test")
 
-helm_lint_test(<a href="#helm_lint_test-name">name</a>, <a href="#helm_lint_test-chart">chart</a>, <a href="#helm_lint_test-strict">strict</a>, <a href="#helm_lint_test-substitutions">substitutions</a>)
+helm_lint_test(<a href="#helm_lint_test-name">name</a>, <a href="#helm_lint_test-chart">chart</a>, <a href="#helm_lint_test-strict">strict</a>, <a href="#helm_lint_test-substitutions">substitutions</a>, <a href="#helm_lint_test-values">values</a>)
 </pre>
 <p>A rule for performing <code>helm lint</code> on a helm package</p>
 <p><strong>ATTRIBUTES</strong></p>
@@ -259,6 +259,7 @@ helm_lint_test(<a href="#helm_lint_test-name">name</a>, <a href="#helm_lint_test
 <tr><td style="text-align: left"><a id="helm_lint_test-chart"></a>chart</td><td style="text-align: left">The helm package to run linting on.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="helm_lint_test-strict"></a>strict</td><td style="text-align: left">Fail on lint warnings.</td><td style="text-align: left">Boolean</td><td style="text-align: left">optional</td><td style="text-align: left"><code>False</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_lint_test-substitutions"></a>substitutions</td><td style="text-align: left">A dictionary of substitutions passed to `helm lint --set flag.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_lint_test-values"></a>values</td><td style="text-align: left">A list of files passed to `helm lint --values flag.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 </tbody></table>
 </div>
 <p><a id="helm_package"></a></p>
