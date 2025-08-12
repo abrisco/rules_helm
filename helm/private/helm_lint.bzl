@@ -66,6 +66,11 @@ def _helm_lint_test_impl(ctx):
     # Passed directly to --set flag of `helm lint`, but using -substitutions to match helm_package.bzl.
     args.add("-substitutions", ",".join(["%s=%s" % (k, v) for k, v in ctx.attr.substitutions.items()]))
 
+    # args_all with map_each can't be used here since the function can only
+    # accept one argument and Bazel doesn't allow inline functions.
+    for v in ctx.files.values:
+        args.add("-values", rlocationpath(v, ctx.workspace_name))
+
     ctx.actions.write(
         output = args_file,
         content = args,
@@ -87,7 +92,7 @@ def _helm_lint_test_impl(ctx):
         DefaultInfo(
             files = depset([test_runner]),
             runfiles = ctx.runfiles(
-                files = [toolchain.helm, toolchain.helm_plugins, helm_pkg_info.chart, args_file],
+                files = [toolchain.helm, toolchain.helm_plugins, helm_pkg_info.chart, args_file] + ctx.files.values,
             ).merge(ctx.attr._linter[DefaultInfo].default_runfiles),
             executable = test_runner,
         ),
@@ -111,6 +116,11 @@ helm_lint_test = rule(
         "substitutions": attr.string_dict(
             doc = "A dictionary of substitutions passed to `helm lint --set flag.",
             default = {},
+        ),
+        "values": attr.label_list(
+            doc = "A list of files passed to `helm lint --values flag.",
+            default = [],
+            allow_files = True,
         ),
         "_copier": attr.label(
             cfg = "exec",
