@@ -18,6 +18,7 @@ import (
 
 type Arguments struct {
 	helm          string
+	strict        bool
 	substitutions string
 	helmPlugins   string
 	pkg           string
@@ -39,6 +40,7 @@ func parse_args() Arguments {
 	var args Arguments
 
 	flag.StringVar(&args.helm, "helm", "", "The path to a helm executable")
+	flag.BoolVar(&args.strict, "strict", false, "Fail on lint warnings")
 	flag.StringVar(&args.substitutions, "substitutions", "", "Additional values to pass to helm's --set flag.")
 	flag.StringVar(&args.helmPlugins, "helm_plugins", "", "The path to a helm plugins directory")
 	flag.StringVar(&args.output, "output", "", "The path to the Bazel `HelmPackage` action output")
@@ -156,8 +158,8 @@ func lint(directory string, helm string, helmArgs []string, helmPluginsDir strin
 	cmd.Dir = directory
 
 	out, err := cmd.Output()
+	os.Stderr.WriteString(string(out))
 	if err != nil {
-		os.Stderr.WriteString(string(out))
 		log.Fatal(err)
 	}
 
@@ -243,6 +245,9 @@ func main() {
 
 	lint_dir := find_package_root(dir)
 	helmArgs := []string{"lint", lint_dir}
+	if args.strict {
+		helmArgs = append(helmArgs, "--strict")
+	}
 	if args.substitutions != "" {
 		helmArgs = append(helmArgs, "--set", args.substitutions)
 	}
