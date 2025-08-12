@@ -24,9 +24,12 @@ version: 0.1.0
 appVersion: "1.16.0"
 
 dependencies:
+  - name: grafana
+    repository: https://charts.bitnami.com/bitnami
+    version: 12.1.4
   - name: redis
     repository: https://charts.bitnami.com/bitnami
-    version: 14.4.0
+    version: 21.2.5
   - name: postgresql
     repository: https://charts.bitnami.com/bitnami
     version: 14.0.5

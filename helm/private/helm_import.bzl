@@ -1,6 +1,7 @@
 """Helm rules for managing external dependencies"""
 
 load("//helm:providers.bzl", "HelmPackageInfo")
+load(":helm_import_authn.bzl", "authn")
 
 def _helm_import_impl(ctx):
     metadata_output = ctx.actions.declare_file(ctx.label.name + ".metadata.json")
@@ -38,18 +39,41 @@ helm_import = rule(
     },
 )
 
-def _find_chart_url(repository_ctx, repo_file, chart_file):
+def _find_chart_url(repository_ctx, repo_file, chart_name, chart_version):
+    # HTTP source for `repository_ctx.download`:
+    chart_file = "{}-{}.tgz".format(chart_name, chart_version)
+
+    # OCI source:
+    oci_identifier = "{}:{}".format(chart_name, chart_version)
+
     repo_def = repository_ctx.read(repo_file)
     lines = repo_def.splitlines()
     for line in lines:
         line = line.lstrip(" ")
-        if line.startswith("-") and line.endswith(chart_file):
+        if line.startswith("-") and line.endswith(chart_file) or line.endswith(oci_identifier):
             url = line.lstrip("-").lstrip(" ")
             if url == chart_file:
                 return "{}/{}".format(repository_ctx.attr.repository, url)
             if url.startswith("http") and url.endswith("/{}".format(chart_file)):
                 return url
-    fail("cannot find {} in {}".format(chart_file, repo_file))
+            if url.startswith("oci") and url.endswith("/{}".format(oci_identifier)):
+                return url
+    fail("cannot find {} (version {}) in {}".format(chart_name, chart_version, repository_ctx.attr.repository))
+
+def _get_chart_file_name(chart_url):
+    if chart_url.startswith("http") and chart_url.endswith(".tgz"):
+        return chart_url.split("/")[-1]
+    if chart_url.startswith("oci"):
+        chart_name, chart_version = chart_url.split("/")[-1].split(":")
+        return "{}-{}.tgz".format(chart_name, chart_version)
+    fail("cannot determine chart file name from {}".format(chart_url))
+
+def _find_chart_digest(manifest):
+    for layer in manifest["layers"]:
+        # https://helm.sh/docs/topics/registries/#helm-chart-manifest
+        if layer["mediaType"] == "application/vnd.cncf.helm.chart.content.v1.tar+gzip":
+            return layer["digest"]
+    fail("could not find chart content layer")
 
 _HELM_DEP_BUILD_FILE = """\
 load("@rules_helm//helm:defs.bzl", "helm_import")
@@ -91,18 +115,64 @@ def _helm_import_repository_impl(repository_ctx):
                 repo_yaml,
             ),
         )
-        file_name = "{}-{}.tgz".format(
-            repository_ctx.attr.chart_name,
-            repository_ctx.attr.version,
+
+        chart_url = _find_chart_url(repository_ctx, repo_yaml, repository_ctx.attr.chart_name, repository_ctx.attr.version)
+
+    chart_file = _get_chart_file_name(chart_url)
+
+    if chart_url.startswith("http"):
+        result = repository_ctx.download(
+            output = repository_ctx.path(chart_file),
+            url = chart_url,
+            sha256 = repository_ctx.attr.sha256,
+        )
+    elif chart_url.startswith("oci"):
+        url, _, chart_version = chart_url.rpartition(":")
+        hostname, _, chart_path = url.removeprefix("oci://").partition("/")
+
+        au = authn.new(repository_ctx)
+        token = au.get_token(hostname, chart_path)
+
+        # Find the digest for the layer with the chart package in the image manifest:
+        manifest_json = "manifest.json"
+        manifest_url = "https://{}/v2/{}/manifests/{}".format(
+            hostname,
+            chart_path,
+            chart_version,
+        )
+        repository_ctx.download(
+            output = manifest_json,
+            url = manifest_url,
+            auth = {
+                manifest_url: token,
+            },
+        )
+        manifest = json.decode(repository_ctx.read(manifest_json))
+
+        # https://helm.sh/docs/topics/registries/#helm-chart-manifest
+        if manifest["config"]["mediaType"] != "application/vnd.cncf.helm.config.v1+json":
+            fail("{} is not a Helm chart package".format(chart_url))
+
+        chart_digest = _find_chart_digest(manifest)
+        chart_blob_url = "https://{}/v2/{}/blobs/{}".format(
+            hostname,
+            chart_path,
+            chart_digest,
         )
 
-        chart_url = _find_chart_url(repository_ctx, repo_yaml, file_name)
+        # Download the chart package:
+        result = repository_ctx.download(
+            output = repository_ctx.path(chart_file),
+            url = chart_blob_url,
+            sha256 = repository_ctx.attr.sha256,
+            auth = {
+                chart_blob_url: token,
+            },
+        )
 
-    if not chart_url.startswith("http"):
-        fail("Cannot download from {}, unsupported protocol".format(chart_url))
+    else:
+        fail("cannot download {} from {}, unsupported scheme".format(repository_ctx.attr.chart_name, chart_url))
 
-    # Parse the chart file name from the URL
-    _, _, chart_file = chart_url.rpartition("/")
     chart_name, _, chart_version = chart_file.removesuffix(".tgz").rpartition("-")
 
     repository_ctx.file("BUILD.bazel", content = _HELM_DEP_BUILD_FILE.format(
@@ -110,12 +180,6 @@ def _helm_import_repository_impl(repository_ctx):
         chart_file = chart_file,
         repository_name = repository_ctx.name,
     ))
-
-    result = repository_ctx.download(
-        output = repository_ctx.path(chart_file),
-        url = chart_url,
-        sha256 = repository_ctx.attr.sha256,
-    )
 
     return {
         "chart_name": chart_name,

@@ -42,8 +42,8 @@ func WithChartDepsTest(t *testing.T) {
 	tarReader := tar.NewReader(gzr)
 
 	// Initialize flags to check for the two files
-	var redisChartFound, postgresChartFound bool
-	var redisChartContent, postgresChartContent string
+	var grafanaChartFound, redisChartFound, postgresChartFound bool
+	var grafanaChartContent, redisChartContent, postgresChartContent string
 
 	// Iterate through the tar archive
 	for {
@@ -55,7 +55,16 @@ func WithChartDepsTest(t *testing.T) {
 			t.Fatalf("Error reading tar archive: %v", err)
 		}
 
-		// Check for the two specific files
+		// Check for the three specific files
+		if header.Name == "charts/grafana/Chart.yaml" {
+			grafanaChartFound = true
+			content, err := io.ReadAll(tarReader)
+			if err != nil {
+				t.Fatalf("Failed to read grafana Chart.yaml: %v", err)
+			}
+			grafanaChartContent = string(content)
+		}
+
 		if header.Name == "charts/redis/Chart.yaml" {
 			redisChartFound = true
 			content, err := io.ReadAll(tarReader)
@@ -75,7 +84,10 @@ func WithChartDepsTest(t *testing.T) {
 		}
 	}
 
-	// Assert that both files were found
+	// Assert that all files were found
+	if !grafanaChartFound {
+		t.Error("charts/grafana/Chart.yaml was not found in the Helm chart")
+	}
 	if !redisChartFound {
 		t.Error("charts/redis/Chart.yaml was not found in the Helm chart")
 	}
@@ -83,7 +95,10 @@ func WithChartDepsTest(t *testing.T) {
 		t.Error("charts/postgresql/Chart.yaml was not found in the Helm chart")
 	}
 
-	// Assert that the content of both files contains the expected strings
+	// Assert that the content of all files contains the expected strings
+	if !strings.Contains(grafanaChartContent, "grafana") {
+		t.Error("charts/grafana/Chart.yaml does not contain the expected string 'grafana'")
+	}
 	if !strings.Contains(redisChartContent, "redis") {
 		t.Error("charts/redis/Chart.yaml does not contain the expected string 'redis'")
 	}
