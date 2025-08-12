@@ -4,7 +4,7 @@ go 1.23.0
 
 require gopkg.in/yaml.v3 v3.0.1
 
-require github.com/bazelbuild/rules_go v0.54.0
+require github.com/bazelbuild/rules_go v0.56.1
 
 require (
 	github.com/gogo/protobuf v1.3.2 // indirect
