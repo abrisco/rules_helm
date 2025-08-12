@@ -16,9 +16,23 @@ import (
 	"github.com/abrisco/rules_helm/helm/private/helm_utils"
 )
 
+// stringSliceFlag is a custom flag type for collecting multiple values
+type stringSliceFlag []string
+
+func (i *stringSliceFlag) String() string {
+	return strings.Join(*i, ",")
+}
+
+func (i *stringSliceFlag) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
+
 type Arguments struct {
 	helm          string
+	strict        bool
 	substitutions string
+	values        stringSliceFlag
 	helmPlugins   string
 	pkg           string
 	output        string
@@ -39,7 +53,9 @@ func parse_args() Arguments {
 	var args Arguments
 
 	flag.StringVar(&args.helm, "helm", "", "The path to a helm executable")
+	flag.BoolVar(&args.strict, "strict", false, "Fail on lint warnings")
 	flag.StringVar(&args.substitutions, "substitutions", "", "Additional values to pass to helm's --set flag.")
+	flag.Var(&args.values, "values", "Values files to pass to helm's --values flag.")
 	flag.StringVar(&args.helmPlugins, "helm_plugins", "", "The path to a helm plugins directory")
 	flag.StringVar(&args.output, "output", "", "The path to the Bazel `HelmPackage` action output")
 	flag.StringVar(&args.pkg, "package", "", "The path to the helm package to lint.")
@@ -156,8 +172,8 @@ func lint(directory string, helm string, helmArgs []string, helmPluginsDir strin
 	cmd.Dir = directory
 
 	out, err := cmd.Output()
+	os.Stderr.WriteString(string(out))
 	if err != nil {
-		os.Stderr.WriteString(string(out))
 		log.Fatal(err)
 	}
 
@@ -194,6 +210,12 @@ func hashString(text string) string {
 	return hex.EncodeToString(hashSum)
 }
 
+func transformStringSlice(slice []string, f func(string) string) {
+	for i, s := range slice {
+		slice[i] = f(s)
+	}
+}
+
 func main() {
 	args := parse_args()
 
@@ -227,14 +249,17 @@ func main() {
 	var pkg = args.pkg
 	var helm = args.helm
 	var helmPlugins = args.helmPlugins
+	var valuesFiles = args.values
 	if is_test {
 		pkg = helm_utils.GetRunfile(pkg)
 		helm = helm_utils.GetRunfile(helm)
 		helmPlugins = helm_utils.GetRunfile(helmPlugins)
+		transformStringSlice(valuesFiles, helm_utils.GetRunfile)
 	} else {
 		pkg = makeAbsolutePath(pkg)
 		helm = makeAbsolutePath(helm)
 		helmPlugins = makeAbsolutePath(helmPlugins)
+		transformStringSlice(args.values, makeAbsolutePath)
 	}
 
 	if err := extractPackage(pkg, dir); err != nil {
@@ -243,8 +268,14 @@ func main() {
 
 	lint_dir := find_package_root(dir)
 	helmArgs := []string{"lint", lint_dir}
+	if args.strict {
+		helmArgs = append(helmArgs, "--strict")
+	}
 	if args.substitutions != "" {
 		helmArgs = append(helmArgs, "--set", args.substitutions)
+	}
+	for _, v := range valuesFiles {
+		helmArgs = append(helmArgs, "--values", v)
 	}
 
 	lint(dir, helm, helmArgs, helmPlugins, args.output)

@@ -1,5 +1,5 @@
 apiVersion: v2
-name: with_chart_deps
+name: simple
 description: A Helm chart for Kubernetes
 
 # A chart can be either an 'application' or a 'library' chart.
@@ -22,14 +22,3 @@ version: 0.1.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "1.16.0"
-
-dependencies:
-  - name: grafana
-    repository: https://charts.bitnami.com/bitnami
-    version: 12.1.4
-  - name: redis
-    repository: https://charts.bitnami.com/bitnami
-    version: 21.2.5
-  - name: postgresql
-    repository: https://charts.bitnami.com/bitnami
-    version: 14.0.5
