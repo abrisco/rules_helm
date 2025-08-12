@@ -54,6 +54,7 @@ use_repo(
     "helm_cm_push_linux",
     "helm_cm_push_macos",
     "helm_cm_push_windows",
+    "helm_test_deps__with_chart_deps_grafana",
     "helm_test_deps__with_chart_deps_postgresql",
     "helm_test_deps__with_chart_deps_redis",
     "rules_helm_test_container_base",
