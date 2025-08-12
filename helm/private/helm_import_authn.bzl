@@ -55,9 +55,9 @@ def _get_token(repository_ctx, state, hostname, chart_path):
                     return {}
                 fail("could not find token in neither field 'token' nor 'access_token' in the response from the hostname")
             pattern = {
-                "type": "pattern",
-                "pattern": "%s <password>" % www_authenticate["challenge"],
                 "password": token,
+                "pattern": "%s <password>" % www_authenticate["challenge"],
+                "type": "pattern",
             }
 
             # put the token into cache so that we don't do the token exchange again.
