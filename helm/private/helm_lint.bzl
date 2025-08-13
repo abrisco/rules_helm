@@ -60,9 +60,16 @@ def _helm_lint_test_impl(ctx):
     args.add("-helm", rlocationpath(toolchain.helm, ctx.workspace_name))
     args.add("-helm_plugins", rlocationpath(toolchain.helm_plugins, ctx.workspace_name))
     args.add("-package", rlocationpath(helm_pkg_info.chart, ctx.workspace_name))
+    if ctx.attr.strict:
+        args.add("-strict")
 
     # Passed directly to --set flag of `helm lint`, but using -substitutions to match helm_package.bzl.
     args.add("-substitutions", ",".join(["%s=%s" % (k, v) for k, v in ctx.attr.substitutions.items()]))
+
+    # args_all with map_each can't be used here since the function can only
+    # accept one argument and Bazel doesn't allow inline functions.
+    for v in ctx.files.values:
+        args.add("-values", rlocationpath(v, ctx.workspace_name))
 
     ctx.actions.write(
         output = args_file,
@@ -85,7 +92,7 @@ def _helm_lint_test_impl(ctx):
         DefaultInfo(
             files = depset([test_runner]),
             runfiles = ctx.runfiles(
-                files = [toolchain.helm, toolchain.helm_plugins, helm_pkg_info.chart, args_file],
+                files = [toolchain.helm, toolchain.helm_plugins, helm_pkg_info.chart, args_file] + ctx.files.values,
             ).merge(ctx.attr._linter[DefaultInfo].default_runfiles),
             executable = test_runner,
         ),
@@ -103,9 +110,17 @@ helm_lint_test = rule(
             mandatory = True,
             providers = [HelmPackageInfo],
         ),
+        "strict": attr.bool(
+            doc = "Fail on lint warnings.",
+        ),
         "substitutions": attr.string_dict(
             doc = "A dictionary of substitutions passed to `helm lint --set flag.",
             default = {},
+        ),
+        "values": attr.label_list(
+            doc = "A list of files passed to `helm lint --values flag.",
+            default = [],
+            allow_files = True,
         ),
         "_copier": attr.label(
             cfg = "exec",
