@@ -91,9 +91,9 @@ exec "docker-credential-{}" get <<< "$1" """.format(helper_name),
         return {}
 
     return {
-        "type": "basic",
         "login": response["Username"],
         "password": response["Secret"],
+        "type": "basic",
     }
 
 def _get_auth(repository_ctx, state, registry, allow_fail):
@@ -133,17 +133,17 @@ def _get_auth(repository_ctx, state, registry, allow_fail):
                     if not password and "identitytoken" in auth_val:
                         password = auth_val["identitytoken"]
                     pattern = {
-                        "type": "basic",
                         "login": login,
                         "password": password,
+                        "type": "basic",
                     }
 
                 elif "username" in auth_val and "password" in auth_val:
                     # plain text username and password
                     pattern = {
-                        "type": "basic",
                         "login": auth_val["username"],
                         "password": auth_val["password"],
+                        "type": "basic",
                     }
 
     # look for generic credentials-store all lookups for host-specific auth fails
@@ -228,8 +228,8 @@ def _new_auth(repository_ctx, config_path = None):
     if config_path:
         config = json.decode(repository_ctx.read(config_path))
     state = {
-        "config": config,
         "auth": {},
+        "config": config,
         "token": {},
     }
     return struct(
