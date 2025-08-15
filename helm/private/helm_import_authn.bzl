@@ -14,10 +14,6 @@ _WWW_AUTH = {
     },
 }
 
-def _file_exists(repository_ctx, path):
-    result = repository_ctx.execute(["stat", path])
-    return result.return_code == 0
-
 def _strip_host(url):
     # TODO: a principled way of doing this
     return url.replace("http://", "").replace("https://", "").replace("/v1/", "")
@@ -37,7 +33,7 @@ def _get_auth_file_path(repository_ctx):
 
     config_path = "{}/config.json".format(DOCKER_CONFIG)
 
-    if _file_exists(repository_ctx, config_path):
+    if repository_ctx.path(config_path).exists:
         return config_path
 
     # https://docs.podman.io/en/latest/markdown/podman-login.1.html#authfile-path
@@ -54,19 +50,23 @@ def _get_auth_file_path(repository_ctx):
     if "REGISTRY_AUTH_FILE" in repository_ctx.os.environ:
         config_path = repository_ctx.os.environ["REGISTRY_AUTH_FILE"]
 
-    if _file_exists(repository_ctx, config_path):
+    if repository_ctx.path(config_path).exists:
         return config_path
 
     return None
 
 def _fetch_auth_via_creds_helper(repository_ctx, raw_host, helper_name, allow_fail = False):
+    credential_helper = "docker-credential-{}".format(helper_name)
+    if not repository_ctx.which(credential_helper):
+        fail("credential helper `{}` not found".format(credential_helper))
+
     if repository_ctx.os.name.startswith("windows"):
         executable = "{}.bat".format(helper_name)
         repository_ctx.file(
             executable,
             content = """\
 @echo off
-echo %1 | docker-credential-{} get """.format(helper_name),
+echo %1 | {} get """.format(credential_helper),
         )
     else:
         executable = "{}.sh".format(helper_name)
@@ -74,7 +74,7 @@ echo %1 | docker-credential-{} get """.format(helper_name),
             executable,
             content = """\
 #!/usr/bin/env bash
-exec "docker-credential-{}" get <<< "$1" """.format(helper_name),
+exec "{}" get <<< "$1" """.format(credential_helper),
         )
     result = repository_ctx.execute([repository_ctx.path(executable), raw_host])
     if result.return_code:
