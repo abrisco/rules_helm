@@ -138,10 +138,13 @@ def _helm_template_impl(ctx):
     args.add("-chart", chart_info.chart)
     args.add("-output", output)
 
+    for values in ctx.files.values:
+        args.add("-values", values)
+
     ctx.actions.run(
         executable = ctx.executable._templater,
         outputs = [output],
-        inputs = depset([chart_info.chart]),
+        inputs = depset([chart_info.chart] + ctx.files.values),
         tools = depset([toolchain.helm, toolchain.helm_plugins]),
         mnemonic = "HelmTemplate",
         arguments = [args],
@@ -164,6 +167,10 @@ helm_template = rule(
         ),
         "out": attr.output(
             doc = "The output file to write the output from `helm template`.",
+        ),
+        "values": attr.label_list(
+            doc = "Values files to pass to `helm template --values`.",
+            allow_files = [".yml", ".yaml"],
         ),
         "_templater": attr.label(
             doc = "A process wrapper to use for running `helm template`.",
