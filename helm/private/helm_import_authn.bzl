@@ -1,5 +1,8 @@
 """Repository rule for OCI repo authentication."""
 
+load("@aspect_bazel_lib//lib:base64.bzl", "base64")
+load("@aspect_bazel_lib//lib:repo_utils.bzl", "repo_utils")
+
 # Unfortunately bazel downloader doesn't let us sniff the WWW-Authenticate header, therefore we need to
 # keep a map of known registries that require us to acquire a temporary token for authentication.
 _WWW_AUTH = {
@@ -11,8 +14,154 @@ _WWW_AUTH = {
     },
 }
 
+def _strip_host(url):
+    # TODO: a principled way of doing this
+    return url.replace("http://", "").replace("https://", "").replace("/v1/", "")
+
+# Path of the auth file is determined by the order described here;
+# https://github.com/google/go-containerregistry/tree/main/pkg/authn#tldr-for-consumers-of-this-package
+def _get_auth_file_path(repository_ctx):
+    HOME = repo_utils.get_env_var(repository_ctx, "HOME", "ERR_NO_HOME_SET")
+
+    # this is the standard path where registry credentials are stored
+    # https://docs.docker.com/engine/reference/commandline/cli/#configuration-files
+    DOCKER_CONFIG = "{}/.docker".format(HOME)
+
+    # set DOCKER_CONFIG to $DOCKER_CONFIG env if present
+    if "DOCKER_CONFIG" in repository_ctx.os.environ:
+        DOCKER_CONFIG = repository_ctx.os.environ["DOCKER_CONFIG"]
+
+    config_path = "{}/config.json".format(DOCKER_CONFIG)
+
+    if repository_ctx.path(config_path).exists:
+        return config_path
+
+    # https://docs.podman.io/en/latest/markdown/podman-login.1.html#authfile-path
+    XDG_RUNTIME_DIR = "{}/.config".format(HOME)
+
+    # set XDG_RUNTIME_DIR to $XDG_RUNTIME_DIR env if present
+    if "XDG_RUNTIME_DIR" in repository_ctx.os.environ:
+        XDG_RUNTIME_DIR = repository_ctx.os.environ["XDG_RUNTIME_DIR"]
+
+    config_path = "{}/containers/auth.json".format(XDG_RUNTIME_DIR)
+
+    # podman support overriding the standard path for the auth file via this special environment variable.
+    # https://docs.podman.io/en/latest/markdown/podman-login.1.html#authfile-path
+    if "REGISTRY_AUTH_FILE" in repository_ctx.os.environ:
+        config_path = repository_ctx.os.environ["REGISTRY_AUTH_FILE"]
+
+    if repository_ctx.path(config_path).exists:
+        return config_path
+
+    return None
+
+def _fetch_auth_via_creds_helper(repository_ctx, raw_host, helper_name, allow_fail = False):
+    credential_helper_name = "docker-credential-{}".format(helper_name)
+    credential_helper = repository_ctx.which(credential_helper_name)
+    if credential_helper:
+        fail("credential helper `{}` not found".format(credential_helper_name))
+
+    if repository_ctx.os.name.startswith("windows"):
+        executable = "{}.bat".format(helper_name)
+        repository_ctx.file(
+            executable,
+            content = """\
+@echo off
+echo %1 | {} get """.format(credential_helper),
+        )
+    else:
+        executable = "{}.sh".format(helper_name)
+        repository_ctx.file(
+            executable,
+            content = """\
+#!/usr/bin/env bash
+exec "{}" get <<< "$1" """.format(credential_helper),
+        )
+    executable = repository_ctx.path(executable)
+    result = repository_ctx.execute([executable, raw_host])
+    if result.return_code:
+        if not allow_fail:
+            fail("credential helper failed: \nSTDOUT:\n{}\nSTDERR:\n{}".format(result.stdout, result.stderr))
+        else:
+            return {}
+
+    repository_ctx.delete(executable)
+    response = json.decode(result.stdout)
+
+    # If the username and secret are empty, the user does not have a login.
+    # Returning {} avoids sending invalid Basic auth headers that result in 401's
+    if response["Username"] == "" and response["Secret"] == "":
+        return {}
+
+    return {
+        "login": response["Username"],
+        "password": response["Secret"],
+        "type": "basic",
+    }
+
+def _get_auth(repository_ctx, state, registry, allow_fail):
+    # if we have a cached auth for this registry then just return it.
+    # this will prevent repetitive calls to external cred helper binaries.
+    if registry in state["auth"]:
+        return state["auth"][registry]
+
+    pattern = {}
+    config = state["config"]
+
+    # first look into per registry credHelpers if it exists
+    if "credHelpers" in config:
+        for host_raw in config["credHelpers"]:
+            host = _strip_host(host_raw)
+            if host == registry:
+                helper_val = config["credHelpers"][host_raw]
+                pattern = _fetch_auth_via_creds_helper(repository_ctx, host_raw, helper_val, allow_fail)
+
+    # if no match for per registry credential helper for the host then look into auths dictionary
+    if "auths" in config and len(pattern.keys()) == 0:
+        for host_raw in config["auths"]:
+            host = _strip_host(host_raw)
+            if host == registry:
+                auth_val = config["auths"][host_raw]
+
+                if len(auth_val.keys()) == 0:
+                    # zero keys indicates that credentials are stored in credsStore helper.
+                    pattern = _fetch_auth_via_creds_helper(repository_ctx, host_raw, config["credsStore"], allow_fail)
+
+                elif "auth" in auth_val:
+                    # base64 encoded plaintext username and password
+                    raw_auth = auth_val["auth"]
+                    login, sep, password = base64.decode(raw_auth).partition(":")
+                    if not sep:
+                        fail("auth string must be in form username:password")
+                    if not password and "identitytoken" in auth_val:
+                        password = auth_val["identitytoken"]
+                    pattern = {
+                        "login": login,
+                        "password": password,
+                        "type": "basic",
+                    }
+
+                elif "username" in auth_val and "password" in auth_val:
+                    # plain text username and password
+                    pattern = {
+                        "login": auth_val["username"],
+                        "password": auth_val["password"],
+                        "type": "basic",
+                    }
+
+    # look for generic credentials-store all lookups for host-specific auth fails
+    if "credsStore" in config and len(pattern.keys()) == 0:
+        pattern = _fetch_auth_via_creds_helper(repository_ctx, registry, config["credsStore"], allow_fail = True)
+
+    # cache the result so that we don't do this again unnecessarily.
+    state["auth"][registry] = pattern
+
+    return pattern
+
 def _get_token(repository_ctx, state, hostname, chart_path):
     allow_fail = repository_ctx.os.environ.get("OCI_GET_TOKEN_ALLOW_FAIL") != None
+    pattern = _get_auth(repository_ctx, state, hostname, allow_fail)
+
     www_auth = dict(**_WWW_AUTH)
     for registry_pattern in www_auth.keys():
         if (hostname == registry_pattern) or hostname.endswith(registry_pattern):
@@ -62,18 +211,41 @@ def _get_token(repository_ctx, state, hostname, chart_path):
 
             # put the token into cache so that we don't do the token exchange again.
             state["token"][url] = pattern
-            return pattern
-    return {}
+    return pattern
 
-def _new_auth(repository_ctx):
+NO_CONFIG_FOUND_ERROR = """\
+Could not find the `$HOME/.docker/config.json` or `$XDG_RUNTIME_DIR/containers/auth.json` file
+
+Running one of `podman login`, `docker login`, `crane login` may help.
+"""
+
+def _explain(state):
+    if not state["config"]:
+        return NO_CONFIG_FOUND_ERROR
+    return None
+
+def _new_auth(repository_ctx, config_path = None):
+    if not config_path:
+        config_path = _get_auth_file_path(repository_ctx)
+    config = {}
+    if config_path:
+        config = json.decode(repository_ctx.read(config_path))
     state = {
-        "config": {},
+        "auth": {},
+        "config": config,
         "token": {},
     }
     return struct(
         get_token = lambda hostname, chart_path: _get_token(repository_ctx, state, hostname, chart_path),
+        explain = lambda: _explain(state),
     )
 
 authn = struct(
     new = _new_auth,
+    ENVIRON = [
+        "DOCKER_CONFIG",
+        "REGISTRY_AUTH_FILE",
+        "XDG_RUNTIME_DIR",
+        "HOME",
+    ],
 )
