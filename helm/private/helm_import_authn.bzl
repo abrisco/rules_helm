@@ -77,13 +77,15 @@ echo %1 | {} get """.format(credential_helper),
 #!/usr/bin/env bash
 exec "{}" get <<< "$1" """.format(credential_helper),
         )
-    result = repository_ctx.execute([repository_ctx.path(executable), raw_host])
+    executable = repository_ctx.path(executable)
+    result = repository_ctx.execute([executable, raw_host])
     if result.return_code:
         if not allow_fail:
             fail("credential helper failed: \nSTDOUT:\n{}\nSTDERR:\n{}".format(result.stdout, result.stderr))
         else:
             return {}
 
+    repository_ctx.delete(executable)
     response = json.decode(result.stdout)
 
     # If the username and secret are empty, the user does not have a login.
