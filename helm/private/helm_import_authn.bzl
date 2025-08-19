@@ -58,7 +58,7 @@ def _get_auth_file_path(repository_ctx):
 def _fetch_auth_via_creds_helper(repository_ctx, raw_host, helper_name, allow_fail = False):
     credential_helper_name = "docker-credential-{}".format(helper_name)
     credential_helper = repository_ctx.which(credential_helper_name)
-    if credential_helper:
+    if not credential_helper:
         fail("credential helper `{}` not found".format(credential_helper_name))
 
     if repository_ctx.os.name.startswith("windows"):
