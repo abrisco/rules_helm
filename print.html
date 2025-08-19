@@ -394,7 +394,7 @@ if the following environment variables are defined:</p>
 <pre>
 load("@rules_helm//helm:defs.bzl", "helm_template")
 
-helm_template(<a href="rules.html#helm_template-name">name</a>, <a href="rules.html#helm_template-out">out</a>, <a href="rules.html#helm_template-chart">chart</a>)
+helm_template(<a href="rules.html#helm_template-name">name</a>, <a href="rules.html#helm_template-out">out</a>, <a href="rules.html#helm_template-chart">chart</a>, <a href="rules.html#helm_template-values">values</a>)
 </pre>
 <p>A rule for rendering helm chart templates to a file.</p>
 <p><strong>ATTRIBUTES</strong></p>
@@ -402,6 +402,7 @@ helm_template(<a href="rules.html#helm_template-name">name</a>, <a href="rules.h
 <tr><td style="text-align: left"><a id="helm_template-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="helm_template-out"></a>out</td><td style="text-align: left">The output file to write the output from <code>helm template</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_template-chart"></a>chart</td><td style="text-align: left">The helm package to resolve charts for.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_template-values"></a>values</td><td style="text-align: left">Values files to pass to <code>helm template --values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 </tbody></table>
 </div>
 <p><a id="helm_template_test"></a></p>
