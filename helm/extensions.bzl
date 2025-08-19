@@ -8,6 +8,10 @@ load(
     "helm_toolchain_repository",
 )
 load(
+    "//helm/private:helm_import.bzl",
+    "helm_import_repository",
+)
+load(
     "//helm/private:versions.bzl",
     "CONSTRAINTS",
     "DEFAULT_HELM_URL_TEMPLATES",
@@ -26,6 +30,7 @@ def _helm_impl(ctx):
         "plugins": [],
         "version": DEFAULT_HELM_VERSION,
     }
+    deps = []
     for module in ctx.modules:
         if not module.is_root:
             # TODO support toolchain generation from non-root modules. This requires encoding all options into the repo name and adding deduplication.
@@ -44,7 +49,23 @@ def _helm_impl(ctx):
             toolchain_config["helm_url_templates"] = toolchain_option.helm_url_templates
             toolchain_config["plugins"] = toolchain_option.plugins
 
+        for chart in module.tags.import_repository:
+            helm_import_repository(
+                name = chart.name,
+                chart_name = chart.chart_name,
+                repository = chart.repository,
+                sha256 = chart.sha256,
+                url = chart.url,
+                version = chart.version,
+            )
+            deps.append(chart.name)
+
     _register_toolchains(**toolchain_config)
+
+    return ctx.extension_metadata(
+        root_module_direct_deps = deps,
+        root_module_direct_dev_deps = [],
+    )
 
 def _register_toolchains(version, helm_url_templates, plugins):
     if not version in HELM_VERSIONS:
@@ -99,6 +120,30 @@ def _register_toolchains(version, helm_url_templates, plugins):
         name = "helm",
     )
 
+import_repository = tag_class(
+    doc = "Fetch a Helm chart from an arbitrary URL or repository.",
+    attrs = {
+        "name": attr.string(
+            doc = "Repository rule name.",
+        ),
+        "chart_name": attr.string(
+            doc = "Chart name to import. Must be set if `repository` is specified",
+        ),
+        "repository": attr.string(
+            doc = "Chart repository url where to locate the requested chart. Mutually exclusive with `url`.",
+        ),
+        "sha256": attr.string(
+            doc = "The expected SHA-256 hash of the chart imported.",
+        ),
+        "url": attr.string(
+            doc = "The url where a chart can be directly downloaded. Mutually exclusive with `chart_name`, `repository`, and `version`",
+        ),
+        "version": attr.string(
+            doc = "Specify a version constraint for the chart version to use. Must be set if `repository` is specified.",
+        ),
+    },
+)
+
 _toolchain = tag_class(
     doc = "Configure a helm toolchain.",
     attrs = {
@@ -126,5 +171,6 @@ helm = module_extension(
     tag_classes = {
         "options": _toolchain,  # deprecated: use toolchain instead and remove in next major version
         "toolchain": _toolchain,
+        "import_repository": import_repository,
     },
 )
