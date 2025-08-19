@@ -146,6 +146,16 @@ def _helm_import_repository_impl(repository_ctx):
             auth = {
                 manifest_url: token,
             },
+            # Copied from `helm pull --debug`
+            headers = {
+                "Accept": [
+                    "application/vnd.docker.distribution.manifest.v2+json",
+                    "application/vnd.docker.distribution.manifest.list.v2+json",
+                    "application/vnd.oci.image.manifest.v1+json",
+                    "application/vnd.oci.image.index.v1+json",
+                    "*/*",
+                ],
+            },
         )
         manifest = json.decode(repository_ctx.read(manifest_json))
 
