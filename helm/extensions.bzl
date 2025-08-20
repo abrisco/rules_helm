@@ -123,11 +123,11 @@ def _register_toolchains(version, helm_url_templates, plugins):
 import_repository = tag_class(
     doc = "Fetch a Helm chart from an arbitrary URL or repository.",
     attrs = {
-        "name": attr.string(
-            doc = "Repository rule name.",
-        ),
         "chart_name": attr.string(
             doc = "Chart name to import. Must be set if `repository` is specified",
+        ),
+        "name": attr.string(
+            doc = "Repository rule name.",
         ),
         "repository": attr.string(
             doc = "Chart repository url where to locate the requested chart. Mutually exclusive with `url`.",
@@ -169,8 +169,8 @@ _toolchain = tag_class(
 helm = module_extension(
     implementation = _helm_impl,
     tag_classes = {
+        "import_repository": import_repository,
         "options": _toolchain,  # deprecated: use toolchain instead and remove in next major version
         "toolchain": _toolchain,
-        "import_repository": import_repository,
     },
 )
