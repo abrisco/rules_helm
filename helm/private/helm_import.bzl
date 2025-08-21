@@ -89,22 +89,16 @@ def _helm_import_url_impl(repository_ctx):
     ))
 
     if chart_url.startswith("http"):
-        chart_package = repository_ctx.download(
+        repository_ctx.download(
             output = repository_ctx.path(chart_file),
             url = chart_url,
-            sha256 = repository_ctx.attr.sha256,
+            # canonical_id = get_default_canonical_id(repository_ctx, [chart_url]),
+            # sha256 = repository_ctx.attr.sha256,
         )
     elif chart_url.startswith("oci"):
-        chart_package = _oci_url_download(repository_ctx, chart_url, chart_file)
+        _oci_url_download(repository_ctx, chart_url, chart_file)
     else:
         fail("{} does not use a supported protocol".format(chart_url))
-
-    return {
-        "chart_name": chart_name,
-        "name": repository_ctx.name,
-        "sha256": chart_package.sha256,
-        "url": chart_url,
-    }
 
 helm_import_url = repository_rule(
     implementation = _helm_import_url_impl,
@@ -112,9 +106,6 @@ helm_import_url = repository_rule(
         "chart_name": attr.string(
             doc = "Chart name to import.",
             mandatory = True,
-        ),
-        "sha256": attr.string(
-            doc = "The expected SHA-256 hash of the chart imported.",
         ),
         "url": attr.string(
             doc = "The URL where the chart can be directly downloaded.",
@@ -170,7 +161,6 @@ def _oci_url_download(repository_ctx, url, chart_file):
     return repository_ctx.download(
         output = repository_ctx.path(chart_file),
         url = chart_blob_url,
-        sha256 = repository_ctx.attr.sha256,
         auth = {
             chart_blob_url: token,
         },
@@ -192,28 +182,20 @@ def _helm_import_repository_impl(repository_ctx):
     chart_file = "{}.tgz".format(chart_name)
 
     if chart_url.startswith("http"):
-        chart_package = repository_ctx.download(
+        repository_ctx.download(
             output = repository_ctx.path(chart_file),
             url = chart_url,
-            sha256 = repository_ctx.attr.sha256,
         )
     elif chart_url.startswith("oci"):
-        chart_package = _oci_url_download(repository_ctx, chart_url, chart_file)
+        _oci_url_download(repository_ctx, chart_url, chart_file)
     else:
         fail("cannot download {} from {}, unsupported scheme".format(chart_name, chart_url))
 
     repository_ctx.file("BUILD.bazel", content = _HELM_DEP_BUILD_FILE.format(
         chart_name = chart_name,
         chart_file = chart_file,
+        repository_name = repository_ctx.name,
     ))
-
-    return {
-        "chart_name": chart_name,
-        "name": repository_ctx.name,
-        "repository": repository_ctx.attr.repository,
-        "sha256": chart_package.sha256,
-        "version": chart_version,
-    }
 
 helm_import_repository = repository_rule(
     implementation = _helm_import_repository_impl,
@@ -226,53 +208,6 @@ helm_import_repository = repository_rule(
         "repository": attr.string(
             doc = "Repository URL where to locate the specified chart.",
             mandatory = True,
-        ),
-        "sha256": attr.string(
-            doc = "The expected SHA-256 hash of the chart imported.",
-        ),
-        "version": attr.string(
-            doc = "Chart version to import.",
-            mandatory = True,
-        ),
-    },
-)
-
-def _helm_import_registry_impl(repository_ctx):
-    registry = repository_ctx.attr.registry
-    chart_name = repository_ctx.attr.chart_name
-    version = repository_ctx.attr.version
-
-    chart_url = "{}/{}:{}".format(registry, chart_name, version)
-    chart_file = "{}.tgz".format(chart_name)
-    chart_package = _oci_url_download(repository_ctx, chart_url, chart_file)
-
-    repository_ctx.file("BUILD.bazel", content = _HELM_DEP_BUILD_FILE.format(
-        chart_name = chart_name,
-        chart_file = chart_file,
-    ))
-
-    return {
-        "chart_name": chart_name,
-        "name": repository_ctx.name,
-        "registry": repository_ctx.attr.registry,
-        "sha256": chart_package.sha256,
-        "version": repository_ctx.attr.version,
-    }
-
-helm_import_registry = repository_rule(
-    implementation = _helm_import_registry_impl,
-    doc = "A rule for fetching an external Helm chart from a OCI registry.",
-    attrs = {
-        "chart_name": attr.string(
-            doc = "Chart name to import.",
-            mandatory = True,
-        ),
-        "registry": attr.string(
-            doc = "OCI registry URL where to locate the specified chart.",
-            mandatory = True,
-        ),
-        "sha256": attr.string(
-            doc = "The expected SHA-256 hash of the chart imported.",
         ),
         "version": attr.string(
             doc = "Chart version to import.",

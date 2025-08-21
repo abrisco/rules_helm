@@ -3,7 +3,7 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("@rules_oci//oci:pull.bzl", "oci_pull")
-load("//helm:defs.bzl", "helm_import_registry", "helm_import_repository", "helm_import_url")
+load("//helm:defs.bzl", "helm_import_repository", "helm_import_url")
 
 _CM_HELM_PUSH_BUILD_CONTENT = """\
 package(default_visibility = ["//visibility:public"])
@@ -26,7 +26,6 @@ def helm_test_deps():
         repository = "https://charts.bitnami.com/bitnami",
         chart_name = "redis",
         version = "21.2.5",
-        sha256 = "4f70fc4c8caac66b21450581e29e3437cad401895d5ac0191e9e91f74ed8dc10",
     )
 
     # Directly download this chart from a HTTP URL:
@@ -35,17 +34,14 @@ def helm_test_deps():
         name = "helm_test_deps__with_chart_deps_postgresql",
         chart_name = "postgresql",
         url = "https://charts.bitnami.com/bitnami/postgresql-14.0.5.tgz",
-        sha256 = "38d9b6657aa3b0cc16d190570dbaf96796e997d03a1665264dac9966343e4d1b",
     )
 
     # Download this chart from an OCI registry:
     maybe(
-        helm_import_registry,
+        helm_import_url,
         name = "helm_test_deps__with_chart_deps_grafana",
-        registry = "oci://registry-1.docker.io/bitnamicharts",
         chart_name = "grafana",
-        version = "12.1.4",
-        sha256 = "015f66a231a809557ab368d903f6762ba31ba2f7b3d0f890445be6e8f213cff1",
+        url = "oci://registry-1.docker.io/bitnamicharts/grafana:12.1.4",
     )
 
     maybe(
