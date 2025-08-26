@@ -13,7 +13,7 @@ bazel_dep(name = "gazelle", version = "0.45.0", repo_name = "bazel_gazelle")
 
 # `aspect_bazel_lib` is unfortunately required by `rules_oci`.
 # https://github.com/bazel-contrib/rules_oci/issues/575
-bazel_dep(name = "aspect_bazel_lib", version = "2.20.0", dev_dependency = True)
+bazel_dep(name = "aspect_bazel_lib", version = "2.20.0")
 bazel_dep(name = "rules_oci", version = "2.2.6", dev_dependency = True)
 bazel_dep(name = "stardoc", version = "0.8.0", dev_dependency = True, repo_name = "io_bazel_stardoc")
 bazel_dep(name = "rules_rust_mdbook", version = "0.63.0", dev_dependency = True)

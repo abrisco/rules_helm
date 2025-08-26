@@ -124,6 +124,7 @@ def _helm_pull_impl(repository_ctx):
     ))
 
 helm_pull = repository_rule(
+    doc = "Download a chart using `helm pull`",
     implementation = _helm_pull_impl,
     attrs = {
         "chart_name": attr.string(
