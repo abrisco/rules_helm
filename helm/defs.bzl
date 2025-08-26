@@ -30,6 +30,10 @@ load(
     _helm_package = "helm_package",
 )
 load(
+    "//helm/private:helm_pull.bzl",
+    _helm_pull = "helm_pull",
+)
+load(
     "//helm/private:helm_registry.bzl",
     _helm_push = "helm_push",
     _helm_push_images = "helm_push_images",
@@ -62,6 +66,7 @@ helm_lint_aspect = _helm_lint_aspect
 helm_lint_test = _helm_lint_test
 helm_package = _helm_package
 helm_plugin = _helm_plugin
+helm_pull = _helm_pull
 helm_push = _helm_push
 helm_push_images = _helm_push_images
 helm_push_registry = _helm_push

@@ -121,10 +121,20 @@ _toolchain = tag_class(
     },
 )
 
+pull = tag_class(
+    doc = "Download a chart from a Helm registry or repository",
+    attrs = {
+        "url": attr.string(doc = "HTTP or OCI URL of chart"),
+        "repo": attr.string(doc = "Chart repository URL."),
+        "version": attr.string(doc = "Version constraint"),
+    },
+)
+
 helm = module_extension(
     implementation = _helm_impl,
     tag_classes = {
         "options": _toolchain,  # deprecated: use toolchain instead and remove in next major version
         "toolchain": _toolchain,
+        "pull": pull,
     },
 )
