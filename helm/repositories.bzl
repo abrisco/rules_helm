@@ -110,7 +110,7 @@ helm_toolchain_repository = repository_rule(
     },
 )
 
-def platform(rctx):
+def _platform(rctx):
     """Returns a normalized name of the host os and CPU architecture.
 
     Alias archictures names are normalized:
@@ -170,7 +170,7 @@ exports_files(["helm{ext}"])
 
     repository_ctx.symlink("../{name}_{platform}/helm{ext}".format(
         name = repository_ctx.attr.name,
-        platform = platform(repository_ctx),
+        platform = _platform(repository_ctx),
         ext = ext,
     ), "helm{ext}".format(ext = ext))
 
