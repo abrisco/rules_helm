@@ -131,8 +131,8 @@ helm_pull = repository_rule(
             doc = "Name of the chart.",
             mandatory = True,
         ),
-        "helm_version": attr.string(default = DEFAULT_HELM_VERSION),
         "helm_url_templates": attr.string_list(default = DEFAULT_HELM_URL_TEMPLATES),
+        "helm_version": attr.string(default = DEFAULT_HELM_VERSION),
         "repo": attr.string(
             doc = "URL of a Helm chart repository. Do not set if `url` is set.",
         ),

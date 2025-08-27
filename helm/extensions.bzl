@@ -158,7 +158,7 @@ helm = module_extension(
     implementation = _helm_impl,
     tag_classes = {
         "options": _toolchain,  # deprecated: use toolchain instead and remove in next major version
-        "toolchain": _toolchain,
         "pull": pull,
+        "toolchain": _toolchain,
     },
 )
