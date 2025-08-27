@@ -62,6 +62,48 @@ def _platform(repository_ctx):
 
     return "%s-%s" % (os, arch)
 
+def _helm_pull_repo_metadata(repository_ctx):
+    url = repository_ctx.attr.url
+    chart_name = repository_ctx.attr.chart_name
+    repo = repository_ctx.attr.repo
+    version = repository_ctx.attr.version
+
+    reproducible = True
+    attrs_for_reproducibility = None
+
+    # HTTP URLs are always reproducible since they point directly to a chart package.
+    # OCI URLs may omit a tag or version and default to latest:
+    if url and url.startswith("oci://"):
+        url = url.removeprefix("oci://")
+        if "@" not in url and ":" not in url:
+            reproducible = False
+            attrs_for_reproducibility = {
+                "chart_name": chart_name,
+                "name": repository_ctx.name,
+                "url": "Specify tag or digest",
+            }
+
+        # If a repo is specified, a version should be specified:
+    elif repo and (not version or version == "latest"):
+        reproducible = False
+        attrs_for_reproducibility = {
+            "chart_name": chart_name,
+            "name": repository_ctx.name,
+            "repo": repo,
+            "version": "Specific version",
+        }
+
+    # Cannot set `attrs_for_reproducibility = None`:
+    if reproducible:
+        return repository_ctx.repo_metadata(
+            reproducible = True,
+        )
+    else:
+        return repository_ctx.repo_metadata(
+            reproducible = False,
+            attrs_for_reproducibility = attrs_for_reproducibility,
+        )
+
 def _helm_pull_impl(repository_ctx):
     url = repository_ctx.attr.url
     chart_name = repository_ctx.attr.chart_name
@@ -74,17 +116,6 @@ def _helm_pull_impl(repository_ctx):
     if not url:
         if not repo:
             fail("`repo` must be specified")
-        if not version:
-            fail("`version` must be specified")
-
-    if url and url.startswith("http"):
-        _, _, chart_file = url.rpartition("/")
-    elif url and url.startswith("oci"):
-        _, _, identifier = url.rpartition("/")
-        name, version = identifier.split(":")
-        chart_file = "{}-{}.tgz".format(name, version)
-    else:
-        chart_file = "{}-{}.tgz".format(chart_name, version)
 
     helm_version = repository_ctx.attr.helm_version
     platform = _platform(repository_ctx)
@@ -113,15 +144,26 @@ def _helm_pull_impl(repository_ctx):
     if repository_ctx.attr.url:
         pull_cmd.append(repository_ctx.attr.url)
     else:
-        pull_cmd.extend([chart_name, "--repo", repo, "--version", version])
+        pull_cmd.extend([chart_name, "--repo", repo])
+        if version:
+            pull_cmd.extend(["--version", version])
 
     repository_ctx.execute(pull_cmd)
+
+    chart_file = "{}.tgz".format(chart_name)
+
+    # Find the chart archive and rename it:
+    for path in repository_ctx.path(".").readdir():
+        if path.basename.endswith(".tgz"):
+            repository_ctx.rename(path.basename, chart_file)
 
     repository_ctx.file("BUILD.bazel", content = _HELM_DEP_BUILD_FILE.format(
         chart_name = chart_name,
         chart_file = chart_file,
         repository_name = repository_ctx.name,
     ))
+
+    return _helm_pull_repo_metadata(repository_ctx)
 
 helm_pull = repository_rule(
     doc = "Download a chart using `helm pull`",
@@ -140,7 +182,7 @@ helm_pull = repository_rule(
             doc = "HTTP or OCI URL to directly download a chart.",
         ),
         "version": attr.string(
-            doc = "Chart version to pull. Must be set if `repo` is set and be a specific version, \"latest\" or a version constraint are not supported.",
+            doc = "Chart version to pull. Use a specific version to make this rule reproducible.",
         ),
     },
 )
