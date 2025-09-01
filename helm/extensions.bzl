@@ -172,7 +172,8 @@ _import_repository = tag_class(attrs = {
     "version": attr.string(
         doc = "Specify a version constraint for the chart version to use.",
     ),
-})
+},
+    doc = "Download a chart from an existing repository. E.g. as dependency for complex charts.")
 
 helm = module_extension(
     implementation = _helm_impl,
