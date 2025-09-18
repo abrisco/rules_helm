@@ -106,7 +106,9 @@ def _helm_pull_impl(repository_ctx):
 
     # https://helm.sh/docs/helm/helm_pull/
     pull_cmd = [helm_bin, "pull"] + args
-    repository_ctx.execute(pull_cmd)
+    pull_result = repository_ctx.execute(pull_cmd)
+    if pull_result.return_code:
+        fail(pull_result.stderr)
 
     chart_file = "{}.tgz".format(chart_name)
 
@@ -128,12 +130,12 @@ def _helm_pull_impl(repository_ctx):
     show_result = repository_ctx.execute(show_cmd)
 
     # Unforunately, Bazel doesn't support YAML like it does JSON.
-    show_version = None
+    show_version, show_digest = "", ""
     for line in show_result.stdout.splitlines():
         if line.startswith("version: "):
             show_version = line.removeprefix("version: ")
 
-    show_digest = None
+    # OCI Pull prints the digest on stderr:
     for line in show_result.stderr.splitlines():
         if line.startswith("Digest: "):
             show_digest = line.removeprefix("Digest: ")

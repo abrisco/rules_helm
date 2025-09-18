@@ -142,14 +142,26 @@ pull = tag_class(
         "name": attr.string(
             doc = "Repository rule name.",
         ),
+        "helm_url_templates": attr.string_list(
+            doc = (
+                "A url template used to download helm. The template can contain the following " +
+                "format strings `{platform}` for the helm platform, `{version}` for the helm " +
+                "version, and `{compression}` for the archive type containing the helm binary."
+            ),
+            default = DEFAULT_HELM_URL_TEMPLATES,
+        ),
+        "helm_version": attr.string(
+            doc = "The version of helm to download for the toolchain.",
+            default = DEFAULT_HELM_VERSION,
+        ),
         "repo": attr.string(
-            doc = "URL of a Helm chart repository. Do not set if `url` is set.",
+            doc = "URL of a Helm chart repository. Exclusive with `url`.",
         ),
         "url": attr.string(
-            doc = "HTTP or OCI URL to directly download a chart.",
+            doc = "HTTP or OCI URL to directly download a chart. Exclusive with `repo`.",
         ),
         "version": attr.string(
-            doc = "Chart version to pull. Must be set if `repo` is set and be a specific version, \"latest\" or a version constraint are not supported.",
+            doc = "Chart version to pull. If not specified, the latest version is pulled.",
         ),
     },
 )
