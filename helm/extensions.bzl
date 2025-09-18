@@ -139,9 +139,6 @@ pull = tag_class(
             doc = "Name of the chart.",
             mandatory = True,
         ),
-        "name": attr.string(
-            doc = "Repository rule name.",
-        ),
         "helm_url_templates": attr.string_list(
             doc = (
                 "A url template used to download helm. The template can contain the following " +
@@ -153,6 +150,9 @@ pull = tag_class(
         "helm_version": attr.string(
             doc = "The version of helm to download for the toolchain.",
             default = DEFAULT_HELM_VERSION,
+        ),
+        "name": attr.string(
+            doc = "Repository rule name.",
         ),
         "repo": attr.string(
             doc = "URL of a Helm chart repository. Exclusive with `url`.",
