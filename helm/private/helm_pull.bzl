@@ -75,6 +75,10 @@ def _helm_pull_impl(repository_ctx):
         fail("`repo` and `url` are exclusive attributes")
 
     helm_version = repository_ctx.attr.helm_version
+
+    if not helm_version in HELM_VERSIONS:
+        fail("{} is not a supported version ({})".format(helm_version, HELM_VERSIONS.keys()))
+
     platform = _platform(repository_ctx)
     if platform.startswith("windows"):
         compression = "zip"

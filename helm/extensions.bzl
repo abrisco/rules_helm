@@ -47,9 +47,12 @@ def _helm_impl(ctx):
                 toolchain_config["plugins"] = toolchain_option.plugins
 
         for chart in module.tags.pull:
-            helm_pull(
+            maybe(
+                helm_pull,
                 name = chart.name,
                 chart_name = chart.chart_name,
+                helm_url_templates = chart.helm_url_templates,
+                helm_version = chart.helm_version,
                 repo = chart.repo,
                 version = chart.version,
                 url = chart.url,
