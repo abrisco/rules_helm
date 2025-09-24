@@ -99,6 +99,14 @@ def _helm_pull_impl(repository_ctx):
     )
     helm_bin = repository_ctx.path("helm/{}/helm".format(platform))
 
+    username = repository_ctx.getenv("HELM_REGISTRY_USERNAME")
+
+    password_file = repository_ctx.getenv("HELM_REGISTRY_PASSWORD_FILE")
+    if password_file:
+        password = repository_ctx.read(password_file)
+    else:
+        password = repository_ctx.getenv("HELM_REGISTRY_PASSWORD")
+
     # Conveinently, `helm pull` and `helm show` use the same arguments
     args = []
     if url:
@@ -107,6 +115,8 @@ def _helm_pull_impl(repository_ctx):
         args.extend([chart_name, "--repo", repo])
     if version:
         args.extend(["--version", version])
+    if username and password:
+        args.extend(["--username", username, "--password", password])
 
     # https://helm.sh/docs/helm/helm_pull/
     pull_cmd = [helm_bin, "pull"] + args
