@@ -8,6 +8,10 @@ load(
     "helm_toolchain_repository",
 )
 load(
+    "//helm/private:helm_pull.bzl",
+    "helm_pull",
+)
+load(
     "//helm/private:versions.bzl",
     "CONSTRAINTS",
     "DEFAULT_HELM_URL_TEMPLATES",
@@ -27,22 +31,32 @@ def _helm_impl(ctx):
         "version": DEFAULT_HELM_VERSION,
     }
     for module in ctx.modules:
-        if not module.is_root:
-            # TODO support toolchain generation from non-root modules. This requires encoding all options into the repo name and adding deduplication.
-            print("Ignoring call to helm module extension in non-root module.")  # buildifier: disable=print
-            continue
-        if len(module.tags.options) > 0:
-            # TODO Use deprecation tag when available: https://github.com/bazelbuild/bazel/issues/24843
-            # TODO remove deprecated tag in next major release
-            print("helm.options() is deprecated. Use helm.toolchain() instead.")  # buildifier: disable=print
-        toolchain_options = module.tags.toolchain + module.tags.options
-        if len(toolchain_options) > 1:
-            # TODO support generating multiple toolchains. This requires encoding all options into the repo name and adding deduplication.
-            fail("Only a single call to helm.toolchain() is taken into account. Please remove the other ones.")
-        for toolchain_option in toolchain_options:
-            toolchain_config["version"] = toolchain_option.version
-            toolchain_config["helm_url_templates"] = toolchain_option.helm_url_templates
-            toolchain_config["plugins"] = toolchain_option.plugins
+        # Only generate toolchain in root module:
+        if module.is_root:
+            if len(module.tags.options) > 0:
+                # TODO Use deprecation tag when available: https://github.com/bazelbuild/bazel/issues/24843
+                # TODO remove deprecated tag in next major release
+                print("helm.options() is deprecated. Use helm.toolchain() instead.")  # buildifier: disable=print
+            toolchain_options = module.tags.toolchain + module.tags.options
+            if len(toolchain_options) > 1:
+                # TODO support generating multiple toolchains. This requires encoding all options into the repo name and adding deduplication.
+                fail("Only a single call to helm.toolchain() is taken into account. Please remove the other ones.")
+            for toolchain_option in toolchain_options:
+                toolchain_config["version"] = toolchain_option.version
+                toolchain_config["helm_url_templates"] = toolchain_option.helm_url_templates
+                toolchain_config["plugins"] = toolchain_option.plugins
+
+        for chart in module.tags.pull:
+            maybe(
+                helm_pull,
+                name = chart.name,
+                chart_name = chart.chart_name,
+                helm_url_templates = chart.helm_url_templates,
+                helm_version = chart.helm_version,
+                repo = chart.repo,
+                version = chart.version,
+                url = chart.url,
+            )
 
     _register_toolchains(**toolchain_config)
 
@@ -121,10 +135,45 @@ _toolchain = tag_class(
     },
 )
 
+pull = tag_class(
+    doc = "Download a chart using `helm pull`",
+    attrs = {
+        "chart_name": attr.string(
+            doc = "Name of the chart.",
+            mandatory = True,
+        ),
+        "helm_url_templates": attr.string_list(
+            doc = (
+                "A url template used to download helm. The template can contain the following " +
+                "format strings `{platform}` for the helm platform, `{version}` for the helm " +
+                "version, and `{compression}` for the archive type containing the helm binary."
+            ),
+            default = DEFAULT_HELM_URL_TEMPLATES,
+        ),
+        "helm_version": attr.string(
+            doc = "The version of helm to download for the toolchain.",
+            default = DEFAULT_HELM_VERSION,
+        ),
+        "name": attr.string(
+            doc = "Repository rule name.",
+        ),
+        "repo": attr.string(
+            doc = "URL of a Helm chart repository. Exclusive with `url`.",
+        ),
+        "url": attr.string(
+            doc = "HTTP or OCI URL to directly download a chart. Exclusive with `repo`.",
+        ),
+        "version": attr.string(
+            doc = "Chart version to pull. If not specified, the latest version is pulled.",
+        ),
+    },
+)
+
 helm = module_extension(
     implementation = _helm_impl,
     tag_classes = {
         "options": _toolchain,  # deprecated: use toolchain instead and remove in next major version
+        "pull": pull,
         "toolchain": _toolchain,
     },
 )

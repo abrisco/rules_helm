@@ -3,7 +3,7 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("@rules_oci//oci:pull.bzl", "oci_pull")
-load("//helm:defs.bzl", "helm_import_repository")
+load("//helm:defs.bzl", "helm_pull")
 
 _CM_HELM_PUSH_BUILD_CONTENT = """\
 package(default_visibility = ["//visibility:public"])
@@ -19,30 +19,29 @@ filegroup(
 def helm_test_deps():
     """Helm test dependencies"""
 
-    # Find this chart in the repository:
+    # Pull this chart from a repository:
     maybe(
-        helm_import_repository,
+        helm_pull,
         name = "helm_test_deps__with_chart_deps_redis",
-        repository = "https://charts.bitnami.com/bitnami",
+        repo = "https://charts.bitnami.com/bitnami",
         chart_name = "redis",
         version = "21.2.5",
-        sha256 = "4f70fc4c8caac66b21450581e29e3437cad401895d5ac0191e9e91f74ed8dc10",
     )
 
-    # Directly download this chart from a HTTP URL:
+    # Directly pull this chart from a HTTP URL:
     maybe(
-        helm_import_repository,
+        helm_pull,
         name = "helm_test_deps__with_chart_deps_postgresql",
+        chart_name = "postgresql",
         url = "https://charts.bitnami.com/bitnami/postgresql-14.0.5.tgz",
-        sha256 = "38d9b6657aa3b0cc16d190570dbaf96796e997d03a1665264dac9966343e4d1b",
     )
 
-    # Directly download this chart from an OCI URL:
+    # Directly pull this chart from an OCI URL:
     maybe(
-        helm_import_repository,
+        helm_pull,
         name = "helm_test_deps__with_chart_deps_grafana",
+        chart_name = "grafana",
         url = "oci://registry-1.docker.io/bitnamicharts/grafana:12.1.4",
-        sha256 = "015f66a231a809557ab368d903f6762ba31ba2f7b3d0f890445be6e8f213cff1",
     )
 
     maybe(
