@@ -1,6 +1,8 @@
 package main
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -434,6 +436,111 @@ func copyFile(source string, dest string) error {
 	return nil
 }
 
+func loadChart(content string) (HelmChart, error) {
+	var chart HelmChart
+	err := yaml.Unmarshal([]byte(content), &chart)
+	if err != nil {
+		return chart, fmt.Errorf("Error unmarshalling chart content: %w", err)
+	}
+
+	return chart, nil
+}
+
+func readChartYamlFromTarball(tarballPath string) (HelmChart, error) {
+	file, err := os.Open(tarballPath)
+	if err != nil {
+		return HelmChart{}, fmt.Errorf("Error opening tarball %s: %w", tarballPath, err)
+	}
+	defer file.Close()
+
+	archive, err := gzip.NewReader(file)
+	if err != nil {
+		return HelmChart{}, fmt.Errorf("Error creating Gzip reader: %w", err)
+	}
+	defer archive.Close()
+
+	tarReader := tar.NewReader(archive)
+
+	var chartBytes []byte
+	for {
+		header, err := tarReader.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return HelmChart{}, fmt.Errorf("Error reading tar archive: %w", err)
+		}
+
+		// The folder structure is <chart name>/Chart.yaml
+		parts := strings.Split(header.Name, string(os.PathSeparator))
+		if len(parts) > 1 {
+			if parts[1] == "Chart.yaml" {
+				chartContentBytes, err := io.ReadAll(tarReader)
+				if err != nil {
+					return HelmChart{}, fmt.Errorf("Error reading Chart.yaml: %w", err)
+				}
+
+				chartBytes = chartContentBytes
+				break
+			}
+		}
+	}
+
+	if chartBytes == nil {
+		return HelmChart{}, errors.New("Chart.yaml not found in tarball")
+	}
+
+	var chart HelmChart
+	err = yaml.Unmarshal(chartBytes, &chart)
+	if err != nil {
+		return HelmChart{}, fmt.Errorf("Error unmarshalling Chart.yaml: %w", err)
+	}
+
+	return chart, nil
+}
+
+func addDependencyToChart(workingDir, chartContent string, dep string) (string, error) {
+	parentChart, err := loadChart(chartContent)
+	if err != nil {
+		return chartContent, fmt.Errorf("Error loading chart content: %w", err)
+	}
+
+	depChart, err := readChartYamlFromTarball(dep)
+	if err != nil {
+		return chartContent, fmt.Errorf("Error reading dependency %s: %w", dep, err)
+	}
+
+	// Only add the dependency if the chart.yaml does not already have it
+	// since the end user can manually add it to their Chart.yaml
+	alreadyExists := false
+	for _, existingDep := range parentChart.Dependencies {
+		if existingDep.Name == depChart.Name {
+			alreadyExists = true
+			break
+		}
+	}
+
+	if !alreadyExists {
+		parentChart.Dependencies = append(parentChart.Dependencies, HelmDependency{
+			Name:    depChart.Name,
+			Version: depChart.Version,
+		})
+	}
+
+	err = copyFile(dep, filepath.Join(workingDir, "charts", fmt.Sprintf("%s-%s.tgz", depChart.Name, depChart.Version)))
+	if err != nil {
+		return chartContent, fmt.Errorf("Error copying dependency %s: %w", dep, err)
+	}
+
+	chartContentBytes, err := yaml.Marshal(parentChart)
+	if err != nil {
+		return chartContent, fmt.Errorf("Error marshalling chart content: %w", err)
+	}
+	chartContent = string(chartContentBytes)
+
+	return chartContent, nil
+}
+
 func installHelmContent(workingDir string, packagePath string, stampedChartContent string, stampedValuesContent string, stampedSchemaContent string, templatesManifest string, filesManifest string, crdsManifest string, depsManifest string) (string, error) {
 	templatesParent := filepath.Join(workingDir, packagePath)
 
@@ -551,12 +658,6 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 				return "", fmt.Errorf("Error copying template %s: %w", templatePath, err)
 			}
 		}
-	}
-
-	chartYaml := filepath.Join(templatesParent, "Chart.yaml")
-	err = os.WriteFile(chartYaml, []byte(stampedChartContent), 0644)
-	if err != nil {
-		return "", fmt.Errorf("Error writing chart file %s: %w", chartYaml, err)
 	}
 
 	valuesYaml := filepath.Join(templatesParent, "values.yaml")
@@ -684,7 +785,7 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 		}
 
 		for _, dep := range deps {
-			err = copyFile(dep, filepath.Join(templatesParent, "charts", filepath.Base(dep)))
+			stampedChartContent, err = addDependencyToChart(templatesParent, stampedChartContent, dep)
 			if err != nil {
 				return "", fmt.Errorf("Error copying dep %s: %w", dep, err)
 			}
@@ -709,6 +810,13 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 		if err != nil {
 			return "", fmt.Errorf("Error copying data file %s: %w", filePath, err)
 		}
+	}
+
+	// Write the Chart.yaml last because it may have been modified by the above steps
+	chartYaml := filepath.Join(templatesParent, "Chart.yaml")
+	err = os.WriteFile(chartYaml, []byte(stampedChartContent), 0644)
+	if err != nil {
+		return "", fmt.Errorf("Error writing chart file %s: %w", chartYaml, err)
 	}
 
 	return templatesParent, nil
