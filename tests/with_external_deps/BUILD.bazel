@@ -1,0 +1,34 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+
+exports_files(["Chart.lock"])
+
+helm_chart(
+    name = "with_external_deps",
+    deps = [
+        "@helm_test_deps__with_external_deps_grafana//:grafana",
+        "@helm_test_deps__with_external_deps_postgresql//:postgresql",
+        "@helm_test_deps__with_external_deps_redis//:redis",
+    ],
+)
+
+helm_lint_test(
+    name = "with_external_deps_lint_test",
+    chart = ":with_external_deps",
+)
+
+helm_template_test(
+    name = "with_external_deps_template_test",
+    chart = ":with_external_deps",
+)
+
+go_test(
+    name = "with_external_deps_test",
+    srcs = ["with_external_deps_test.go"],
+    data = [":with_external_deps"],
+    env = {"HELM_CHART": "$(rlocationpath :with_external_deps)"},
+    deps = [
+        "@io_bazel_rules_go//go/runfiles",
+        "@in_gopkg_yaml_v3//:yaml_v3",
+    ],
+)
