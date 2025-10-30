@@ -13,6 +13,7 @@ load(
     "//helm/private:helm_import.bzl",
     _helm_import = "helm_import",
     _helm_import_repository = "helm_import_repository",
+    _helm_import_url = "helm_import_url",
 )
 load(
     "//helm/private:helm_install.bzl",
@@ -57,6 +58,7 @@ load(
 helm_chart = _helm_chart
 helm_import = _helm_import
 helm_import_repository = _helm_import_repository
+helm_import_url = _helm_import_url
 helm_install = _helm_install
 helm_lint_aspect = _helm_lint_aspect
 helm_lint_test = _helm_lint_test
