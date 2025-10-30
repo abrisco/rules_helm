@@ -2,6 +2,7 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
+load("@rules_img//img:pull.bzl", img_pull = "pull")
 load("@rules_oci//oci:pull.bzl", "oci_pull")
 load("//helm:defs.bzl", "helm_import_repository")
 
@@ -47,9 +48,17 @@ def helm_test_deps():
 
     maybe(
         oci_pull,
-        name = "rules_helm_test_container_base",
+        name = "rules_helm_test_oci_container_base",
         digest = "sha256:2042a492bcdd847a01cd7f119cd48caa180da696ed2aedd085001a78664407d6",
         image = "alpine",
+    )
+
+    maybe(
+        img_pull,
+        name = "rules_helm_test_img_container_base",
+        digest = "sha256:2042a492bcdd847a01cd7f119cd48caa180da696ed2aedd085001a78664407d6",
+        registry = "index.docker.io",
+        repository = "library/alpine",
     )
 
     maybe(

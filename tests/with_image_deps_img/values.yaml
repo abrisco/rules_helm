@@ -12,11 +12,11 @@ image:
 
 bazel_produced_images:
   image_a:
-    url: "{@//tests/with_image_deps:image_a.push}"
+    url: "{@//tests/with_image_deps_img:image_a.push}"
   image_b:
-    url: "{@//tests/with_image_deps:image_b.push}"
+    url: "{@//tests/with_image_deps_img:image_b.push}"
   image_c:
-    url: "{@//tests/with_image_deps:image_c.push.repository}:{@//tests/with_image_deps:image_c.push.tag}"
+    url: "{@//tests/with_image_deps_img:image_c.push.repository}:{@//tests/with_image_deps_img:image_c.push.tag}"
 
 imagePullSecrets: []
 nameOverride: ""

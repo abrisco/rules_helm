@@ -16,8 +16,8 @@ helm_chart(
     name = "with_image_deps",
     images = [
         ":image_a.push",
-        "//tests/with_image_deps:image_b.push",
-        "//tests/with_image_deps:image_c.push",
+        "//tests/with_image_deps_oci:image_b.push",
+        "//tests/with_image_deps_oci:image_c.push",
     ],
     target_compatible_with = EXCLUDE_WINDOWS,
 )
@@ -54,7 +54,7 @@ _IMAGES = [
 [
     oci_image(
         name = name,
-        base = "@rules_helm_test_container_base",
+        base = "@rules_helm_test_oci_container_base",
         target_compatible_with = EXCLUDE_WINDOWS,
     )
     for name in _IMAGES
