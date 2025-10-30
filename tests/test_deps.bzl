@@ -23,7 +23,7 @@ def helm_test_deps():
     # Find this chart in the repository:
     maybe(
         helm_import_repository,
-        name = "helm_test_deps__with_chart_deps_redis",
+        name = "helm_test_deps__with_external_deps_redis",
         repository = "https://charts.bitnami.com/bitnami",
         chart_name = "redis",
         version = "21.2.5",
@@ -33,7 +33,7 @@ def helm_test_deps():
     # Directly download this chart from a HTTP URL:
     maybe(
         helm_import_repository,
-        name = "helm_test_deps__with_chart_deps_postgresql",
+        name = "helm_test_deps__with_external_deps_postgresql",
         url = "https://charts.bitnami.com/bitnami/postgresql-14.0.5.tgz",
         sha256 = "38d9b6657aa3b0cc16d190570dbaf96796e997d03a1665264dac9966343e4d1b",
     )
@@ -41,7 +41,7 @@ def helm_test_deps():
     # Directly download this chart from an OCI URL:
     maybe(
         helm_import_repository,
-        name = "helm_test_deps__with_chart_deps_grafana",
+        name = "helm_test_deps__with_external_deps_grafana",
         url = "oci://registry-1.docker.io/bitnamicharts/grafana:12.1.4",
         sha256 = "015f66a231a809557ab368d903f6762ba31ba2f7b3d0f890445be6e8f213cff1",
     )
