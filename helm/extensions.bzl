@@ -3,6 +3,10 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load(
+    "//helm:defs.bzl",
+    "helm_import_repository",
+)
+load(
     "//helm:repositories.bzl",
     "helm_host_alias_repository",
     "helm_toolchain_repository",
@@ -45,6 +49,22 @@ def _helm_impl(ctx):
             toolchain_config["plugins"] = toolchain_option.plugins
 
     _register_toolchains(**toolchain_config)
+
+    # Separate iteration, because this can depend on the _register_toolchains called above.
+    # And the _register_toolchains needs to be called *after* iteration of all modules.
+    for module in ctx.modules:
+        for repository in module.tags.import_repository:
+            if not module.is_root:
+                print("Ignoring import_repository of", repository.name, "from", repository.repository, "because it's not in the root module")  # buildifier: disable=print
+                continue
+            helm_import_repository(
+                name = repository.name,
+                chart_name = repository.chart_name,
+                repository = repository.repository,
+                sha256 = repository.sha256,
+                url = repository.url,
+                version = repository.version,
+            )
 
 def _register_toolchains(version, helm_url_templates, plugins):
     if not version in HELM_VERSIONS:
@@ -121,10 +141,34 @@ _toolchain = tag_class(
     },
 )
 
+_import_repository = tag_class(attrs = {
+    "name": attr.string(
+        doc = "Name for the import dependency",
+    ),
+    "chart_name": attr.string(
+        doc = "Chart name to import.",
+    ),
+    "repository": attr.string(
+        doc = "Chart repository url where to locate the requested chart.",
+        mandatory = True,
+    ),
+    "sha256": attr.string(
+        doc = "The expected SHA-256 hash of the chart imported.",
+    ),
+    "url": attr.string(
+        doc = "The url where the chart can be directly downloaded.",
+    ),
+    "version": attr.string(
+        doc = "Specify a version constraint for the chart version to use.",
+    ),
+},
+    doc = "Download a chart from an existing repository. E.g. as dependency for complex charts.")
+
 helm = module_extension(
     implementation = _helm_impl,
     tag_classes = {
         "options": _toolchain,  # deprecated: use toolchain instead and remove in next major version
         "toolchain": _toolchain,
+        "import_repository": _import_repository,
     },
 )
