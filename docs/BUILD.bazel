@@ -21,11 +21,6 @@ stardoc(
     out = "src/rules.md",
     input = "//helm:defs.bzl",
     table_of_contents_template = "@io_bazel_stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
-    # TODO: https://github.com/bazelbuild/stardoc/issues/110
-    target_compatible_with = select({
-        "@platforms//os:windows": ["@platforms//:incompatible"],
-        "//conditions:default": [],
-    }),
     deps = [":bzl_lib"],
 )
 

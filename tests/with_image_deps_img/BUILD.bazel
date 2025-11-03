@@ -1,0 +1,104 @@
+load("@rules_img//img:image.bzl", "image_manifest")
+load("@rules_img//img:layer.bzl", "image_layer")
+load("@rules_img//img:push.bzl", "image_push")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+load("//tests:test_defs.bzl", "helm_package_regex_test")
+
+exports_files(["Chart.lock"])
+
+EXCLUDE_WINDOWS = select({
+    # TODO: rules_img may have platform-specific behavior
+    "@platforms//os:windows": ["@platforms//:incompatible"],
+    "//conditions:default": [],
+})
+
+helm_chart(
+    name = "with_image_deps_img",
+    images = [
+        ":image_a.push",
+        ":image_b.push",
+        ":image_c.push",
+    ],
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_lint_test(
+    name = "with_image_deps_img_lint_test",
+    chart = ":with_image_deps_img",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_template_test(
+    name = "with_image_deps_img_template_test",
+    chart = ":with_image_deps_img",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_package_regex_test(
+    name = "with_image_deps_img_regex_test",
+    package = ":with_image_deps_img",
+    target_compatible_with = EXCLUDE_WINDOWS,
+    values_patterns = [
+        r"image_a:\s+url:\s+\"docker.io/rules_helm/test_img/image_a@sha256:[a-z0-9]{64}\"",
+        r"image_b:\s+url:\s+\"docker.io/rules_helm/test_img/image_b@sha256:[a-z0-9]{64}\"",
+        r"image_c:\s+url:\s+\"docker.io/rules_helm/test_img/image_c:1.2.3\"",
+    ],
+)
+
+_IMAGES = [
+    "image_a",
+    "image_b",
+    "image_c",
+]
+
+# Create simple image layers and manifests for each test image
+# Note: Building from scratch (no base image) to ensure cross-platform compatibility
+# In production, you would use platform-specific base images pulled in MODULE.bazel
+[
+    image_layer(
+        name = "{}_layer".format(name),
+        srcs = {},
+        target_compatible_with = EXCLUDE_WINDOWS,
+    )
+    for name in _IMAGES
+]
+
+[
+    image_manifest(
+        name = name,
+        base = "@rules_helm_test_img_container_base",
+        layers = [":{}_layer".format(name)],
+        target_compatible_with = EXCLUDE_WINDOWS,
+    )
+    for name in _IMAGES
+]
+
+# Image A: Simple push with repository and tags
+image_push(
+    name = "image_a.push",
+    image = ":image_a",
+    registry = "docker.io",
+    repository = "rules_helm/test_img/image_a",
+    tags = ["latest"],
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+# Image B: Push with repository attribute (demonstrating flexibility)
+image_push(
+    name = "image_b.push",
+    image = ":image_b",
+    registry = "docker.io",
+    repository = "rules_helm/test_img/image_b",
+    tags = ["latest"],
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+# Image C: Push with specific version tag
+image_push(
+    name = "image_c.push",
+    image = ":image_c",
+    registry = "docker.io",
+    repository = "rules_helm/test_img/image_c",
+    tags = ["1.2.3"],
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
