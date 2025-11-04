@@ -105,7 +105,6 @@ func TestWithChartDepsTest(t *testing.T) {
 		}
 	}
 
-	// Assert that all files were found
 	// Assert that dependencie were found
 	if !dep1ChartFound {
 		t.Error("charts/dep1_chart/Chart.yaml was not found in the Helm chart")

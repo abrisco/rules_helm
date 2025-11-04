@@ -7,8 +7,8 @@ helm_chart(
     name = "with_chart_deps",
     deps = [
         # Make sure that charts that are created by rules_helm can be used as dependencies
-        "//tests/with_chart_deps/deps/dep1:chart",
-        "//tests/with_chart_deps/deps/dep2:chart",
+        "//tests/with_chart_deps/deps/dep1",
+        "//tests/with_chart_deps/deps/dep2",
     ],
 )
 
