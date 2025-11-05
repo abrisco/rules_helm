@@ -107,7 +107,7 @@ func TestWithChartDepsTest(t *testing.T) {
 
 	// Assert that dependencie were found
 	if !dep1ChartFound {
-		t.Error("charts/dep1_chart/Chart.yaml was not found in the Helm chart")
+		t.Error("charts/dep1/Chart.yaml was not found in the Helm chart")
 	}
 	if !dep2ChartFound {
 		t.Error("charts/dep2/Chart.yaml was not found in the Helm chart")
