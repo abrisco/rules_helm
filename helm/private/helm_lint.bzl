@@ -1,5 +1,6 @@
 """Helm rules"""
 
+load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 load("//helm:providers.bzl", "HelmPackageInfo")
 load(":helm_utils.bzl", "rlocationpath", "symlink")
 
@@ -9,6 +10,7 @@ def _helm_lint_aspect_impl(target, ctx):
 
     helm_pkg_info = target[HelmPackageInfo]
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
+    strict = ctx.attr._strict_setting[BuildSettingInfo].value
 
     output = ctx.actions.declare_file(ctx.label.name + ".helm_lint.ok")
 
@@ -17,6 +19,8 @@ def _helm_lint_aspect_impl(target, ctx):
     args.add("-helm_plugins", toolchain.helm_plugins.path)
     args.add("-package", helm_pkg_info.chart)
     args.add("-output", output)
+    if strict:
+        args.add("-strict")
 
     ctx.actions.run(
         outputs = [output],
@@ -43,6 +47,9 @@ helm_lint_aspect = aspect(
             executable = True,
             default = Label("//helm/private/linter:linter"),
         ),
+        "_strict_setting": attr.label(
+            default = Label("//helm/settings:lint_default_strict"),
+        ),
     },
     toolchains = [
         str(Label("//helm:toolchain_type")),
@@ -60,7 +67,9 @@ def _helm_lint_test_impl(ctx):
     args.add("-helm", rlocationpath(toolchain.helm, ctx.workspace_name))
     args.add("-helm_plugins", rlocationpath(toolchain.helm_plugins, ctx.workspace_name))
     args.add("-package", rlocationpath(helm_pkg_info.chart, ctx.workspace_name))
-    if ctx.attr.strict:
+
+    strict = ctx.attr._strict_setting[BuildSettingInfo].value
+    if strict:
         args.add("-strict")
 
     # Passed directly to --set flag of `helm lint`, but using -substitutions to match helm_package.bzl.
@@ -110,9 +119,6 @@ helm_lint_test = rule(
             mandatory = True,
             providers = [HelmPackageInfo],
         ),
-        "strict": attr.bool(
-            doc = "Fail on lint warnings.",
-        ),
         "substitutions": attr.string_dict(
             doc = "A dictionary of substitutions passed to `helm lint --set flag.",
             default = {},
@@ -132,6 +138,9 @@ helm_lint_test = rule(
             cfg = "exec",
             executable = True,
             default = Label("//helm/private/linter:linter"),
+        ),
+        "_strict_setting": attr.label(
+            default = Label("//helm/settings:lint_default_strict"),
         ),
     },
     toolchains = [
