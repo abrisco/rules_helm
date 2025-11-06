@@ -63,7 +63,7 @@ def version_stamp_test_suite(name):
         out = "version_stamp.no_stamp.expected_metadata.json",
         content = """\
 {
-    "name": "version_stamp",
+    "name": "version-stamp",
     "version": "0.1.0+STABLE-STAMP-VALUE-VOLATILE-STAMP-VALUE"
 }
 """.splitlines(),
@@ -81,7 +81,7 @@ def version_stamp_test_suite(name):
         out = "version_stamp.stamp.expected_metadata.json",
         content = """\
 {
-    "name": "version_stamp",
+    "name": "version-stamp",
     "version": "0.1.0+stable-volatile"
 }
 """.splitlines(),

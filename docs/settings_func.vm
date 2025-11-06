@@ -3,7 +3,7 @@
 #[[##]]# ${funcInfo.functionName}
 
 <pre>
---@rules_julia//julia/settings:${funcInfo.functionName}
+--@rules_helm//helm/settings:${funcInfo.functionName}
 </pre>
 
 ${funcInfo.docString}
