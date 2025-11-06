@@ -1,7 +1,7 @@
 """Helm transitive dependencies"""
 
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+load("@gazelle//:deps.bzl", "gazelle_dependencies")
+load("@rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("//helm:go_repositories.bzl", "go_dependencies")
 
 # buildifier: disable=unnamed-macro

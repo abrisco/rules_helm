@@ -28,7 +28,7 @@ def rules_helm_dependencies():
 
     maybe(
         http_archive,
-        name = "io_bazel_rules_go",
+        name = "rules_go",
         sha256 = "f4a9314518ca6acfa16cc4ab43b0b8ce1e4ea64b81c38d8a3772883f153346b8",
         urls = [
             "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.50.1/rules_go-v0.50.1.zip",
@@ -38,7 +38,7 @@ def rules_helm_dependencies():
 
     maybe(
         http_archive,
-        name = "bazel_gazelle",
+        name = "gazelle",
         integrity = "sha256-t2D3/nUXOIYAf3wuYWohJBII89kOhlfcZdNqdx6Ra2o=",
         urls = ["https://github.com/bazel-contrib/bazel-gazelle/releases/download/v0.39.1/bazel-gazelle-v0.39.1.tar.gz"],
     )
