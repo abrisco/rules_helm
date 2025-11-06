@@ -28,7 +28,7 @@ go_test(
     data = [":with_chart_deps"],
     env = {"HELM_CHART": "$(rlocationpath :with_chart_deps)"},
     deps = [
-        "@io_bazel_rules_go//go/runfiles",
         "@in_gopkg_yaml_v3//:yaml_v3",
+        "@io_bazel_rules_go//go/runfiles",
     ],
 )
