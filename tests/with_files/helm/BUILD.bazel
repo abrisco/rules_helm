@@ -37,7 +37,7 @@ helm_template_test(
     name = "with_files_template_test",
     chart = ":with_files",
     template_patterns = {
-        "with_files/templates/deployment.yaml": [
+        "with-files/templates/deployment.yaml": [
             # Base64 encoded value
             r"FROM_SRC: \"SGVsbG8gV29ybGQuCg==\"",
             # Base64 encoded value

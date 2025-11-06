@@ -11,8 +11,10 @@ bzl_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
+        "//helm/settings:settings_bzl",
         "@aspect_bazel_lib//lib:base64",
         "@aspect_bazel_lib//lib:repo_utils",
+        "@bazel_skylib//rules:common_settings",
     ],
 )
 
@@ -24,10 +26,20 @@ stardoc(
     deps = [":bzl_lib"],
 )
 
+stardoc(
+    name = "settings",
+    out = "src/settings.md",
+    func_template = "settings_func.vm",
+    input = "//helm/settings:settings.bzl",
+    tags = ["manual"],
+    deps = [":bzl_lib"],
+)
+
 mdbook(
     name = "book",
     srcs = glob(["src/**/*.md"]) + [
         ":rules",
+        ":settings",
     ],
     book = "book.toml",
 )
