@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("@rules_go//go:def.bzl", "go_test")
 load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
 
 exports_files(["Chart.lock"])
@@ -27,5 +27,5 @@ go_test(
     srcs = ["with_chart_deps_test.go"],
     data = [":with_chart_deps"],
     env = {"HELM_CHART": "$(rlocationpath :with_chart_deps)"},
-    deps = ["@io_bazel_rules_go//go/runfiles"],
+    deps = ["@rules_go//go/runfiles"],
 )
