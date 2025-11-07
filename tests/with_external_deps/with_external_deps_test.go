@@ -77,7 +77,7 @@ func TestWithChartDepsTest(t *testing.T) {
 			t.Fatalf("Error reading tar archive: %v", err)
 		}
 		// Read the Chart.yaml content so that we can check its content
-		if header.Name == "with_external_deps/Chart.yaml" {
+		if header.Name == "with-external-deps/Chart.yaml" {
 			content, err := io.ReadAll(tarReader)
 			if err != nil {
 				t.Fatalf("Failed to read Chart.yaml: %v", err)
@@ -86,7 +86,7 @@ func TestWithChartDepsTest(t *testing.T) {
 		}
 
 		// Check for the three specific files
-		if header.Name == "with_external_deps/charts/grafana/Chart.yaml" {
+		if header.Name == "with-external-deps/charts/grafana/Chart.yaml" {
 			grafanaChartFound = true
 			content, err := io.ReadAll(tarReader)
 			if err != nil {
@@ -95,7 +95,7 @@ func TestWithChartDepsTest(t *testing.T) {
 			grafanaChartContent = string(content)
 		}
 
-		if header.Name == "with_external_deps/charts/redis/Chart.yaml" {
+		if header.Name == "with-external-deps/charts/redis/Chart.yaml" {
 			redisChartFound = true
 			content, err := io.ReadAll(tarReader)
 			if err != nil {
@@ -104,7 +104,7 @@ func TestWithChartDepsTest(t *testing.T) {
 			redisChartContent = string(content)
 		}
 
-		if header.Name == "with_external_deps/charts/postgresql/Chart.yaml" {
+		if header.Name == "with-external-deps/charts/postgresql/Chart.yaml" {
 			postgresChartFound = true
 			content, err := io.ReadAll(tarReader)
 			if err != nil {
