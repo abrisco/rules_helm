@@ -518,7 +518,7 @@ func readChartYamlFromTarball(tarballPath string) (HelmChart, error) {
 		}
 
 		// The folder structure is <chart name>/Chart.yaml
-		parts := strings.Split(header.Name, string(os.PathSeparator))
+		parts := strings.Split(header.Name, "/")
 		if len(parts) > 1 {
 			if parts[1] == "Chart.yaml" {
 				chartContentBytes, err := io.ReadAll(tarReader)
