@@ -77,7 +77,7 @@ func TestWithChartDepsTest(t *testing.T) {
 			t.Fatalf("Error reading tar archive: %v", err)
 		}
 		// Read the Chart.yaml content so that we can check its content
-		if header.Name == "with_chart_deps/Chart.yaml" {
+		if header.Name == "with-chart-deps/Chart.yaml" {
 			content, err := io.ReadAll(tarReader)
 			if err != nil {
 				t.Fatalf("Failed to read Chart.yaml: %v", err)
@@ -86,7 +86,7 @@ func TestWithChartDepsTest(t *testing.T) {
 		}
 
 		// Check for the existance of the dependencies
-		if header.Name == "with_chart_deps/charts/dep1/Chart.yaml" {
+		if header.Name == "with-chart-deps/charts/dep1/Chart.yaml" {
 			dep1ChartFound = true
 			content, err := io.ReadAll(tarReader)
 			if err != nil {
@@ -95,7 +95,7 @@ func TestWithChartDepsTest(t *testing.T) {
 			dep1ChartContent = string(content)
 		}
 
-		if header.Name == "with_chart_deps/charts/dep2/Chart.yaml" {
+		if header.Name == "with-chart-deps/charts/dep2/Chart.yaml" {
 			dep2ChartFound = true
 			content, err := io.ReadAll(tarReader)
 			if err != nil {
