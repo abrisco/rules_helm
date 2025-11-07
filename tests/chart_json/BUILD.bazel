@@ -3,7 +3,7 @@ load("//helm:defs.bzl", "chart_content", "helm_chart", "helm_lint_test", "helm_t
 helm_chart(
     name = "chart_json",
     chart_json = chart_content(
-        name = "chart_json",
+        name = "chart-json",
         api_version = "v2",
         app_version = "1.16.0",
         description = "A Helm chart for Kubernetes by Bazel.",

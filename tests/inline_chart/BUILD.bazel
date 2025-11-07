@@ -2,7 +2,7 @@ load("//helm:defs.bzl", "chart_file", "helm_lint_test", "helm_package", "helm_te
 
 chart_file(
     name = "chart_file",
-    chart_name = "inline_chart",
+    chart_name = "inline-chart",
 )
 
 helm_package(

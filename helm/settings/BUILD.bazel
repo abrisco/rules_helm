@@ -1,0 +1,17 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load(
+    ":settings.bzl",
+    "lint_default_strict",
+)
+
+package(default_visibility = ["//visibility:public"])
+
+bzl_library(
+    name = "settings_bzl",
+    srcs = glob(["*.bzl"]),
+    deps = [
+        "@bazel_skylib//rules:common_settings",
+    ],
+)
+
+lint_default_strict()

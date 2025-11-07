@@ -8,7 +8,6 @@ helm_chart(
 helm_lint_test(
     name = "simple_lint_test",
     chart = ":simple",
-    strict = True,
 )
 
 helm_template(
