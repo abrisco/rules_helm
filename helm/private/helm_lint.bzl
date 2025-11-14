@@ -8,6 +8,17 @@ def _helm_lint_aspect_impl(target, ctx):
     if HelmPackageInfo not in target:
         return []
 
+    # Skip targets tagged for no-lint
+    ignore_tags = [
+        "no_helm_lint",
+        "no_lint",
+        "nolint",
+        "nohelmlint",
+    ]
+    for tag in ctx.rule.attr.tags:
+        if tag.replace("-", "_").lower() in ignore_tags:
+            return []
+
     helm_pkg_info = target[HelmPackageInfo]
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
     strict = ctx.attr._strict_setting[BuildSettingInfo].value

@@ -3,11 +3,19 @@ load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template", "helm_t
 helm_chart(
     name = "no_templates",
     registry_url = "oci://localhost/helm-registry",
+    tags = [
+        # In Helm 4 the absence of a templates directory
+        # is an issue. But this behavior should be tested
+        # with these rules so linting is simply disabled
+        # for these targets.
+        "no-helm-lint",
+    ],
 )
 
 helm_lint_test(
     name = "no_templates_lint_test",
     chart = ":no_templates",
+    tags = ["manual"],
 )
 
 helm_template(
