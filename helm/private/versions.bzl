@@ -511,4 +511,14 @@ HELM_VERSIONS = {
         "linux-arm64": "sha256-0kFj5Gb3iExVB50QUJaOgKBbYzgwBHEWzf2K4o01sMA=",
         "windows-amd64": "sha256-fNwTQrwYY7bVzmlfvvTTsNZcfFvO9uxq34/JqlOCEmI=",
     },
+    "4.0.0": {
+        "darwin-amd64": "sha256-ElIzz5Q+be8qvHJ1YMVYTpCDMI1nLTgJS64cw+C/6qI=",
+        "darwin-arm64": "sha256-T102evniFBsEdxBTnSK35Ycs2u94gzM5YHcjb+tCJBk=",
+        "linux-amd64": "sha256-x36efBzJbgZr0kDRkNG+7ZprCAYLIEPvCGLE+GXsoI8=",
+        "linux-arm": "sha256-I0mP+PX7NYrSV2JpzUH6mlS5RpMygG3/DWiUcDIxgL4=",
+        "linux-arm64": "sha256-jFx34gzClQnWQOIIpqfSt+n5m7BOW1++InB7cqUjUkU=",
+        "linux-i386": "sha256-7aC2UI3vRUugfi+TjFX3O+eV5/mVUgeMzIrywrvVikU=",
+        "linux-ppc64le": "sha256-c66D6YiKr6DpxXodTXfctsl8JT7xdaSYOou0vMdx0us=",
+        "windows-amd64": "sha256-D5qMiRuNkIo3+7aPEt6pK2M+sp5JBwvWUPV2ChqZqo0="
+    },
 }
