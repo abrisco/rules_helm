@@ -6,7 +6,7 @@ bcr_test_module:
   module_path: "."
   matrix:
     platform: ["macos_arm64", "ubuntu2004", "windows"]
-    bazel: ["7.x", "8.x"]
+    bazel: ["7.x", "8.x", "rolling"]
   tasks:
     run_tests:
       name: "Run test module"
