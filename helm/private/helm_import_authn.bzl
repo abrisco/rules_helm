@@ -1,7 +1,7 @@
 """Repository rule for OCI repo authentication."""
 
-load("@aspect_bazel_lib//lib:base64.bzl", "base64")
-load("@aspect_bazel_lib//lib:repo_utils.bzl", "repo_utils")
+load("@bazel_lib//lib:base64.bzl", "base64")
+load("@bazel_lib//lib:repo_utils.bzl", "repo_utils")
 
 # Unfortunately bazel downloader doesn't let us sniff the WWW-Authenticate header, therefore we need to
 # keep a map of known registries that require us to acquire a temporary token for authentication.
