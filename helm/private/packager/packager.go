@@ -561,6 +561,10 @@ func addDependencyToChart(workingDir, chartContent string, dep string) (string, 
 	alreadyExists := false
 	for _, existingDep := range parentChart.Dependencies {
 		if existingDep.Name == depChart.Name {
+			if existingDep.Version != depChart.Version {
+				return chartContent, fmt.Errorf("Dependency %s already exists in Chart.yaml with different version (%s != %s)", depChart.Name, existingDep.Version, depChart.Version)
+			}
+
 			alreadyExists = true
 			break
 		}
