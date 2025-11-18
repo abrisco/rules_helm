@@ -1,0 +1,6 @@
+load("//helm:defs.bzl", "helm_chart")
+
+helm_chart(
+    name = "dep1",
+    visibility = ["//tests:__subpackages__"],
+)

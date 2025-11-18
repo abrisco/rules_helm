@@ -64,8 +64,8 @@ func TestWithChartDepsTest(t *testing.T) {
 	tarReader := tar.NewReader(gzr)
 
 	// Initialize flags to check for the two files
-	var dep1ChartFound, dep2ChartFound bool
-	var chartContent, dep1ChartContent, dep2ChartContent string
+	var grafanaChartFound, redisChartFound, postgresChartFound bool
+	var chartContent, grafanaChartContent, redisChartContent, postgresChartContent string
 
 	// Iterate through the tar archive
 	for {
@@ -77,7 +77,7 @@ func TestWithChartDepsTest(t *testing.T) {
 			t.Fatalf("Error reading tar archive: %v", err)
 		}
 		// Read the Chart.yaml content so that we can check its content
-		if header.Name == "with-chart-deps/Chart.yaml" {
+		if header.Name == "with-external-deps/Chart.yaml" {
 			content, err := io.ReadAll(tarReader)
 			if err != nil {
 				t.Fatalf("Failed to read Chart.yaml: %v", err)
@@ -85,32 +85,45 @@ func TestWithChartDepsTest(t *testing.T) {
 			chartContent = string(content)
 		}
 
-		// Check for the existance of the dependencies
-		if header.Name == "with-chart-deps/charts/dep1/Chart.yaml" {
-			dep1ChartFound = true
+		// Check for the three specific files
+		if header.Name == "with-external-deps/charts/grafana/Chart.yaml" {
+			grafanaChartFound = true
 			content, err := io.ReadAll(tarReader)
 			if err != nil {
-				t.Fatalf("Failed to read dep1 Chart.yaml: %v", err)
+				t.Fatalf("Failed to read grafana Chart.yaml: %v", err)
 			}
-			dep1ChartContent = string(content)
+			grafanaChartContent = string(content)
 		}
 
-		if header.Name == "with-chart-deps/charts/dep2/Chart.yaml" {
-			dep2ChartFound = true
+		if header.Name == "with-external-deps/charts/redis/Chart.yaml" {
+			redisChartFound = true
 			content, err := io.ReadAll(tarReader)
 			if err != nil {
-				t.Fatalf("Failed to read dep2 Chart.yaml: %v", err)
+				t.Fatalf("Failed to read redis Chart.yaml: %v", err)
 			}
-			dep2ChartContent = string(content)
+			redisChartContent = string(content)
+		}
+
+		if header.Name == "with-external-deps/charts/postgresql/Chart.yaml" {
+			postgresChartFound = true
+			content, err := io.ReadAll(tarReader)
+			if err != nil {
+				t.Fatalf("Failed to read postgresql Chart.yaml: %v", err)
+			}
+			postgresChartContent = string(content)
 		}
 	}
 
+	// Assert that all files were found
 	// Assert that dependencie were found
-	if !dep1ChartFound {
-		t.Error("charts/dep1/Chart.yaml was not found in the Helm chart")
+	if !grafanaChartFound {
+		t.Error("charts/grafana/Chart.yaml was not found in the Helm chart")
 	}
-	if !dep2ChartFound {
-		t.Error("charts/dep2/Chart.yaml was not found in the Helm chart")
+	if !redisChartFound {
+		t.Error("charts/redis/Chart.yaml was not found in the Helm chart")
+	}
+	if !postgresChartFound {
+		t.Error("charts/postgresql/Chart.yaml was not found in the Helm chart")
 	}
 
 	// Assert that the the main Chart.yaml contains the expected dependencies
@@ -118,8 +131,8 @@ func TestWithChartDepsTest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to load main Chart.yaml: %v", err)
 	}
-	if len(chart.Dependencies) != 2 {
-		t.Fatalf("Expected 2 dependencies in main Chart.yaml, but found %d", len(chart.Dependencies))
+	if len(chart.Dependencies) != 3 {
+		t.Fatalf("Expected 3 dependencies in main Chart.yaml, but found %d", len(chart.Dependencies))
 	}
 
 	expectedDeps := map[string]HelmChartDependency{
@@ -142,10 +155,13 @@ func TestWithChartDepsTest(t *testing.T) {
 	}
 
 	// Assert that the content of all files contains the expected strings
-	if !strings.Contains(dep1ChartContent, "dep1") {
-		t.Error("charts/dep1_chart/Chart.yaml does not contain the expected string 'dep1'")
+	if !strings.Contains(grafanaChartContent, "grafana") {
+		t.Error("charts/grafana/Chart.yaml does not contain the expected string 'grafana'")
 	}
-	if !strings.Contains(dep2ChartContent, "dep2") {
-		t.Error("charts/dep2/Chart.yaml does not contain the expected string 'dep2'")
+	if !strings.Contains(redisChartContent, "redis") {
+		t.Error("charts/redis/Chart.yaml does not contain the expected string 'redis'")
+	}
+	if !strings.Contains(postgresChartContent, "postgres") {
+		t.Error("charts/postgresql/Chart.yaml does not contain the expected string 'postgres'")
 	}
 }
