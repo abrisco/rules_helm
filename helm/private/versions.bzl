@@ -1,6 +1,6 @@
 """Constants for accessing helm binaries"""
 
-DEFAULT_HELM_VERSION = "3.19.0"
+DEFAULT_HELM_VERSION = "4.0.0"
 
 DEFAULT_HELM_URL_TEMPLATES = [
     "https://get.helm.sh/helm-v{version}-{platform}.{compression}",
@@ -436,6 +436,26 @@ HELM_VERSIONS = {
         "linux-ppc64le": "sha256-9X6gTX+mLMPpCoMetn7bFADIEN9gg4db7jp8GVp5XOQ=",
         "windows-amd64": "sha256-ZIhjDC5dWUXtmQ+gL9npn5xnks28156yZLbPuQF50tE=",
     },
+    "3.19.1": {
+        "darwin-amd64": "sha256-Vn9QxYVcRehez6UIRr8wra1daOHTX/IWhmtIl+kby4A=",
+        "darwin-arm64": "sha256-CA8yDPxO44Fv1sj3OCD0s9lBsQ9wnmm/mv14+PjnySo=",
+        "linux-amd64": "sha256-lmvtmx4N2hEmj1m9cmjDzT4wizewcFRuHXigJSb/Y/I=",
+        "linux-arm": "sha256-zSHH7nZ7QTjhPKhW8QJzLK5ycMG75tCAo9mBU5U1UKw=",
+        "linux-arm64": "sha256-zu0VAwWh0e9KN5I6f2aTGmgHw0o46kh/qDQOEC3Sx/c=",
+        "linux-i386": "sha256-vjtw76ew3a3dYNlO8KN7aeIqXuBe++xXlynNqswufF4=",
+        "linux-ppc64le": "sha256-rLipLYc8wq4t1EWT2IoLw6eOt6vWs3hMP87Z4AVAEBg=",
+        "windows-amd64": "sha256-P9OrSkc2TATFHg5zh+BZiqLIxD3VNRKGZapD5pXOwR4=",
+    },
+    "3.19.2": {
+        "darwin-amd64": "sha256-fvRBbN70wteKCeHI8HpR6UXcA0PIg6RrH2KN6rUmkLc=",
+        "darwin-arm64": "sha256-8IR/iZR5tmpt2Nn81FLo2yVi5M8/feKBA/n88rgk8dU=",
+        "linux-amd64": "sha256-IRTJ3qKETc5tDuLXkqmq6Ea+jPU9WxncKYi1oOj+wm4=",
+        "linux-arm": "sha256-ILywqtghcjNZFOMK4+/QINKKvBtHC0tWXmev8VLA5O4=",
+        "linux-arm64": "sha256-Vm6fOlqDqB5LA1A64342jt1S1plhnoqbsf3yFWGuDog=",
+        "linux-i386": "sha256-VJMuzyxGxtPNmSbSjVbhjnC0JGfYrWgoRMZMvo89/BE=",
+        "linux-ppc64le": "sha256-cNeC+yCOvme1xQj25ZEKC3X5ssme48VpqSZauhR9ajc=",
+        "windows-amd64": "sha256-iz6je818Xtpo6t0nhpBJj7iGoX7FQbRJIWqztFdIYA4=",
+    },
     "3.4.2": {
         "darwin-amd64": "sha256-wzt+5ysABvI7M/UDK1Md1gn/97CKQyT5ugdyKk8/7Jo=",
         "linux-amd64": "sha256-ys3ndoQg3UERGkYw4EfCMa+gH2fknMDGQpVj4CTaS5g=",
@@ -510,5 +530,15 @@ HELM_VERSIONS = {
         "linux-amd64": "sha256-MZYP8vdqc3nZusUm3fiJ+3kkEZHx2+KiT3hk3cs/ZWA=",
         "linux-arm64": "sha256-0kFj5Gb3iExVB50QUJaOgKBbYzgwBHEWzf2K4o01sMA=",
         "windows-amd64": "sha256-fNwTQrwYY7bVzmlfvvTTsNZcfFvO9uxq34/JqlOCEmI=",
+    },
+    "4.0.0": {
+        "darwin-amd64": "sha256-ElIzz5Q+be8qvHJ1YMVYTpCDMI1nLTgJS64cw+C/6qI=",
+        "darwin-arm64": "sha256-T102evniFBsEdxBTnSK35Ycs2u94gzM5YHcjb+tCJBk=",
+        "linux-amd64": "sha256-x36efBzJbgZr0kDRkNG+7ZprCAYLIEPvCGLE+GXsoI8=",
+        "linux-arm": "sha256-I0mP+PX7NYrSV2JpzUH6mlS5RpMygG3/DWiUcDIxgL4=",
+        "linux-arm64": "sha256-jFx34gzClQnWQOIIpqfSt+n5m7BOW1++InB7cqUjUkU=",
+        "linux-i386": "sha256-7aC2UI3vRUugfi+TjFX3O+eV5/mVUgeMzIrywrvVikU=",
+        "linux-ppc64le": "sha256-c66D6YiKr6DpxXodTXfctsl8JT7xdaSYOou0vMdx0us=",
+        "windows-amd64": "sha256-D5qMiRuNkIo3+7aPEt6pK2M+sp5JBwvWUPV2ChqZqo0=",
     },
 }

@@ -31,15 +31,10 @@ def _helm_impl(ctx):
             # TODO support toolchain generation from non-root modules. This requires encoding all options into the repo name and adding deduplication.
             print("Ignoring call to helm module extension in non-root module.")  # buildifier: disable=print
             continue
-        if len(module.tags.options) > 0:
-            # TODO Use deprecation tag when available: https://github.com/bazelbuild/bazel/issues/24843
-            # TODO remove deprecated tag in next major release
-            print("helm.options() is deprecated. Use helm.toolchain() instead.")  # buildifier: disable=print
-        toolchain_options = module.tags.toolchain + module.tags.options
-        if len(toolchain_options) > 1:
+        if len(module.tags.toolchain) > 1:
             # TODO support generating multiple toolchains. This requires encoding all options into the repo name and adding deduplication.
             fail("Only a single call to helm.toolchain() is taken into account. Please remove the other ones.")
-        for toolchain_option in toolchain_options:
+        for toolchain_option in module.tags.toolchain:
             toolchain_config["version"] = toolchain_option.version
             toolchain_config["helm_url_templates"] = toolchain_option.helm_url_templates
             toolchain_config["plugins"] = toolchain_option.plugins
@@ -124,7 +119,6 @@ _toolchain = tag_class(
 helm = module_extension(
     implementation = _helm_impl,
     tag_classes = {
-        "options": _toolchain,  # deprecated: use toolchain instead and remove in next major version
         "toolchain": _toolchain,
     },
 )
