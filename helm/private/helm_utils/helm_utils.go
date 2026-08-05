@@ -2,16 +2,144 @@ package helm_utils
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
 )
+
+// ImagePushConcurrencyEnvVar names the environment variable that overrides how
+// many image pushers run concurrently. Set it to 1 to push serially.
+const ImagePushConcurrencyEnvVar = "RULES_HELM_IMAGE_PUSH_CONCURRENCY"
+
+// defaultImagePushConcurrency bounds concurrent pushers by default. It
+// multiplies an already-parallel conversation rather than starting one: crane
+// uploads a single image's layers 4 at a time, and nests that again per child for
+// a multi-platform index. Kept modest because a throttled push is only retried
+// when the registry answers with a docker-distribution body naming
+// TOOMANYREQUESTS; a bare HTTP 429 matches neither go-containerregistry retry
+// path and fails the push outright.
+const defaultImagePushConcurrency = 4
+
+// imagePushConcurrency resolves the concurrency limit for a run of n pushers.
+// An unparsable or non-positive override falls back to the default.
+func imagePushConcurrency(n int) int {
+	limit := defaultImagePushConcurrency
+	if raw, ok := os.LookupEnv(ImagePushConcurrencyEnvVar); ok {
+		parsed, err := strconv.Atoi(raw)
+		if err != nil || parsed < 1 {
+			log.Printf("WARNING: Ignoring invalid %s=%q, using %d.", ImagePushConcurrencyEnvVar, raw, limit)
+		} else {
+			limit = parsed
+		}
+	}
+
+	if limit > n {
+		return n
+	}
+
+	return limit
+}
+
+// RunImagePushers runs each image pusher executable, up to
+// `RULES_HELM_IMAGE_PUSH_CONCURRENCY` at a time.
+//
+// Every pusher is announced on stderr before it starts, so a slow or stalled
+// push is identifiable while it is still running.
+//
+// When more than one pusher may run at a time their output would otherwise
+// collide line by line, so each pusher's stdout and stderr are captured and
+// replayed to stdout as a single block once it exits. At a concurrency of 1
+// nothing can collide and the pusher writes through to stdout and stderr live,
+// unbuffered and on their original streams.
+//
+// Every pusher runs even if an earlier one fails; the returned error joins all
+// failures, in the order the pushers were given.
+//
+// Parameters:
+//   - pushers: Paths to image pusher executables, already resolved to real files.
+//
+// Returns:
+//   - error: The joined failures of every pusher that did not exit successfully.
+func RunImagePushers(pushers []string) error {
+	if len(pushers) == 0 {
+		return nil
+	}
+
+	r, err := runfiles.New()
+	if err != nil {
+		return fmt.Errorf("failed to load runfiles: %w", err)
+	}
+
+	// Shared across pushers: exec.Cmd copies it into a new slice and never
+	// writes through this one.
+	env := append(os.Environ(), r.Env()...)
+
+	concurrency := imagePushConcurrency(len(pushers))
+	streamLive := concurrency == 1
+
+	var wg sync.WaitGroup
+	var outputMutex sync.Mutex
+	semaphore := make(chan struct{}, concurrency)
+	errs := make([]error, len(pushers))
+
+	for i, pusher := range pushers {
+		wg.Add(1)
+		go func(i int, pusher string) {
+			defer wg.Done()
+
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
+
+			// Announced before the process starts, so the run is never silent
+			// and a push that hangs names itself.
+			outputMutex.Lock()
+			log.Printf("Running image pusher: %s", pusher)
+			outputMutex.Unlock()
+
+			cmd := exec.Command(pusher)
+			cmd.Env = env
+
+			var output bytes.Buffer
+			if streamLive {
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
+			} else {
+				cmd.Stdout = &output
+				cmd.Stderr = &output
+			}
+
+			runErr := cmd.Run()
+
+			if !streamLive {
+				outputMutex.Lock()
+				// Header and body share one stream so a block cannot be split
+				// by another pusher's output.
+				fmt.Fprintf(os.Stdout, "Output from image pusher %s:\n", pusher)
+				if _, err := output.WriteTo(os.Stdout); err != nil {
+					log.Printf("WARNING: Failed to write output of image pusher %s: %v", pusher, err)
+				}
+				outputMutex.Unlock()
+			}
+
+			if runErr != nil {
+				errs[i] = fmt.Errorf("failed to run image pusher %s: %w", pusher, runErr)
+			}
+		}(i, pusher)
+	}
+
+	wg.Wait()
+
+	return errors.Join(errs...)
+}
 
 // BuildHelmCommand constructs an exec.Cmd to run a Helm command with the specified arguments and plugins directory.
 // It takes the path to the Helm executable, a slice of arguments for the Helm command, and the path to the plugins directory.

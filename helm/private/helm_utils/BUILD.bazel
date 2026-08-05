@@ -1,4 +1,4 @@
-load("@rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "helm_utils",
@@ -8,4 +8,11 @@ go_library(
     deps = [
         "@rules_go//go/runfiles",
     ],
+)
+
+go_test(
+    name = "helm_utils_test",
+    srcs = ["helm_utils_test.go"],
+    embed = [":helm_utils"],
+    deps = ["@rules_go//go/runfiles"],
 )

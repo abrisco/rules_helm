@@ -4,9 +4,7 @@ import (
 	"bufio"
 	"log"
 	"os"
-	"os/exec"
 
-	"github.com/bazelbuild/rules_go/go/runfiles"
 	"github.com/periareon/rules_helm/helm/private/helm_utils"
 )
 
@@ -36,20 +34,7 @@ func main() {
 		log.Fatalf("Failed to read args file: %v", err)
 	}
 
-	r, err := runfiles.New()
-	if err != nil {
-		log.Fatalf("Unable to create runfiles: %v", err)
-	}
-
-	for _, pusher := range imagePushers {
-		cmd := exec.Command(pusher)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Env = append(os.Environ(), r.Env()...)
-
-		log.Printf("Running image pusher: %s", pusher)
-		if err := cmd.Run(); err != nil {
-			log.Fatalf("Failed to run image pusher %s: %v", pusher, err)
-		}
+	if err := helm_utils.RunImagePushers(imagePushers); err != nil {
+		log.Fatal(err)
 	}
 }
