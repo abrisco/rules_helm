@@ -171,6 +171,8 @@ load("@rules_helm//helm:helm_install.bzl", "helm_install")
 helm_install(<a href="#helm_install-name">name</a>, <a href="#helm_install-data">data</a>, <a href="#helm_install-helm_opts">helm_opts</a>, <a href="#helm_install-install_name">install_name</a>, <a href="#helm_install-opts">opts</a>, <a href="#helm_install-package">package</a>, <a href="#helm_install-values">values</a>)
 </pre>
 <p>Produce an executable for performing a <code>helm install</code> operation.</p>
+<p>Any images bundled into <code>package</code> are pushed first, at most <code>RULES_HELM_IMAGE_PUSH_CONCURRENCY</code>
+(default <code>4</code>) at a time.</p>
 <p><strong>ATTRIBUTES</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="helm_install-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
@@ -207,6 +209,8 @@ load("@rules_helm//helm:helm_install.bzl", "helm_upgrade")
 helm_upgrade(<a href="#helm_upgrade-name">name</a>, <a href="#helm_upgrade-data">data</a>, <a href="#helm_upgrade-helm_opts">helm_opts</a>, <a href="#helm_upgrade-install_name">install_name</a>, <a href="#helm_upgrade-opts">opts</a>, <a href="#helm_upgrade-package">package</a>, <a href="#helm_upgrade-values">values</a>)
 </pre>
 <p>Produce an executable for performing a <code>helm upgrade</code> operation.</p>
+<p>Any images bundled into <code>package</code> are pushed first, at most <code>RULES_HELM_IMAGE_PUSH_CONCURRENCY</code>
+(default <code>4</code>) at a time.</p>
 <p><strong>ATTRIBUTES</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="helm_upgrade-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>

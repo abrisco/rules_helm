@@ -349,6 +349,8 @@ load("@rules_helm//helm:helm_install.bzl", "helm_install")
 helm_install(<a href="helm_install.html#helm_install-name">name</a>, <a href="helm_install.html#helm_install-data">data</a>, <a href="helm_install.html#helm_install-helm_opts">helm_opts</a>, <a href="helm_install.html#helm_install-install_name">install_name</a>, <a href="helm_install.html#helm_install-opts">opts</a>, <a href="helm_install.html#helm_install-package">package</a>, <a href="helm_install.html#helm_install-values">values</a>)
 </pre>
 <p>Produce an executable for performing a <code>helm install</code> operation.</p>
+<p>Any images bundled into <code>package</code> are pushed first, at most <code>RULES_HELM_IMAGE_PUSH_CONCURRENCY</code>
+(default <code>4</code>) at a time.</p>
 <p><strong>ATTRIBUTES</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="helm_install-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
@@ -385,6 +387,8 @@ load("@rules_helm//helm:helm_install.bzl", "helm_upgrade")
 helm_upgrade(<a href="helm_install.html#helm_upgrade-name">name</a>, <a href="helm_install.html#helm_upgrade-data">data</a>, <a href="helm_install.html#helm_upgrade-helm_opts">helm_opts</a>, <a href="helm_install.html#helm_upgrade-install_name">install_name</a>, <a href="helm_install.html#helm_upgrade-opts">opts</a>, <a href="helm_install.html#helm_upgrade-package">package</a>, <a href="helm_install.html#helm_upgrade-values">values</a>)
 </pre>
 <p>Produce an executable for performing a <code>helm upgrade</code> operation.</p>
+<p>Any images bundled into <code>package</code> are pushed first, at most <code>RULES_HELM_IMAGE_PUSH_CONCURRENCY</code>
+(default <code>4</code>) at a time.</p>
 <p><strong>ATTRIBUTES</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="helm_upgrade-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
@@ -568,6 +572,9 @@ if the following environment variables are defined:</p>
 <li><code>HELM_REGISTRY_USERNAME</code>: The value of <code>--username</code>.</li>
 <li><code>HELM_REGISTRY_PASSWORD</code>/<code>HELM_REGISTRY_PASSWORD_FILE</code>: The value of <code>--password</code> or a file containing the <code>--password</code> value.</li>
 </ul>
+<p>When <code>include_images</code> is True, the chart's images are pushed concurrently, at most
+<code>RULES_HELM_IMAGE_PUSH_CONCURRENCY</code> (default <code>4</code>) at a time. Set it to <code>1</code> to push them one at a
+time and stream each pusher's output live.</p>
 <p><strong>ATTRIBUTES</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="helm_push-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
@@ -589,6 +596,8 @@ load("@rules_helm//helm:helm_push.bzl", "helm_push_images")
 helm_push_images(<a href="helm_push.html#helm_push_images-name">name</a>, <a href="helm_push.html#helm_push_images-env">env</a>, <a href="helm_push.html#helm_push_images-package">package</a>)
 </pre>
 <p>Produce an executable for pushing all oci images used by a helm chart.</p>
+<p>The images are pushed concurrently, at most <code>RULES_HELM_IMAGE_PUSH_CONCURRENCY</code> (default <code>4</code>) at a
+time. Set it to <code>1</code> to push them one at a time and stream each pusher's output live.</p>
 <p><strong>ATTRIBUTES</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="helm_push_images-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
@@ -611,6 +620,9 @@ if the following environment variables are defined:</p>
 <li><code>HELM_REGISTRY_USERNAME</code>: The value of <code>--username</code>.</li>
 <li><code>HELM_REGISTRY_PASSWORD</code>/<code>HELM_REGISTRY_PASSWORD_FILE</code>: The value of <code>--password</code> or a file containing the <code>--password</code> value.</li>
 </ul>
+<p>When <code>include_images</code> is True, the chart's images are pushed concurrently, at most
+<code>RULES_HELM_IMAGE_PUSH_CONCURRENCY</code> (default <code>4</code>) at a time. Set it to <code>1</code> to push them one at a
+time and stream each pusher's output live.</p>
 <p><strong>ATTRIBUTES</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="helm_push_registry-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
