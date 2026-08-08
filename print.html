@@ -161,13 +161,13 @@
 <h2 id="setup-modulebazel"><a class="header" href="#setup-modulebazel">Setup MODULE.bazel</a></h2>
 <p><code>rules_helm</code> is published to the
 <a href="https://registry.bazel.build/modules/rules_helm">Bazel Central Registry</a>:</p>
-<pre><code class="language-starlark">bazel_dep(name = "rules_helm", version = "{version}")
+<pre><code class="language-python">bazel_dep(name = "rules_helm", version = "{version}")
 </code></pre>
 <h2 id="run-as-a-tool"><a class="header" href="#run-as-a-tool">Run as a tool</a></h2>
 <pre><code class="language-bash">bazel run @helm//:helm -- ...
 </code></pre>
 <h2 id="use-in-a-genrule"><a class="header" href="#use-in-a-genrule">Use in a genrule</a></h2>
-<pre><code class="language-starlark">genrule(
+<pre><code class="language-python">genrule(
     name = "genrule",
     srcs = [":chart"],
     outs = ["template.yaml"],
@@ -175,6 +175,20 @@
     toolchains = ["@rules_helm//helm:current_toolchain"],
 )
 </code></pre>
+<h2 id="environment-variables"><a class="header" href="#environment-variables">Environment variables</a></h2>
+<h3 id="rules_helm_image_push_concurrency"><a class="header" href="#rules_helm_image_push_concurrency"><code>RULES_HELM_IMAGE_PUSH_CONCURRENCY</code></a></h3>
+<p>How many of a chart's bundled image pushers run at once. Defaults to <code>4</code>, and applies to
+<a href="https://periareon.github.io/rules_helm/defs.html#helm_push">helm_push</a>,
+<a href="https://periareon.github.io/rules_helm/defs.html#helm_push_images">helm_push_images</a>,
+<a href="https://periareon.github.io/rules_helm/defs.html#helm_install">helm_install</a> and
+<a href="https://periareon.github.io/rules_helm/defs.html#helm_upgrade">helm_upgrade</a>.</p>
+<p>Each image is pushed by its own process, which authenticates with the registry before it looks at
+anything, so a chart with many images spends most of the push waiting rather than transferring.
+Running the pushers concurrently keeps that cost from scaling with the image count.</p>
+<p>Set it to <code>1</code> to push one image at a time. A serial run also streams each pusher's output live on
+its own streams, instead of capturing it and replaying it as a block once the pusher exits, which
+makes a single failing push easier to follow.</p>
+<p>Values that are not a positive integer are ignored with a warning.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="helm-rules"><a class="header" href="#helm-rules">Helm Rules</a></h1>
 <ul>
 <li><a href="./chart_file.html#chart_content">chart_content</a></li>
