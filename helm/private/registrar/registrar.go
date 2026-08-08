@@ -8,11 +8,9 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
 
-	"github.com/bazelbuild/rules_go/go/runfiles"
 	"github.com/periareon/rules_helm/helm/private/helm_utils"
 )
 
@@ -160,22 +158,9 @@ func main() {
 		log.Printf("WARNING: A Helm registry password was set but no associated `HELM_REGISTRY_USERNAME` var was found. Skipping `helm registry login`.")
 	}
 
-	r, err := runfiles.New()
-	if err != nil {
-		log.Fatalf("Unable to create runfiles.")
-	}
-
 	// Subprocess image pushers
-	for _, pusher := range imagePushers {
-		cmd := exec.Command(pusher)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Env = append(os.Environ(), r.Env()...)
-
-		log.Printf("Running image pusher: %s", pusher)
-		if err := cmd.Run(); err != nil {
-			log.Fatalf("Failed to run image pusher %s: %v", pusher, err)
-		}
+	if err := helm_utils.RunImagePushers(imagePushers); err != nil {
+		log.Fatal(err)
 	}
 
 	// Pin the chart's mtime to the `created` timestamp from metadata.json,

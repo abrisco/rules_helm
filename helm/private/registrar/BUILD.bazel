@@ -6,6 +6,5 @@ go_binary(
     visibility = ["//visibility:public"],
     deps = [
         "//helm/private/helm_utils",
-        "@rules_go//go/runfiles",
     ],
 )

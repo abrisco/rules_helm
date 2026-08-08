@@ -111,6 +111,10 @@ Before performing `helm push` the executable produced will conditionally perform
 if the following environment variables are defined:
 - `HELM_REGISTRY_USERNAME`: The value of `--username`.
 - `HELM_REGISTRY_PASSWORD`/`HELM_REGISTRY_PASSWORD_FILE`: The value of `--password` or a file containing the `--password` value.
+
+When `include_images` is True, the chart's images are pushed concurrently, at most
+`RULES_HELM_IMAGE_PUSH_CONCURRENCY` (default `4`) at a time. Set it to `1` to push them one at a
+time and stream each pusher's output live.
 """,
     implementation = _helm_push_impl,
     executable = True,
@@ -212,7 +216,12 @@ def _helm_push_images_impl(ctx):
     ]
 
 helm_push_images = rule(
-    doc = "Produce an executable for pushing all oci images used by a helm chart.",
+    doc = """\
+Produce an executable for pushing all oci images used by a helm chart.
+
+The images are pushed concurrently, at most `RULES_HELM_IMAGE_PUSH_CONCURRENCY` (default `4`) at a
+time. Set it to `1` to push them one at a time and stream each pusher's output live.
+""",
     implementation = _helm_push_images_impl,
     executable = True,
     attrs = {

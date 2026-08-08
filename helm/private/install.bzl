@@ -145,7 +145,12 @@ def _helm_install_impl(ctx, subcommand = "install"):
     ]
 
 helm_install = rule(
-    doc = "Produce an executable for performing a `helm install` operation.",
+    doc = """\
+Produce an executable for performing a `helm install` operation.
+
+Any images bundled into `package` are pushed first, at most `RULES_HELM_IMAGE_PUSH_CONCURRENCY`
+(default `4`) at a time.
+""",
     implementation = _helm_install_impl,
     executable = True,
     attrs = {
@@ -202,7 +207,12 @@ def _helm_upgrade_impl(ctx):
     return _helm_install_impl(ctx, "upgrade")
 
 helm_upgrade = rule(
-    doc = "Produce an executable for performing a `helm upgrade` operation.",
+    doc = """\
+Produce an executable for performing a `helm upgrade` operation.
+
+Any images bundled into `package` are pushed first, at most `RULES_HELM_IMAGE_PUSH_CONCURRENCY`
+(default `4`) at a time.
+""",
     implementation = _helm_upgrade_impl,
     executable = True,
     attrs = {
